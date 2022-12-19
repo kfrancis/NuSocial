@@ -13,21 +13,24 @@
 
         <ShellContent Title="{mex:LocString Home}" ContentTemplate="{DataTemplate views:TimelinePage}">
             <ShellContent.Icon>
-                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.User}" />
+                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.House}" />
             </ShellContent.Icon>
         </ShellContent>
-        <ShellContent
-            Title="{mex:LocString Global}"
-            ContentTemplate="{DataTemplate views:GlobalPage}"
-            Icon="iconlistdetail.png" />
-        <ShellContent
-            Title="{mex:LocString Notifications}"
-            ContentTemplate="{DataTemplate views:NotificationsPage}"
-            Icon="iconblank.png" />
-        <ShellContent
-            Title="{mex:LocString DMs}"
-            ContentTemplate="{DataTemplate views:DirectMessagesPage}"
-            Icon="iconlistdetail.png" />
+        <ShellContent Title="{mex:LocString Global}" ContentTemplate="{DataTemplate views:GlobalPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Globe}" />
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent Title="{mex:LocString Notifications}" ContentTemplate="{DataTemplate views:NotificationsPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Bell}" />
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent Title="{mex:LocString DMs}" ContentTemplate="{DataTemplate views:DirectMessagesPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Message}" />
+            </ShellContent.Icon>
+        </ShellContent>
 
     </TabBar>
 </Shell>
