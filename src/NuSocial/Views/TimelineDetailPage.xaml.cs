@@ -1,6 +1,8 @@
-﻿namespace NuSocial.Views;
+﻿using UraniumUI.Pages;
 
-public partial class TimelineDetailPage : ContentPage
+namespace NuSocial.Views;
+
+public partial class TimelineDetailPage : UraniumContentPage
 {
     public TimelineDetailPage(TimelineDetailViewModel viewModel)
     {

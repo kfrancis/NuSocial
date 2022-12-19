@@ -1,8 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:NuSocial.ViewModels"
-             x:Class="NuSocial.Views.ProfilePage"
-             x:DataType="vm:ProfileViewModel">
-
-</ContentPage>
+<uranium:UraniumContentPage
+    x:Class="NuSocial.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:NuSocial.ViewModels"
+    Title="{Binding Title}"
+    x:DataType="vm:ProfileViewModel">
+    <uranium:UraniumContentPage.Resources>
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
+        </Style>
+    </uranium:UraniumContentPage.Resources>
+</uranium:UraniumContentPage>

@@ -3,7 +3,7 @@ using Android.Runtime;
 
 namespace NuSocial;
 
-[Application]
+[Application(Debuggable = true)]
 public class MainApplication : MauiApplication
 {
 	public MainApplication(IntPtr handle, JniHandleOwnership ownership)

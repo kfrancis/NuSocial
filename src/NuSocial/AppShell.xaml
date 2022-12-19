@@ -3,21 +3,31 @@
     x:Class="NuSocial.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
+    xmlns:local="clr-namespace:NuSocial"
+    xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:views="clr-namespace:NuSocial.Views"
-    xmlns:local="clr-namespace:NuSocial">
+    Shell.FlyoutBehavior="Disabled">
 
     <TabBar>
+
+        <ShellContent Title="{mex:LocString Home}" ContentTemplate="{DataTemplate views:TimelinePage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.User}" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent
-            Title="Profile"
-            Icon="iconblank.png"
-            ContentTemplate="{DataTemplate views:ProfilePage}" />
+            Title="{mex:LocString Global}"
+            ContentTemplate="{DataTemplate views:GlobalPage}"
+            Icon="iconlistdetail.png" />
         <ShellContent
-            Title="Timeline"
-            Icon="iconlistdetail.png"
-            ContentTemplate="{DataTemplate views:TimelinePage}" />
+            Title="{mex:LocString Notifications}"
+            ContentTemplate="{DataTemplate views:NotificationsPage}"
+            Icon="iconblank.png" />
         <ShellContent
-            Title="Localization"
-            Icon="iconlocalization.png"
-            ContentTemplate="{DataTemplate views:LocalizationPage}" />
+            Title="{mex:LocString DMs}"
+            ContentTemplate="{DataTemplate views:DirectMessagesPage}"
+            Icon="iconlistdetail.png" />
+
     </TabBar>
 </Shell>

@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:NuSocial.ViewModels"
-             x:Class="NuSocial.Views.TimelineDetailPage"
-             x:DataType="vm:TimelineDetailViewModel">
+<uranium:UraniumContentPage
+    x:Class="NuSocial.Views.TimelineDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:NuSocial.ViewModels"
+    x:DataType="vm:TimelineDetailViewModel">
+    <uranium:UraniumContentPage.Resources>
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
+        </Style>
+    </uranium:UraniumContentPage.Resources>
     <ScrollView>
         <VerticalStackLayout Margin="12">
-            <Label Text="{Binding Item.Title}" FontSize="Header" />
-            <Label Text="{Binding Item.Description}" FontSize="Default" />
+            <Label FontSize="Header" Text="{Binding Item.Title}" />
+            <Label FontSize="Default" Text="{Binding Item.Description}" />
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</uranium:UraniumContentPage>

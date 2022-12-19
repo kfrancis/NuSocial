@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uranium:UraniumContentPage
-    x:Class="NuSocial.Views.SettingsPage"
+    x:Class="NuSocial.Views.GlobalPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-    Title="SettingsPage">
+    Title="GlobalPage">
     <uranium:UraniumContentPage.Resources>
         <Style TargetType="Frame">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />

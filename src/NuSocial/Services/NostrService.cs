@@ -21,7 +21,7 @@ namespace NuSocial.Services
         {
             _client.NoticeReceived += NoticeReceived;
             _client.MessageReceived += MessageReceived;
-            return _client.Connect(ct);
+            return _client.ConnectAndWaitUntilConnected(ct);
         }
 
         public Task StopAsync(CancellationToken ct = default)

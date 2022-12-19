@@ -1,6 +1,8 @@
-﻿namespace NuSocial.Views;
+﻿using UraniumUI.Pages;
 
-public partial class ProfilePage : ContentPage
+namespace NuSocial.Views;
+
+public partial class ProfilePage : UraniumContentPage
 {
 	public ProfilePage(ProfileViewModel viewModel)
 	{

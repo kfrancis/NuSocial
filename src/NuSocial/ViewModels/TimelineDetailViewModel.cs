@@ -4,5 +4,5 @@
 public partial class TimelineDetailViewModel : BaseViewModel
 {
     [ObservableProperty]
-    SampleItem item;
+    private SampleItem item;
 }

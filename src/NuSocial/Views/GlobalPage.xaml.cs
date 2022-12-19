@@ -2,9 +2,9 @@ using UraniumUI.Pages;
 
 namespace NuSocial.Views;
 
-public partial class SettingsPage : UraniumContentPage
+public partial class GlobalPage : UraniumContentPage
 {
-	public SettingsPage()
+	public GlobalPage()
 	{
 		InitializeComponent();
 	}
