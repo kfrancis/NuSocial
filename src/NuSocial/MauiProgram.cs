@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Maui.Markup;
+using NNostr.Client;
 using NuSocial.Core.Threading;
 using UraniumUI;
+using Microsoft.Extensions.Logging;
 
 namespace NuSocial;
 
@@ -27,11 +29,16 @@ public static class MauiProgram
                 fonts.AddFontAwesomeIconFonts();
             });
 
+#if DEBUG
+        builder.Logging.AddDebug();
+#endif
+
         var mauiDispatcher = new MauiDispatcher();
 
         builder.Services.AddSingleton<ICustomDispatcher>(mauiDispatcher);
         builder.Services.AddSingleton<IDialogService>(new DialogService(mauiDispatcher));
 
+        builder.Services.AddSingleton(new NostrService());
         builder.Services.AddSingleton<ProfileViewModel>();
 
         builder.Services.AddSingleton<ProfilePage>();

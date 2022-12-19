@@ -47,6 +47,8 @@ public partial class BaseViewModel : ViewModelBase
         _customDispatcher = customDispatcher;
     }
 
+    public IDialogService DialogService => _dialogService;
+
     public virtual async Task InitializeAsync() => await Task.CompletedTask;
 
     public virtual void OnAppearing()

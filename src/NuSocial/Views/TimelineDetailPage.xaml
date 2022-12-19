@@ -13,8 +13,8 @@
     </uranium:UraniumContentPage.Resources>
     <ScrollView>
         <VerticalStackLayout Margin="12">
-            <Label FontSize="Header" Text="{Binding Item.Title}" />
-            <Label FontSize="Default" Text="{Binding Item.Description}" />
+            <Label FontSize="Header" Text="{Binding Item.Contact}" />
+            <Label FontSize="Default" Text="{Binding Item.Content}" />
         </VerticalStackLayout>
     </ScrollView>
 </uranium:UraniumContentPage>

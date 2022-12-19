@@ -52,10 +52,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="..\..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+	  <PackageReference Include="Bogus" Version="34.0.2" />
+	  <PackageReference Include="Bogus.Tools.Analyzer" Version="34.0.2">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="CommunityToolkit.Maui" Version="3.0.0" />
 	  <PackageReference Include="CommunityToolkit.Maui.Markup" Version="2.1.0" />
 	  <PackageReference Include="CommunityToolkit.MVVM" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 	  <PackageReference Include="NNostr.Client" Version="0.0.17" />
 	  <PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.1.2" />
 	  <PackageReference Include="UraniumUI.Material" Version="2.1.2" />

@@ -1,22 +1,18 @@
-﻿using UraniumUI.Pages;
+﻿namespace NuSocial.Views;
 
-namespace NuSocial.Views;
-
-public partial class TimelinePage : UraniumContentPage
+public partial class TimelinePage : BetterUraniumContentPage<TimelineViewModel>
 {
-    TimelineViewModel ViewModel;
-
     public TimelinePage(TimelineViewModel viewModel)
     {
         InitializeComponent();
 
-        BindingContext = ViewModel = viewModel;
+        ViewModel = viewModel;
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
 
-        await ViewModel.LoadDataAsync();
+        ViewModel?.LoadDataAsync();
     }
 }

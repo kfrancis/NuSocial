@@ -1,12 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<uranium:UraniumContentPage
+<local:BetterUraniumContentPage
     x:Class="NuSocial.Views.TimelinePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:NuSocial"
     xmlns:m="clr-namespace:NuSocial.Models"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
-    x:DataType="vm:TimelineViewModel">
+    x:DataType="vm:TimelineViewModel"
+    x:TypeArguments="vm:TimelineViewModel">
+
     <uranium:UraniumContentPage.Resources>
         <Style TargetType="Frame">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
@@ -18,14 +21,14 @@
             RemainingItemsThreshold="10"
             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="m:SampleItem">
+                <DataTemplate x:DataType="m:Post">
                     <Frame Margin="4" Padding="12">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
                         </Frame.GestureRecognizers>
                         <Label
                             FontSize="Large"
-                            Text="{Binding Title}"
+                            Text="{Binding Contact}"
                             TextColor="{AppThemeBinding Light={StaticResource Primary},
                                                         Dark={StaticResource Black}}" />
                     </Frame>
@@ -33,4 +36,4 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
     </RefreshView>
-</uranium:UraniumContentPage>
+</local:BetterUraniumContentPage>
