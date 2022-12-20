@@ -5,15 +5,18 @@ namespace NostrLib.Tests
 {
     public class ClientBaseFixture
     {
+        private static string _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
+
         protected static readonly string BaseUrl = ConfigVariable("BASE_URL");
         protected Client? Client;
-        private static readonly string _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
 
         protected ClientBaseFixture()
         {
+            _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
+
             AssertSettingsAvailable();
 
-            Client = new Client(new Uri("wss://relay.damus.io"));
+            Client = new Client(new Uri(BaseUrl));
         }
 
         private static void AssertSettingsAvailable()

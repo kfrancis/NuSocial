@@ -1,40 +1,55 @@
 using NostrLib.Models;
+using Shouldly;
 
 namespace NostrLib.Tests
 {
     public class ClientTests : ClientBaseFixture
     {
         [Fact]
-        public async void Client_MessageReceivedAfterConnecting()
-        {
-            ArgumentNullException.ThrowIfNull(Client);
-
-            Assert.Raises<string>(handler => Client.MessageReceived += handler, handler => Client.MessageReceived -= handler, async () => {
-                await Client.Connect();
-            });
-        }
-
-        [Fact]
         public async void Client_CanConnectAndWaitUntilConnected()
         {
             ArgumentNullException.ThrowIfNull(Client);
 
-            await Client.ConnectAndWaitUntilConnected();
+            await Client.Connect();
         }
 
         [Fact]
         public async void Client_CanSubscribe()
         {
             ArgumentNullException.ThrowIfNull(Client);
+            var cts = new CancellationTokenSource();
 
-            await Client.CreateSubscription("123", Array.Empty<NostrSubscriptionFilter>());
+            var filters = new List<NostrSubscriptionFilter>() {
+                new NostrSubscriptionFilter(){  Kinds = new[]{ 1, 7 } }
+            };
+
+            int messageCount = 0;
+            try
+            {
+                Client.Subscriptions.Add("<sub here>", filters.ToArray());
+                Client.MessageReceived += (s, msg) =>
+                {
+                    messageCount++;
+                };
+                cts.CancelAfter(TimeSpan.FromSeconds(5));
+                await Client.Connect(cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            finally
+            {
+                Client.MessageReceived -= (s, msg) => { };
+            }
+
+            messageCount.ShouldBeGreaterThan(0);
         }
+
 
         [Fact]
         public async void Client_CanCloseSubscription()
         {
             ArgumentNullException.ThrowIfNull(Client);
-
 
             await Client.CloseSubscription("123");
         }
