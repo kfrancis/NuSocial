@@ -40,8 +40,8 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
 
     public async Task LoadDataAsync()
     {
-        //await _nostr.Subscribe("", Array.Empty<NostrSubscriptionFilter>());
-        await _nostr.ToggleRelay(new Uri("wss://relay.damus.io"));
+        await _nostr.Subscribe("1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f", Array.Empty<NostrSubscriptionFilter>());
+        //await _nostr.ToggleRelay(new Uri("wss://relay.damus.io"));
         Items = new ObservableCollection<Post>(await dataService.GetItems());
     }
 

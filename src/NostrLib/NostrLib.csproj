@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<IsPackable>true</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="LinqKit.Core" Version="1.2.3" />
+	  <PackageReference Include="NBitcoin.Secp256k1" Version="3.1.0" />
+	  <PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="System.Text.Json" Version="6.0.5" />
+	  <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
+	</ItemGroup>
+
+</Project>
