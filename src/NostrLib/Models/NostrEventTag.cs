@@ -15,7 +15,7 @@ namespace NostrLib.Models
         public string EventId { get; set; }
         public string TagIdentifier { get; set; }
         public List<string> Data { get; set; } = new();
-        [JsonIgnore] public NostrEvent Event { get; set; }
+        [JsonIgnore] public INostrEvent Event { get; set; }
 
         public override string ToString()
         {
