@@ -1,72 +1,44 @@
 using NostrLib.Models;
 using Shouldly;
+using System.Diagnostics;
+using Xunit.Abstractions;
 
 namespace NostrLib.Tests
 {
     public class ClientTests : ClientBaseFixture
     {
+        public ClientTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
         [Fact]
-        public async void Client_CanConnectAndWaitUntilConnected()
+        public async void Client_CanConnectAndListen()
         {
             ArgumentNullException.ThrowIfNull(Client);
 
             var filters = new List<NostrSubscriptionFilter>() {
                 new NostrSubscriptionFilter(){  Kinds = new[]{ 1, 7 } }
             };
-
             var cts = new CancellationTokenSource();
+
+            int postCount = 0;
             try
             {
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
-                Client.Connect("subid", filters.ToArray(), cts.Token);
+                Client.PostReceived += (sender, post) => {
+                    var rawEvent = post.RawEvent as INostrEvent<string>;
+                    Output.WriteLine($"Received post {rawEvent?.Id}: {rawEvent?.Content}");
+                    postCount++;
+                };
+                cts.CancelAfter(TimeSpan.FromSeconds(1));
+                await Client.ConnectAsync("id", filters.ToArray(), cts.Token);
             }
-            catch (TaskCanceledException)
+            finally
             {
-
-                
+                Client.PostReceived -= (s, post) => { };
             }
-            
-        }
 
-        [Fact]
-        public async void Client_CanSubscribe()
-        {
-            ArgumentNullException.ThrowIfNull(Client);
-            var cts = new CancellationTokenSource();
-
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter(){  Kinds = new[]{ 1, 7 } }
-            };
-
-            //int messageCount = 0;
-            //try
-            //{
-            //    Client.Subscriptions.Add("<sub here>", filters.ToArray());
-            //    Client.MessageReceived += (s, msg) =>
-            //    {
-            //        messageCount++;
-            //    };
-            //    cts.CancelAfter(TimeSpan.FromSeconds(5));
-            //    await Client.Connect(cts.Token);
-            //}
-            //catch (TaskCanceledException)
-            //{
-            //}
-            //finally
-            //{
-            //    Client.MessageReceived -= (s, msg) => { };
-            //}
-
-            //messageCount.ShouldBeGreaterThan(0);
-        }
-
-
-        [Fact]
-        public async void Client_CanCloseSubscription()
-        {
-            ArgumentNullException.ThrowIfNull(Client);
-
-            //await Client.CloseSubscription("123");
+            Output.WriteLine($"Received {postCount} posts");
+            postCount.ShouldBeGreaterThan(0);
         }
     }
 }

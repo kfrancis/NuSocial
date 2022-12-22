@@ -1,22 +1,26 @@
 ﻿using Newtonsoft.Json;
 using System.Reflection;
+using Xunit.Abstractions;
 
 namespace NostrLib.Tests
 {
-    public class ClientBaseFixture
+    public abstract class ClientBaseFixture
     {
         private static string _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
 
         protected static readonly string BaseUrl = ConfigVariable("BASE_URL");
         protected Client? Client;
 
-        protected ClientBaseFixture()
+        public ITestOutputHelper Output { get; }
+
+        public ClientBaseFixture(ITestOutputHelper testOutputHelper)
         {
             _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
 
             AssertSettingsAvailable();
 
             Client = new Client(new Uri(BaseUrl));
+            Output = testOutputHelper;
         }
 
         private static void AssertSettingsAvailable()

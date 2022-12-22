@@ -7,6 +7,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Websocket.Client;
 using Websocket.Client.Models;
 
@@ -15,12 +16,13 @@ namespace NostrLib
     public class Client : IDisposable
     {
         private readonly Uri? _relay;
-        private CancellationToken _disconnectToken;
-        private ManualResetEvent _exitEvent;
+        private readonly CancellationToken _disconnectToken;
         private bool _isDisposed;
         private int _msgSeq;
-        private WebsocketClient _webSocket;
-        private CancellationTokenSource _webSocketTokenSource = new();
+        private WebsocketClient? _webSocket;
+        private readonly CancellationTokenSource _webSocketTokenSource = new();
+
+        public event EventHandler<NostrPost>? PostReceived;
 
         public Client(Uri relay)
         {
@@ -41,24 +43,19 @@ namespace NostrLib
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
 
-        public void Connect(string subId, NostrSubscriptionFilter[] filters, CancellationToken token)
+        public async Task ConnectAsync(string subId, NostrSubscriptionFilter[] filters, CancellationToken token)
         {
-            _webSocket = new WebsocketClient(_relay, () =>
-            {
-                return new ClientWebSocket();
-            })
+            _webSocket = new WebsocketClient(_relay, () => new ClientWebSocket())
             {
                 MessageEncoding = Encoding.UTF8,
                 IsReconnectionEnabled = false
             };
 
-            _exitEvent = new ManualResetEvent(false);
-
             _webSocket.MessageReceived.Subscribe(WsReceived);
             _webSocket.ReconnectionHappened.Subscribe(WsConnected);
             _webSocket.DisconnectionHappened.Subscribe(WsDisconnected);
 
-            _webSocket.Start();
+            await _webSocket.Start();
 
             if (!string.IsNullOrEmpty(subId))
             {
@@ -66,7 +63,10 @@ namespace NostrLib
                 _webSocket.Send(payload);
             }
 
-            _exitEvent.WaitOne();
+            while(!token.IsCancellationRequested)
+            {
+                await Task.Yield();
+            }
         }
 
         public void Dispose()
@@ -85,13 +85,11 @@ namespace NostrLib
                     _webSocket?.Dispose();
                 }
 
-                _webSocket = null;
-
                 _isDisposed = true;
             }
         }
 
-        protected virtual void HandleEvent(INostrEvent ev)
+        protected virtual void HandleEvent(string? subId, INostrEvent ev)
         {
             switch (ev.Kind)
             {
@@ -102,6 +100,7 @@ namespace NostrLib
 
                 case 1:
                     // text_note :: nip-01
+                    PostReceived?.Invoke(this, new NostrPost(ev));
                     break;
 
                 case 2:
@@ -166,6 +165,8 @@ namespace NostrLib
         protected void WsSend<T>(int evKind, T body)
                                     where T : class
         {
+            if (_webSocket == null) return;
+
             _msgSeq++;
 
             var clientMessage = new NostrEvent<T>
@@ -186,16 +187,39 @@ namespace NostrLib
         private void WsDisconnected(DisconnectionInfo obj)
         {
             Debug.WriteLine("Disconnected.");
-            _exitEvent?.Set();
         }
 
         private void WsReceived(ResponseMessage obj)
         {
-            var ev = JsonSerializer.Deserialize<NostrEvent<string>>(obj.Text);
-            if (ev != null)
+            using var doc = JsonDocument.Parse(obj.Text);
+            var json = doc.RootElement;
+            var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
+            switch (messageType)
             {
-                HandleEvent(ev);
+                case "EVENT":
+                    var subId = json[1].GetString();
+                    var ev = json[2].Deserialize<NostrEvent<string>>();
+                    if (ev?.Verify() is true)
+                    {
+                        HandleEvent(subId, ev);
+                    }
+                    break;
+                case "NOTICE":
+                    var msg = json[1].GetString();
+                    if (!string.IsNullOrEmpty(msg))
+                    {
+                        HandleNotice(msg);
+                    }
+                    break;
+                default:
+                    // future
+                    break;
             }
+        }
+
+        private void HandleNotice(string msg)
+        {
+            throw new NotImplementedException();
         }
     }
 

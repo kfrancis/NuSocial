@@ -18,7 +18,7 @@ namespace NostrLib.Models
 
     public interface INostrEvent<TBody> : INostrEvent
     {
-        TBody Content { get; set; }
+        TBody? Content { get; set; }
     }
 
     public class NostrEvent<TBody> : IEqualityComparer<NostrEvent<TBody>>, INostrEvent<TBody>
@@ -26,7 +26,7 @@ namespace NostrLib.Models
     {
         [JsonPropertyName("content")]
         [JsonConverter(typeof(StringEscaperJsonConverter))]
-        public TBody Content { get; set; }
+        public TBody? Content { get; set; }
 
         [JsonPropertyName("created_at")]
         [JsonConverter(typeof(UnixTimestampSecondsJsonConverter))]
