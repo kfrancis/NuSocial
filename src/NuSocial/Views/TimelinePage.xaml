@@ -14,26 +14,31 @@
         <Style TargetType="Frame">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
         </Style>
+        <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
-    <RefreshView Command="{Binding RefreshingCommand}" IsRefreshing="{Binding IsRefreshing}">
-        <CollectionView
-            ItemsSource="{Binding Items}"
-            RemainingItemsThreshold="10"
-            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="m:Post">
-                    <Frame Margin="4" Padding="12">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
-                        <Label
-                            FontSize="Large"
-                            Text="{Binding Contact}"
-                            TextColor="{AppThemeBinding Light={StaticResource Primary},
-                                                        Dark={StaticResource Black}}" />
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </RefreshView>
+    <VerticalStackLayout>
+        <Button Command="{Binding ToggleFeedCommand}" Text="Toggle" />
+        <RefreshView Command="{Binding RefreshingCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView
+                ItemsSource="{Binding Items}"
+                RemainingItemsThreshold="10"
+                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:Post">
+                        <Frame Margin="4" Padding="12">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
+                            <Label
+                                Text="{Binding Content, Converter={StaticResource markdownConverter}}"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary},
+                                                            Dark={StaticResource Black}}"
+                                TextType="Html" />
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </VerticalStackLayout>
+
 </local:BetterUraniumContentPage>

@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
-using NNostr.Client;
+using NostrLib;
+using NostrLib.Models;
 using NuSocial.Core.Threading;
 using NuSocial.Messages;
 
@@ -9,40 +10,39 @@ namespace NuSocial.ViewModels;
 
 public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsChangedMessage>
 {
-    private readonly NostrService _nostr;
+    private readonly Client _nostr;
     private readonly SampleDataService dataService;
 
     [ObservableProperty]
-    private bool isRefreshing;
+    private bool _isRefreshing;
 
     [ObservableProperty]
-    private ObservableCollection<Post> items;
+    private string _key;
+
+    [ObservableProperty]
+    private ObservableCollection<Post> _items = new();
 
     public TimelineViewModel(SampleDataService service)
     {
         dataService = service;
+        _nostr = new Client(new Uri("wss://relay.damus.io"));
     }
 
-    public TimelineViewModel(SampleDataService service, NostrService nostr, IDialogService dialogService, ICustomDispatcher customDispatcher) : base(dialogService, customDispatcher)
+    public TimelineViewModel(SampleDataService service, IDialogService dialogService, ICustomDispatcher customDispatcher) : base(dialogService, customDispatcher)
     {
         dataService = service;
-
-        _nostr = nostr;
-        _nostr.NoticeReceived += NoticeReceived;
-
+        _nostr = new Client(new Uri("wss://relay.damus.io"));
         WeakReferenceMessenger.Default.Register<NostrEventsChangedMessage>(this);
     }
 
     public override async Task InitializeAsync()
     {
-        await _nostr.StartAsync(CancellationToken.None).ConfigureAwait(false);
-    }
+        ArgumentNullException.ThrowIfNull(_nostr);
 
-    public async Task LoadDataAsync()
-    {
-        await _nostr.Subscribe("subid", Array.Empty<NostrSubscriptionFilter>());
-        //await _nostr.ToggleRelay(new Uri("wss://relay.damus.io"));
-        Items = new ObservableCollection<Post>(await dataService.GetItems());
+        await Task.Run(() =>
+        {
+            LoadDataAsync();
+        });
     }
 
     [RelayCommand]
@@ -66,6 +66,29 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
         throw new NotImplementedException();
     }
 
+    public async Task LoadDataAsync()
+    {
+        if (_nostr == null) return;
+
+        _nostr.PostReceived -= Nostr_PostReceived;
+        _nostr.PostReceived += Nostr_PostReceived;
+
+        var filters = new List<NostrSubscriptionFilter>() {
+                new NostrSubscriptionFilter(){
+                    Kinds = new[] { 1, 7 }
+                }
+            };
+
+        var callback = (Client sender) =>
+        {
+            sender.PostReceived -= (s, post) => { };
+        };
+
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(1));
+        await _nostr.ConnectAsync("id", filters.ToArray(), callback, cts.Token);
+    }
+
     [RelayCommand]
     private async void GoToDetails(Post item)
     {
@@ -73,6 +96,21 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
         {
             { "Item", item }
         });
+    }
+
+    private void Nostr_PostReceived(object? sender, NostrPost e)
+    {
+        if (IsRefreshing) return;
+        if (e.RawEvent is INostrEvent<string> contentEvent)
+        {
+            if (!string.IsNullOrEmpty(contentEvent.Content) && Items.Count < 10)
+            {
+                Dispatcher.Run(() =>
+                {
+                    Items.Insert(0, new Post() { Content = contentEvent.Content });
+                });
+            }
+        }
     }
 
     private void NoticeReceived(object? sender, (string tuple, Uri known) e)
@@ -83,13 +121,19 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
     }
 
     [RelayCommand]
+    private void ToggleFeed()
+    {
+        IsRefreshing = !IsRefreshing;
+    }
+
+    [RelayCommand]
     private async void OnRefreshing()
     {
         IsRefreshing = true;
 
         try
         {
-            await LoadDataAsync();
+            //await LoadDataAsync();
         }
         finally
         {

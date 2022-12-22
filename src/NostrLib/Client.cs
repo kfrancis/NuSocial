@@ -43,7 +43,7 @@ namespace NostrLib
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
 
-        public async Task ConnectAsync(string subId, NostrSubscriptionFilter[] filters, CancellationToken token)
+        public async Task ConnectAsync(string subId, NostrSubscriptionFilter[] filters, Action<Client>? cb = null, CancellationToken token = default)
         {
             _webSocket = new WebsocketClient(_relay, () => new ClientWebSocket())
             {
@@ -67,6 +67,8 @@ namespace NostrLib
             {
                 await Task.Yield();
             }
+
+            cb?.Invoke(this);
         }
 
         public void Dispose()

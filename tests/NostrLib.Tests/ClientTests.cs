@@ -20,22 +20,20 @@ namespace NostrLib.Tests
                 new NostrSubscriptionFilter(){  Kinds = new[]{ 1, 7 } }
             };
             var cts = new CancellationTokenSource();
+            var callback = (Client sender) =>
+            {
+                sender.PostReceived -= (s, post) => { };
+            };
 
             int postCount = 0;
-            try
+            Client.PostReceived += (sender, post) =>
             {
-                Client.PostReceived += (sender, post) => {
-                    var rawEvent = post.RawEvent as INostrEvent<string>;
-                    Output.WriteLine($"Received post {rawEvent?.Id}: {rawEvent?.Content}");
-                    postCount++;
-                };
-                cts.CancelAfter(TimeSpan.FromSeconds(1));
-                await Client.ConnectAsync("id", filters.ToArray(), cts.Token);
-            }
-            finally
-            {
-                Client.PostReceived -= (s, post) => { };
-            }
+                var rawEvent = post.RawEvent as INostrEvent<string>;
+                Output.WriteLine($"Received post {rawEvent?.Id}: {rawEvent?.Content}");
+                postCount++;
+            };
+            cts.CancelAfter(TimeSpan.FromMilliseconds(500));
+            await Client.ConnectAsync("id", filters.ToArray(), callback, cts.Token);
 
             Output.WriteLine($"Received {postCount} posts");
             postCount.ShouldBeGreaterThan(0);

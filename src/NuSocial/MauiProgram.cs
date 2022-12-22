@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using NNostr.Client;
 using NuSocial.Core.Threading;
 using UraniumUI;
 using Microsoft.Extensions.Logging;
@@ -38,7 +37,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<ICustomDispatcher>(mauiDispatcher);
         builder.Services.AddSingleton<IDialogService>(new DialogService(mauiDispatcher));
 
-        builder.Services.AddSingleton(new NostrService());
         builder.Services.AddSingleton<ProfileViewModel>();
 
         builder.Services.AddSingleton<ProfilePage>();
