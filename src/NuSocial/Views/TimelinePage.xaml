@@ -17,13 +17,16 @@
         <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
     <VerticalStackLayout>
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,150">
             <Entry
                 Grid.Column="0"
                 Placeholder="Key"
                 Text="{Binding Key}" />
             <Button
+                Margin="5,0"
+                CornerRadius="5"
                 Grid.Column="1"
+                Padding="2"
                 Command="{Binding LoadUnreadPostsCommand}"
                 Text="{Binding UnreadLabel}" />
         </Grid>
