@@ -19,6 +19,7 @@ namespace NostrLib
         private readonly CancellationToken _disconnectToken;
         private bool _isDisposed;
         private int _msgSeq;
+        private bool _isInitialized;
         private WebsocketClient? _webSocket;
         private readonly CancellationTokenSource _webSocketTokenSource = new();
 
@@ -36,6 +37,20 @@ namespace NostrLib
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
+        }
+
+        private bool _enableRaisingEvents;
+
+        public bool EnableRaisingEvents
+        {
+            get { return _enableRaisingEvents; }
+            set
+            {
+                if (!_isInitialized) return;
+                if (value == _enableRaisingEvents) return;
+
+                _enableRaisingEvents = value;
+            }
         }
 
         /// <summary>
@@ -63,7 +78,9 @@ namespace NostrLib
                 _webSocket.Send(payload);
             }
 
-            while(!token.IsCancellationRequested)
+            _isInitialized = true;
+
+            while (!token.IsCancellationRequested)
             {
                 await Task.Yield();
             }
@@ -206,6 +223,7 @@ namespace NostrLib
                         HandleEvent(subId, ev);
                     }
                     break;
+
                 case "NOTICE":
                     var msg = json[1].GetString();
                     if (!string.IsNullOrEmpty(msg))
@@ -213,6 +231,7 @@ namespace NostrLib
                         HandleNotice(msg);
                     }
                     break;
+
                 default:
                     // future
                     break;

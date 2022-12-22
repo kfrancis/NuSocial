@@ -47,8 +47,10 @@ namespace NostrLib
         }
     }
 
+
     internal static class StringExtensions
     {
+
         public static byte[] DecodHexData(this string encoded)
         {
             if (encoded == null)
