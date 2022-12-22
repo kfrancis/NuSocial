@@ -1,59 +1,97 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using NostrLib;
 using NostrLib.Models;
 using NuSocial.Core.Threading;
 using NuSocial.Messages;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Threading.RateLimiting;
 
 namespace NuSocial.ViewModels;
 
 public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsChangedMessage>
 {
     private readonly Client _nostr;
-    private readonly SampleDataService dataService;
+    private ConcurrentStack<NostrPost> _postStack = new ConcurrentStack<NostrPost>();
+    private RateLimiter _limiter = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions()
+    {
+        PermitLimit = 2,
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+        QueueLimit = 1,
+        Window = TimeSpan.FromMilliseconds(50),
+        AutoReplenishment = true
+    });
 
     [ObservableProperty]
     private bool _isRefreshing;
 
     [ObservableProperty]
-    private string _key;
+    private string _key = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UnreadLabel))]
+    private int _unreadPostCount;
+
+    partial void OnKeyChanged(string value)
+    {
+        Task.Run(async () =>
+        {
+            await LoadDataAsync();
+        });
+    }
+
+    public string UnreadLabel => $"Load {(UnreadPostCount > 1000 ? "many" : UnreadPostCount)} unread";
 
     [ObservableProperty]
     private ObservableCollection<Post> _items = new();
 
-    public TimelineViewModel(SampleDataService service)
+    public TimelineViewModel()
+        : this(Ioc.Default.GetRequiredService<IDialogService>(), Ioc.Default.GetRequiredService<ICustomDispatcher>())
     {
-        dataService = service;
-        _nostr = new Client(new Uri("wss://relay.damus.io"));
     }
 
-    public TimelineViewModel(SampleDataService service, IDialogService dialogService, ICustomDispatcher customDispatcher) : base(dialogService, customDispatcher)
+    public TimelineViewModel(IDialogService dialogService, ICustomDispatcher customDispatcher) : base(dialogService, customDispatcher)
     {
-        dataService = service;
         _nostr = new Client(new Uri("wss://relay.damus.io"));
+
         WeakReferenceMessenger.Default.Register<NostrEventsChangedMessage>(this);
+    }
+
+    [RelayCommand()]
+    public async Task LoadUnreadPostsAsync()
+    {
+        await SetBusyAsync(async () =>
+        {
+            await Dispatcher.RunAsync(() =>
+            {
+                Items.Clear();
+                UnreadPostCount = 0;
+                int popCount = 100;
+                if (_postStack.Count < 100)
+                {
+                    popCount = _postStack.Count;
+                }
+                var resultBuffer = new NostrPost[popCount];
+                if (_postStack.TryPopRange(resultBuffer) > 0)
+                {
+                    var resultList = resultBuffer.ToImmutableList().ConvertAll(x => new Post() { Content = (x.RawEvent as INostrEvent<string>)?.Content ?? string.Empty });
+                    foreach (var item in resultList)
+                    {
+                        Items.Add(item);
+                    }
+                }
+            });
+        });
     }
 
     public override async Task InitializeAsync()
     {
         ArgumentNullException.ThrowIfNull(_nostr);
 
-        await Task.Run(() =>
-        {
-            LoadDataAsync();
-        });
-    }
-
-    [RelayCommand]
-    public async Task LoadMore()
-    {
-        var items = await dataService.GetItems();
-
-        foreach (var item in items)
-        {
-            Items.Add(item);
-        }
+        await LoadDataAsync();
     }
 
     public override void OnDisappearing()
@@ -66,9 +104,15 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
         throw new NotImplementedException();
     }
 
+    public override void OnAppearing()
+    {
+        base.OnAppearing();
+    }
+
     public async Task LoadDataAsync()
     {
         if (_nostr == null) return;
+        if (string.IsNullOrEmpty(Key)) return;
 
         _nostr.PostReceived -= Nostr_PostReceived;
         _nostr.PostReceived += Nostr_PostReceived;
@@ -100,15 +144,20 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
 
     private void Nostr_PostReceived(object? sender, NostrPost e)
     {
-        if (IsRefreshing) return;
-        if (e.RawEvent is INostrEvent<string> contentEvent)
+        using RateLimitLease lease = _limiter.AttemptAcquire(permitCount: 1);
+        if (lease.IsAcquired)
         {
-            if (!string.IsNullOrEmpty(contentEvent.Content) && Items.Count < 10)
+            // Do action that is protected by limiter
+            if (e.RawEvent is INostrEvent<string> contentEvent)
             {
-                Dispatcher.Run(() =>
+                if (!string.IsNullOrEmpty(contentEvent.Content))
                 {
-                    Items.Insert(0, new Post() { Content = contentEvent.Content });
-                });
+                    Dispatcher.Run(() =>
+                    {
+                        UnreadPostCount++;
+                        _postStack.Push(e);
+                    });
+                }
             }
         }
     }
@@ -118,26 +167,5 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
         var message = $"{e.known}: {e.tuple}";
         var toast = Toast.Make(message, ToastDuration.Long, 30);
         toast.Show();
-    }
-
-    [RelayCommand]
-    private void ToggleFeed()
-    {
-        IsRefreshing = !IsRefreshing;
-    }
-
-    [RelayCommand]
-    private async void OnRefreshing()
-    {
-        IsRefreshing = true;
-
-        try
-        {
-            //await LoadDataAsync();
-        }
-        finally
-        {
-            IsRefreshing = false;
-        }
     }
 }

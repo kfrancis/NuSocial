@@ -17,28 +17,43 @@
         <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
     <VerticalStackLayout>
-        <Button Command="{Binding ToggleFeedCommand}" Text="Toggle" />
-        <RefreshView Command="{Binding RefreshingCommand}" IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView
-                ItemsSource="{Binding Items}"
-                RemainingItemsThreshold="10"
-                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
-                <CollectionView.ItemTemplate>
+        <Grid ColumnDefinitions="*,Auto">
+            <Entry
+                Grid.Column="0"
+                Placeholder="Key"
+                Text="{Binding Key}" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding LoadUnreadPostsCommand}"
+                Text="{Binding UnreadLabel}" />
+        </Grid>
+        <Grid
+            HorizontalOptions="CenterAndExpand"
+            RowDefinitions="Auto"
+            VerticalOptions="FillAndExpand">
+            <ListView ItemsSource="{Binding Items}" SeparatorVisibility="None">
+                <ListView.ItemTemplate>
                     <DataTemplate x:DataType="m:Post">
-                        <Frame Margin="4" Padding="12">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
-                            </Frame.GestureRecognizers>
-                            <Label
-                                Text="{Binding Content, Converter={StaticResource markdownConverter}}"
-                                TextColor="{AppThemeBinding Light={StaticResource Primary},
-                                                            Dark={StaticResource Black}}"
-                                TextType="Html" />
-                        </Frame>
+                        <ViewCell>
+                            <Frame
+                                Margin="4"
+                                Padding="12"
+                                CornerRadius="15">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+                                <Label
+                                    FormattedText="{Binding Content, Converter={StaticResource markdownConverter}}"
+                                    HorizontalOptions="Start"
+                                    TextColor="{AppThemeBinding Light={StaticResource Primary},
+                                                                Dark={StaticResource Black}}"
+                                    VerticalOptions="StartAndExpand" />
+                            </Frame>
+                        </ViewCell>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
     </VerticalStackLayout>
 
 </local:BetterUraniumContentPage>

@@ -67,6 +67,7 @@
 	  <PackageReference Include="CommunityToolkit.MVVM" Version="8.0.0" />
 	  <PackageReference Include="Markdig" Version="0.30.4" />
 	  <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+	  <PackageReference Include="System.Threading.RateLimiting" Version="7.0.0" />
 	  <PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.1.2" />
 	  <PackageReference Include="UraniumUI.Material" Version="2.1.2" />
 	  <PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.1.2" />

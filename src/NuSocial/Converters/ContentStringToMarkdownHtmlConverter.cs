@@ -13,8 +13,16 @@ namespace NuSocial
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            return Markdown.Parse((string)value, true).ToHtml(pipeline);
+            //try
+            //{
+            //    var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            //    return Markdown.Parse((string)value, true).ToHtml(pipeline);
+            //}
+            //catch (Exception)
+            //{
+            //    return string.Empty;
+            //}
+            return (string)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
