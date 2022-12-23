@@ -10,11 +10,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B82E3B66-170C-4AE0-8591-B03CE3B49C6C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostrLib", "src\NostrLib\NostrLib.csproj", "{FE62262B-722E-47BB-9C8A-01936F9D281C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrLib", "src\NostrLib\NostrLib.csproj", "{FE62262B-722E-47BB-9C8A-01936F9D281C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostrLib.Tests", "tests\NostrLib.Tests\NostrLib.Tests.csproj", "{374A9082-527E-4230-835B-495B7E43BB0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrLib.Tests", "tests\NostrLib.Tests\NostrLib.Tests.csproj", "{374A9082-527E-4230-835B-495B7E43BB0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -15,15 +15,15 @@ namespace NostrLib
 {
     public class Client : IDisposable
     {
-        private readonly Uri? _relay;
         private readonly CancellationToken _disconnectToken;
+        private readonly Uri? _relay;
+        private bool _enableRaisingEvents;
         private bool _isDisposed;
-        private int _msgSeq;
         private bool _isInitialized;
+        private int _msgSeq;
+        private string? _subId;
         private WebsocketClient? _webSocket;
-        private readonly CancellationTokenSource _webSocketTokenSource = new();
-
-        public event EventHandler<NostrPost>? PostReceived;
+        private CancellationTokenSource _webSocketTokenSource = new();
 
         public Client(Uri relay)
         {
@@ -39,7 +39,7 @@ namespace NostrLib
             Dispose(disposing: false);
         }
 
-        private bool _enableRaisingEvents;
+        public event EventHandler<NostrPost>? PostReceived;
 
         public bool EnableRaisingEvents
         {
@@ -53,6 +53,8 @@ namespace NostrLib
             }
         }
 
+        public int MessageSendCount => _msgSeq;
+
         /// <summary>
         /// The time to wait after a connection drops to try reconnecting.
         /// </summary>
@@ -60,6 +62,9 @@ namespace NostrLib
 
         public async Task ConnectAsync(string subId, NostrSubscriptionFilter[] filters, Action<Client>? cb = null, CancellationToken token = default)
         {
+            _subId = subId;
+            _webSocketTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+
             _webSocket = new WebsocketClient(_relay, () => new ClientWebSocket())
             {
                 MessageEncoding = Encoding.UTF8,
@@ -72,9 +77,9 @@ namespace NostrLib
 
             await _webSocket.Start();
 
-            if (!string.IsNullOrEmpty(subId))
+            if (!string.IsNullOrEmpty(_subId))
             {
-                var payload = JsonSerializer.Serialize(new object[] { "REQ", subId }.Concat(filters));
+                var payload = JsonSerializer.Serialize(new object[] { "REQ", _subId }.Concat(filters));
                 _webSocket.Send(payload);
             }
 
@@ -88,9 +93,20 @@ namespace NostrLib
             cb?.Invoke(this);
         }
 
+        public async Task DisconnectAsync()
+        {
+            if (_webSocket != null && !string.IsNullOrEmpty(_subId))
+            {
+                var payload = JsonSerializer.Serialize(new object[] { "CLOSE", _subId });
+                await _webSocket.SendInstant(payload);
+            }
+
+            _webSocketTokenSource?.Cancel();
+            _isInitialized = false;
+        }
+
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
@@ -198,6 +214,11 @@ namespace NostrLib
             _webSocket.Send(msg);
         }
 
+        private void HandleNotice(string msg)
+        {
+            throw new NotImplementedException();
+        }
+
         private void WsConnected(ReconnectionInfo obj)
         {
             Debug.WriteLine("Connected.");
@@ -236,11 +257,6 @@ namespace NostrLib
                     // future
                     break;
             }
-        }
-
-        private void HandleNotice(string msg)
-        {
-            throw new NotImplementedException();
         }
     }
 

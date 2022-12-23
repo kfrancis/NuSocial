@@ -1,4 +1,5 @@
 ﻿using NBitcoin.Secp256k1;
+using SQLite;
 using System.Text.Json.Serialization;
 
 namespace NuSocial.Models
@@ -12,8 +13,13 @@ namespace NuSocial.Models
 
     public record User
     {
-        public string? Username { get; set; }
+        [PrimaryKey]
         public string Key { get; set; }
+
+        public string? Username { get; set; }
+
+        public string? BlurHash { get; set; }
+
         public ECPrivKey? GetKey() => ECPrivKey.TryCreateFromDer(Convert.FromHexString(Key), out var res) ? res : null;
     }
 
@@ -39,8 +45,8 @@ namespace NuSocial.Models
     /// <param name="Email">Gets the email of the contact.</param>
     /// <param name="Picture">Gets the picture of the contact.</param>
     public sealed record Contact
-    { 
-        [JsonPropertyName("name")] 
+    {
+        [JsonPropertyName("name")]
         public Name Name { get; set; }
 
         [JsonPropertyName("email")]
