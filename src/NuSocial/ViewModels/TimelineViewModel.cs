@@ -29,7 +29,7 @@ public partial class TimelineViewModel : BaseViewModel, IRecipient<NostrEventsCh
     private bool _isRefreshing;
 
     [ObservableProperty]
-    private string _key = "";
+    private string _key = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UnreadLabel))]

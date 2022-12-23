@@ -36,6 +36,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<ICustomDispatcher>(mauiDispatcher);
         builder.Services.AddSingleton<IDialogService>(new DialogService(mauiDispatcher));
+        builder.Services.AddSingleton<IDatabase, LocalStorage>();
 
         builder.Services.AddSingleton<ProfileViewModel>();
 
