@@ -12,6 +12,17 @@ namespace NostrLib.Tests
         }
 
         [Fact]
+        public async void Client_CanDisconnect()
+        {
+            ArgumentNullException.ThrowIfNull(Client);
+
+            var cts = new CancellationTokenSource();
+            await Client.ConnectAsync("id", Array.Empty<NostrSubscriptionFilter>(),token: cts.Token);
+
+            await Client.DisconnectAsync();
+        }
+
+        [Fact]
         public async void Client_CanConnectAndListen()
         {
             ArgumentNullException.ThrowIfNull(Client);
