@@ -17,9 +17,7 @@ namespace NostrLib.Tests
             ArgumentNullException.ThrowIfNull(Client);
 
             var cts = new CancellationTokenSource();
-            await Client.ConnectAsync("id", Array.Empty<NostrSubscriptionFilter>(),token: cts.Token);
-
-            await Client.DisconnectAsync();
+            await Client.ConnectAsync(token: cts.Token);
         }
 
         [Fact]
@@ -28,7 +26,7 @@ namespace NostrLib.Tests
             ArgumentNullException.ThrowIfNull(Client);
 
             var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter(){  Kinds = new[]{ 1, 7 } }
+                new NostrSubscriptionFilter(){  Kinds = new[]{ NostrKind.SetMetadata, NostrKind.Reaction } }
             };
             var cts = new CancellationTokenSource();
             var callback = (Client sender) =>
@@ -44,7 +42,7 @@ namespace NostrLib.Tests
                 postCount++;
             };
             cts.CancelAfter(TimeSpan.FromMilliseconds(500));
-            await Client.ConnectAsync("id", filters.ToArray(), callback, cts.Token);
+            await Client.ConnectAsync(callback, cts.Token);
 
             Output.WriteLine($"Received {postCount} posts");
             postCount.ShouldBeGreaterThan(0);

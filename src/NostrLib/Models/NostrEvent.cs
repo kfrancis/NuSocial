@@ -5,12 +5,47 @@ using System.Text.Json.Serialization;
 
 namespace NostrLib.Models
 {
+    public enum NostrKind
+    {
+        SetMetadata = 0,
+        TextNote = 1,
+        RecommendServer = 2,
+        Contacts = 3,
+        EncryptedDM = 4,
+        Deletion = 5,
+        Reaction = 7,
+        /// <summary>
+        /// nip-28
+        /// </summary>
+        ChannelCreate = 40,
+        /// <summary>
+        /// nip-28
+        /// </summary>
+        ChannelMetadata = 41,
+        /// <summary>
+        /// nip-28
+        /// </summary>
+        ChannelMessage = 42,
+        /// <summary>
+        /// nip-28
+        /// </summary>
+        HideMessage = 43,
+        /// <summary>
+        /// nip-28
+        /// </summary>
+        MuteUser = 44,
+        Reserved1 = 45,
+        Reserved2 = 46,
+        Reserved3 = 47,
+        Reserved4 = 48,
+        Reserved5 = 49,
+    }
     public interface INostrEvent
     {
         DateTimeOffset? CreatedAt { get; set; }
         bool Deleted { get; set; }
         string Id { get; set; }
-        int Kind { get; set; }
+        NostrKind Kind { get; set; }
         string PublicKey { get; set; }
         string Signature { get; set; }
         List<NostrEventTag> Tags { get; set; }
@@ -38,7 +73,7 @@ namespace NostrLib.Models
         public string Id { get; set; }
 
         [JsonPropertyName("kind")]
-        public int Kind { get; set; }
+        public NostrKind Kind { get; set; }
 
         [JsonPropertyName("pubkey")]
         public string PublicKey { get; set; }

@@ -16,11 +16,11 @@ namespace NostrLib.Models
         public IDictionary<string, JsonElement> ExtensionData { get; set; }
 
         [JsonPropertyName("ids")] public string[]? Ids { get; set; }
-        [JsonPropertyName("kinds")] public int[]? Kinds { get; set; }
+        [JsonPropertyName("kinds")] public NostrKind[]? Kinds { get; set; }
         [JsonPropertyName("limit")] public int? Limit { get; set; }
         [JsonPropertyName("#p")] public string[]? PublicKey { get; set; }
-        [JsonPropertyName("since")][JsonConverter(typeof(UnixTimestampSecondsJsonConverter))] public DateTimeOffset? Since { get; set; }
-        [JsonPropertyName("until")][JsonConverter(typeof(UnixTimestampSecondsJsonConverter))] public DateTimeOffset? Until { get; set; }
+        [JsonPropertyName("since")][JsonConverter(typeof(UnixTimestampSecondsJsonConverter))] public DateTimeOffset? Since { get; set; } = DateTimeOffset.MinValue;
+        [JsonPropertyName("until")][JsonConverter(typeof(UnixTimestampSecondsJsonConverter))] public DateTimeOffset? Until { get; set; } = DateTimeOffset.MaxValue;
 
         public Dictionary<string, string[]> GetAdditionalTagFilters()
         {

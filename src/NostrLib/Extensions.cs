@@ -4,15 +4,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NostrLib
 {
     internal static class NostrEventExtensions
     {
+        public static async Task<TResult[]> WhenAll<TResult>(this IEnumerable<Task<TResult>> tasks, TimeSpan timeout)
+        {
+            var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(TResult));
+            var completedTasks =
+                (await Task.WhenAll(tasks.Select(task => Task.WhenAny(task, timeoutTask)))).
+                Where(task => task != timeoutTask);
+            return await Task.WhenAll(completedTasks);
+        }
+
         public static string ToJson(this INostrEvent<string> nostrEvent, bool withoutId)
         {
             return
-                $"[{(withoutId ? 0 : $"\"{nostrEvent.Id}\"")},\"{nostrEvent.PublicKey}\",{nostrEvent.CreatedAt?.ToUnixTimeSeconds()},{nostrEvent.Kind},[{string.Join(',', nostrEvent.Tags.Select(tag => tag))}],\"{nostrEvent.Content}\"]";
+                $"[{(withoutId ? 0 : $"\"{nostrEvent.Id}\"")},\"{nostrEvent.PublicKey}\",{nostrEvent.CreatedAt?.ToUnixTimeSeconds()},{(int)nostrEvent.Kind},[{string.Join(',', nostrEvent.Tags.Select(tag => tag))}],\"{nostrEvent.Content}\"]";
         }
         public static ECXOnlyPubKey GetPublicKey(this INostrEvent nostrEvent)
         {

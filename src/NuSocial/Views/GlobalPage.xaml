@@ -1,19 +1,76 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<uranium:UraniumContentPage
+<local:BetterUraniumContentPage
     x:Class="NuSocial.Views.GlobalPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:NuSocial"
+    xmlns:m="clr-namespace:NuSocial.Models"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-    Title="GlobalPage">
+    xmlns:vm="clr-namespace:NuSocial.ViewModels"
+    Title="GlobalPage"
+    x:DataType="vm:GlobalViewModel"
+    x:TypeArguments="vm:GlobalViewModel">
     <uranium:UraniumContentPage.Resources>
         <Style TargetType="Frame">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
         </Style>
+        <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
     <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" />
+        <Grid ColumnDefinitions="*,150">
+            <Entry Grid.Column="0" Placeholder="Key" />
+            <Button
+                Grid.Column="1"
+                Margin="5,0"
+                Padding="2"
+                CornerRadius="5"
+                Text="{Binding UnreadLabel}" />
+        </Grid>
+        <Grid
+            Margin="0,15,0,0"
+            HorizontalOptions="CenterAndExpand"
+            RowDefinitions="Auto"
+            VerticalOptions="FillAndExpand">
+            <ListView ItemsSource="{Binding Items}" SeparatorVisibility="None">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="m:Post">
+                        <ViewCell>
+                            <Frame
+                                Margin="4"
+                                CornerRadius="5"
+                                HasShadow="False">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+                                <Grid ColumnDefinitions="50,Auto">
+                                    <Image
+                                        Grid.Column="0"
+                                        HeightRequest="32"
+                                        Source="iconlistdetail.png"
+                                        WidthRequest="32" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Contact.Name}"
+                                            TextColor="{StaticResource Gray900}"
+                                            TextDecorations="Underline" />
+                                        <!--<Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=CreatedAt}"
+                                            TextColor="{StaticResource Gray900}" />-->
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Content, Converter={StaticResource markdownConverter}}"
+                                            TextColor="{StaticResource Gray900}"
+                                            TextType="Html"
+                                            VerticalOptions="StartAndExpand" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
     </VerticalStackLayout>
-</uranium:UraniumContentPage>
+</local:BetterUraniumContentPage>

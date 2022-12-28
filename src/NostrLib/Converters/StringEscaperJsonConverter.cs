@@ -11,10 +11,10 @@ namespace NostrLib.Converters
             if (string.IsNullOrEmpty(value))
                 return addDoubleQuotes ? "\"\"" : string.Empty;
 
-            int len = value.Length;
-            bool needEncode = false;
+            var len = value.Length;
+            var needEncode = false;
             char c;
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 c = value[i];
 
@@ -32,7 +32,7 @@ namespace NostrLib.Converters
             if (addDoubleQuotes)
                 sb.Append('"');
 
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 c = value[i];
                 // if (c == 0)

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Reflection;
 using Xunit.Abstractions;
 
@@ -19,7 +19,7 @@ namespace NostrLib.Tests
 
             AssertSettingsAvailable();
 
-            Client = new Client(new Uri(BaseUrl));
+            Client = new Client("");
             Output = testOutputHelper;
         }
 

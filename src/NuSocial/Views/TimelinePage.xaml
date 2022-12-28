@@ -23,14 +23,15 @@
                 Placeholder="Key"
                 Text="{Binding Key}" />
             <Button
-                Margin="5,0"
-                CornerRadius="5"
                 Grid.Column="1"
+                Margin="5,0"
                 Padding="2"
                 Command="{Binding LoadUnreadPostsCommand}"
+                CornerRadius="5"
                 Text="{Binding UnreadLabel}" />
         </Grid>
         <Grid
+            Margin="0,15,0,0"
             HorizontalOptions="CenterAndExpand"
             RowDefinitions="Auto"
             VerticalOptions="FillAndExpand">
@@ -40,17 +41,35 @@
                         <ViewCell>
                             <Frame
                                 Margin="4"
-                                Padding="12"
-                                CornerRadius="15">
+                                CornerRadius="5"
+                                HasShadow="False">
                                 <Frame.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
                                 </Frame.GestureRecognizers>
-                                <Label
-                                    FormattedText="{Binding Content, Converter={StaticResource markdownConverter}}"
-                                    HorizontalOptions="Start"
-                                    TextColor="{AppThemeBinding Light={StaticResource Primary},
-                                                                Dark={StaticResource Black}}"
-                                    VerticalOptions="StartAndExpand" />
+                                <Grid ColumnDefinitions="50,Auto">
+                                    <Image
+                                        Grid.Column="0"
+                                        HeightRequest="32"
+                                        Source="iconlistdetail.png"
+                                        WidthRequest="32" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Contact.Name}"
+                                            TextColor="{StaticResource Gray900}"
+                                            TextDecorations="Underline" />
+                                        <!--<Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=CreatedAt}"
+                                            TextColor="{StaticResource Gray900}" />-->
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Content, Converter={StaticResource markdownConverter}}"
+                                            TextColor="{StaticResource Gray900}"
+                                            TextType="Html"
+                                            VerticalOptions="StartAndExpand" />
+                                    </VerticalStackLayout>
+                                </Grid>
                             </Frame>
                         </ViewCell>
                     </DataTemplate>

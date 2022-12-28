@@ -2,10 +2,12 @@ using UraniumUI.Pages;
 
 namespace NuSocial.Views;
 
-public partial class GlobalPage : UraniumContentPage
+public partial class GlobalPage : BetterUraniumContentPage<GlobalViewModel>
 {
-	public GlobalPage()
+	public GlobalPage(GlobalViewModel viewModel)
 	{
 		InitializeComponent();
+
+		ViewModel = viewModel;
 	}
 }

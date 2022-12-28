@@ -9,9 +9,13 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <material:ColorResource />
+                <!--<material:ColorResource />-->
+                <ResourceDictionary Source="Resources/Styles/Bases.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Converters.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Labels.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Icons.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-                <material:StyleResource />
+                <!--<material:StyleResource />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

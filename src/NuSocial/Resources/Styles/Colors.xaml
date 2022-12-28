@@ -2,19 +2,23 @@
 <?xaml-comp compile="true" ?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <Color x:Key="Primary">#FF14D4D2</Color>
-    <Color x:Key="Secondary">#FF26D1A7</Color>
-    <Color x:Key="Tertiary">#FF39CE7C</Color>
-    <Color x:Key="White">#FFF6F6F6</Color>
+    <!--  https://www.happyhues.co/palettes/6  -->
+    <Color x:Key="Primary">#FF6246ea</Color>
+    <Color x:Key="Secondary">#FFd1d1e9</Color>
+    <Color x:Key="Tertiary">#FFe45858</Color>
+
+    <Color x:Key="White">#FFFFFFFE</Color>
     <Color x:Key="Black">#FF000000</Color>
-    <Color x:Key="Gray100">#E1E1E1</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray400">#919191</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
+
+    <Color x:Key="Gray100">#ffE1E1E1</Color>
+    <Color x:Key="Gray200">#ffC8C8C8</Color>
+    <Color x:Key="Gray300">#ffACACAC</Color>
+    <Color x:Key="Gray400">#ff919191</Color>
+    <Color x:Key="Gray500">#ff6E6E6E</Color>
+    <Color x:Key="Gray600">#ff404040</Color>
+    <Color x:Key="Gray900">#FF2b2c34</Color>
+    <Color x:Key="Gray950">#ff141414</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}" />
@@ -29,14 +33,95 @@
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}" />
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}" />
 
-    <Color x:Key="Yellow100Accent">#F7B548</Color>
-    <Color x:Key="Yellow200Accent">#FFD590</Color>
-    <Color x:Key="Yellow300Accent">#FFE5B9</Color>
-    <Color x:Key="Cyan100Accent">#28C2D1</Color>
-    <Color x:Key="Cyan200Accent">#7BDDEF</Color>
-    <Color x:Key="Cyan300Accent">#C3F2F4</Color>
-    <Color x:Key="Blue100Accent">#3E8EED</Color>
-    <Color x:Key="Blue200Accent">#72ACF1</Color>
-    <Color x:Key="Blue300Accent">#A7CBF6</Color>
+    <Color x:Key="Yellow100Accent">#ffF7B548</Color>
+    <Color x:Key="Yellow200Accent">#ffFFD590</Color>
+    <Color x:Key="Yellow300Accent">#ffFFE5B9</Color>
+    <Color x:Key="Cyan100Accent">#ff28C2D1</Color>
+    <Color x:Key="Cyan200Accent">#ff7BDDEF</Color>
+    <Color x:Key="Cyan300Accent">#ffC3F2F4</Color>
+    <Color x:Key="Blue100Accent">#ff3E8EED</Color>
+    <Color x:Key="Blue200Accent">#ff72ACF1</Color>
+    <Color x:Key="Blue300Accent">#ffA7CBF6</Color>
+
+
+    <Color x:Key="PrimaryDark">#ffD0BCFF</Color>
+    <Color x:Key="PrimaryContainer">#FFd1d1e9</Color>
+    <Color x:Key="PrimaryContainerDark">#ff4F378B</Color>
+
+
+    <Color x:Key="SecondaryDark">#ffCCC2DC</Color>
+    <Color x:Key="SecondaryContainer">#FFd1d1e9</Color>
+    <Color x:Key="SecondaryContainerDark">#ff4A4458</Color>
+
+
+    <Color x:Key="TertiaryDark">#ffEFB8C8</Color>
+    <Color x:Key="TertiaryContainer">#ffFFD8E4</Color>
+    <Color x:Key="TertiaryContainerDark">#ff633B48</Color>
+
+    <Color x:Key="Surface">#FFFFFFFE</Color>
+    <Color x:Key="SurfaceDark">#ff1C1B1F</Color>
+
+    <Color x:Key="SurfaceVariant">#ffE7E0EC</Color>
+    <Color x:Key="SurfaceVariantDark">#ff49454F</Color>
+
+    <Color x:Key="Background">#FFFFFFFE</Color>
+    <Color x:Key="BackgroundDark">#ff1C1B1F</Color>
+
+    <Color x:Key="Error">#ffB3261E</Color>
+    <Color x:Key="ErrorDark">#ffF2B8B5</Color>
+    <Color x:Key="ErrorContainer">#ffF9DEDC</Color>
+    <Color x:Key="ErrorContainerDark">#ff8C1D18</Color>
+
+    <Color x:Key="OnPrimary">#FFFFFFFE</Color>
+    <Color x:Key="OnPrimaryDark">#ff371E73</Color>
+    <Color x:Key="OnPrimaryContainer">#ff21005E</Color>
+    <Color x:Key="OnPrimaryContainerDark">#FFd1d1e9</Color>
+
+    <Color x:Key="OnSecondary">#FFFFFFFE</Color>
+    <Color x:Key="OnSecondaryDark">#ff332D41</Color>
+    <Color x:Key="OnSecondaryContainer">#ff1E192B</Color>
+    <Color x:Key="OnSecondaryContainerDark">#ffE8DEF8</Color>
+
+    <Color x:Key="OnTertiary">#FFFFFFFE</Color>
+    <Color x:Key="OnTertiaryDark">#ff492532</Color>
+    <Color x:Key="OnTertiaryContainer">#ff370B1E</Color>
+    <Color x:Key="OnTertiaryContainerDark">#ffFFD8E4</Color>
+
+    <Color x:Key="OnSurface">#ff1C1B1F</Color>
+    <Color x:Key="OnSurfaceDark">#ffE6E1E5</Color>
+
+    <Color x:Key="OnSurfaceVariant">#ff49454E</Color>
+    <Color x:Key="OnSurfaceVariantDark">#ffCAC4D0</Color>
+
+    <Color x:Key="OnError">#FFFFFFFE</Color>
+    <Color x:Key="OnErrorDark">#ff601410</Color>
+    <Color x:Key="OnErrorContainer">#ff370B1E</Color>
+    <Color x:Key="OnErrorContainerDark">#ffF9DEDC</Color>
+
+    <Color x:Key="OnBackground">#ff1C1B1F</Color>
+    <Color x:Key="OnBackgroundDark">#ffE6E1E5</Color>
+
+    <Color x:Key="Outline">#ff79747E</Color>
+    <Color x:Key="OutlineDark">#ff938F99</Color>
+
+    <Color x:Key="OutlineVariant">#ffC4C7C5</Color>
+    <Color x:Key="OutlineVariantDark">#ff444746</Color>
+
+    <Color x:Key="Shadow">#ff000000</Color>
+    <Color x:Key="ShadowDark">#ff000000</Color>
+
+    <Color x:Key="SurfaceTint">#ff6750A4</Color>
+    <Color x:Key="SurfaceTintDark">#ffD0BCFF</Color>
+
+    <Color x:Key="InverseSurface">#ff313033</Color>
+    <Color x:Key="InverseSurfaceDark">#ffE6E1E5</Color>
+    <Color x:Key="InverseOnSurface">#ffF4EFF4</Color>
+    <Color x:Key="InverseOnSurfaceDark">#ff313033</Color>
+
+    <Color x:Key="InversePrimary">#ffD0BCFF</Color>
+    <Color x:Key="InversePrimaryDark">#ff6750A4</Color>
+
+    <Color x:Key="Scrim">#ff000000</Color>
+    <Color x:Key="ScrimDark">#ff000000</Color>
 
 </ResourceDictionary>

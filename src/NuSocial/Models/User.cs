@@ -9,6 +9,7 @@ namespace NuSocial.Models
         public Contact Contact { get; set; }
 
         public string Content { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public record User
@@ -52,12 +53,15 @@ namespace NuSocial.Models
         [JsonPropertyName("email")]
         public string Email { get; set; }
 
+        [JsonIgnore]
+        public string PublicKey { get; set; }
+
         [JsonPropertyName("picture")]
         public Picture Picture { get; set; }
 
         public override string ToString()
         {
-            return Name.ToString();
+            return Name?.ToString() ?? PublicKey;
         }
     }
 
