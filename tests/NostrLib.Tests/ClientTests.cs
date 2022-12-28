@@ -17,19 +17,20 @@ namespace NostrLib.Tests
             ArgumentNullException.ThrowIfNull(Client);
 
             var cts = new CancellationTokenSource();
-            await Client.ConnectAsync(token: cts.Token);
+            await Client.ConnectAsync(cancellationToken: cts.Token);
+            await Client.DisconnectAsync(cancellationToken: cts.Token);
         }
 
         [Fact]
         public async void Client_CanConnectAndListen()
         {
             ArgumentNullException.ThrowIfNull(Client);
-
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter(){  Kinds = new[]{ NostrKind.SetMetadata, NostrKind.Reaction } }
-            };
+            var filter = new NostrSubscriptionFilter();
+            filter.Kinds.Add(NostrKind.SetMetadata);
+            filter.Kinds.Add(NostrKind.Reaction);
+            var filters = new List<NostrSubscriptionFilter>() { filter };
             var cts = new CancellationTokenSource();
-            var callback = (Client sender) =>
+            var callback = (NostrClient sender) =>
             {
                 sender.PostReceived -= (s, post) => { };
             };

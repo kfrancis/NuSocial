@@ -9,7 +9,7 @@ namespace NostrLib.Tests
         private static string _assemblyLocation = typeof(ClientBaseFixture).GetTypeInfo().Assembly.Location;
 
         protected static readonly string BaseUrl = ConfigVariable("BASE_URL");
-        protected Client? Client;
+        protected NostrClient? Client;
 
         public ITestOutputHelper Output { get; }
 
@@ -19,7 +19,7 @@ namespace NostrLib.Tests
 
             AssertSettingsAvailable();
 
-            Client = new Client("");
+            Client = new NostrClient("");
             Output = testOutputHelper;
         }
 

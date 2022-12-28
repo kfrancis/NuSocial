@@ -1,7 +1,8 @@
-﻿using NostrLib.Models;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NostrLib.Models;
 
 namespace NostrLib.Converters
 {
@@ -36,6 +37,11 @@ namespace NostrLib.Converters
 
         public override void Write(Utf8JsonWriter writer, NostrEventTag value, JsonSerializerOptions options)
         {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             if (value is null)
             {
                 writer.WriteNullValue();
@@ -44,8 +50,7 @@ namespace NostrLib.Converters
 
             writer.WriteStartArray();
             writer.WriteStringValue(value.TagIdentifier);
-            value.Data?.ForEach(writer.WriteStringValue);
-
+            new List<string>(value.Data).ForEach(writer.WriteStringValue);
             writer.WriteEndArray();
         }
     }

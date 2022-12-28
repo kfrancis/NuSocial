@@ -15,6 +15,7 @@ namespace NuSocial.ViewModels
     {
         private readonly ISettingsService _settingsService;
         private readonly INostrClient _nostrClient;
+        private CancellationTokenSource? _clientCts;
 
         public string UnreadLabel => $"Load {(UnreadPostCount > 1000 ? "many" : UnreadPostCount)} unread";
 
@@ -23,6 +24,7 @@ namespace NuSocial.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(UnreadLabel))]
         private int _unreadPostCount;
+        private object _lock = new();
 
         [ObservableProperty]
         private ObservableCollection<Post> _items = new();
@@ -39,39 +41,59 @@ namespace NuSocial.ViewModels
             return Task.CompletedTask;
         }
 
-        public override async Task InitializeAsync()
-        {
-            if (_nostrClient == null) return;
-
-            await _nostrClient.DisconnectAsync().ConfigureAwait(true);
-            await _nostrClient.ConnectAsync().ConfigureAwait(true);
-        }
-
-        public virtual Task<IEnumerable<NostrPost>> GetPosts()
+        public virtual Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
+        public override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            lock (_lock)
+            {
+                _clientCts ??= new();
+            }
+        }
+
+        public override void OnDisappearing()
+        {
+            //lock (_lock)
+            //{
+            //    _clientCts?.Cancel();
+            //}
+
+            base.OnDisappearing();
+        }
+
         public Task LoadDataAsync()
         {
+            Debug.WriteLine("LoadDataAsync started");
+            lock (_lock)
+            {
+                _clientCts ??= new();
+            }
             return SetBusyAsync(async () =>
             {
-                await NostrClient.SetRelaysAsync(_settingsService.GetRelays());
+                await NostrClient.SetRelaysAsync(_settingsService.GetRelays(), false, _clientCts.Token).ConfigureAwait(true);
 
-                var posts = await GetPosts().ConfigureAwait(true);
+                var posts = await GetPosts(_clientCts.Token).ConfigureAwait(true);
                 if (posts != null && posts.Any())
                 {
-                    await Dispatcher.RunAsync(() =>
+                    await Dispatcher.RunAsync(async () =>
                     {
                         AddItems(posts.OrderBy(x => x.CreatedAt));
+                        await Snackbar.Make($"Found {posts.Count()} posts.", duration: TimeSpan.FromSeconds(5)).Show(_clientCts.Token).ConfigureAwait(false);
                     }).ConfigureAwait(true);
                 }
                 else
                 {
                     var message = $"Nothing new to fetch";
                     var toast = Toast.Make(message, ToastDuration.Long, 30);
-                    await toast.Show().ConfigureAwait(false);
+                    await toast.Show(_clientCts.Token).ConfigureAwait(false);
                 }
+
+                Debug.WriteLine("LoadDataAsync ended");
             });
         }
 

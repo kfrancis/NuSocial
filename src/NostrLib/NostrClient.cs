@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,19 +11,25 @@ using NostrLib.Models;
 
 namespace NostrLib
 {
-    public class Client : IDisposable, INostrClient
+    public class NostrClient : IDisposable, INostrClient
     {
+        private readonly ConcurrentDictionary<Uri, NostrRelay> _relayInstances = new();
+        private readonly ObservableCollection<RelayItem> _relayList = new();
         private bool _isDisposed;
-        private ConcurrentDictionary<Uri, Relay> _relayInstances = new();
-        private ObservableCollection<RelayItem> _relayList = new();
+        private bool _isConnected;
 
-        public Client(string privateKey)
+        public NostrClient(string privateKey)
             : this(privateKey, Array.Empty<RelayItem>())
         {
         }
 
-        public Client(string privateKey, RelayItem[] relays)
+        public NostrClient(string privateKey, RelayItem[] relays)
         {
+            if (relays is null)
+            {
+                throw new ArgumentNullException(nameof(relays));
+            }
+
             PrivateKey = privateKey;
             PublicKey = privateKey;
 
@@ -36,12 +41,13 @@ namespace NostrLib
             }
         }
 
-        ~Client()
+        ~NostrClient()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
         }
 
+        public Action<object, NostrPost> PostReceived { get; set; }
         public string? PrivateKey { get; set; }
         public string? PublicKey { get; set; }
 
@@ -49,18 +55,17 @@ namespace NostrLib
         /// The time to wait after a connection drops to try reconnecting.
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
-        public Action<object, NostrPost> PostReceived { get; set; }
 
-        public async Task ConnectAsync(Action<Client>? cb = null, CancellationToken token = default)
+        public async Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default)
         {
             if (_relayList.Count < 1)
             {
-                throw new Exception("Please add any relay and try again.");
+                throw new InvalidOperationException("Please add any relay and try again.");
             }
             for (var i = 0; i < _relayList.Count; i++)
             {
                 var item = _relayList[i];
-                var relay = new Relay(this)
+                using var relay = new NostrRelay(this)
                 {
                     Url = item.Uri,
                     Name = item.Name
@@ -70,14 +75,14 @@ namespace NostrLib
                     relay.RelayPost += Relay_RelayPost;
                     relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                     relay.RelayNotice += Relay_RelayNotice;
-                    if (await relay.ConnectAsync(token))
+                    if (await relay.ConnectAsync(cancellationToken).ConfigureAwait(false))
                     {
                         _relayInstances.TryAdd(relay.Url, relay);
+                        _isConnected = true;
                         cb?.Invoke(this);
                     }
                     else
                     {
-                        var t = "";
                         // something went wrong
                     }
                 }
@@ -93,8 +98,9 @@ namespace NostrLib
                         relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                         relay.RelayNotice -= Relay_RelayNotice;
                         relay.RelayNotice += Relay_RelayNotice;
-                        if (await existingRelay.ConnectAsync(token))
+                        if (await existingRelay.ConnectAsync(cancellationToken).ConfigureAwait(false))
                         {
+                            _isConnected = true;
                             cb?.Invoke(this);
                         }
                     }
@@ -102,7 +108,7 @@ namespace NostrLib
             }
         }
 
-        public Task DisconnectAsync()
+        public Task DisconnectAsync(CancellationToken cancellationToken = default)
         {
             if (_relayInstances?.Count > 0)
             {
@@ -119,6 +125,8 @@ namespace NostrLib
                 _relayInstances.Clear();
             }
 
+            _isConnected = false;
+
             return Task.CompletedTask;
         }
 
@@ -128,17 +136,24 @@ namespace NostrLib
             GC.SuppressFinalize(this);
         }
 
-        public async Task<INostrEvent?> GetFollowingInfoAsync(string publicKey)
+        public async Task<IEnumerable<string>> GetFollowerInfoAsync(string publicKey, CancellationToken cancellationToken = default)
         {
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter()
-                {
-                    Kinds = new[] { NostrKind.Contacts },
-                    Authors = new[]{ publicKey }
-                }
-            };
+            var filter = new NostrSubscriptionFilter();
+            filter.Kinds.Add(NostrKind.Contacts);
+            filter.Authors.Add(publicKey);
+            var filters = new List<NostrSubscriptionFilter>() { filter };
+            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+            return events.Values.ToList().ConvertAll(x => x.PublicKey);
+        }
+
+        public async Task<INostrEvent?> GetFollowingInfoAsync(string publicKey, CancellationToken cancellationToken = default)
+        {
+            var filter = new NostrSubscriptionFilter();
+            filter.Kinds.Add(NostrKind.Contacts);
+            filter.Authors.Add(publicKey);
+            var filters = new List<NostrSubscriptionFilter>() { filter };
             var createdAt = DateTimeOffset.MinValue;
-            var events = await GetEventsAsync(filters);
+            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
             INostrEvent? retVal = null;
             foreach (var evt in events.Values)
             {
@@ -151,25 +166,29 @@ namespace NostrLib
             return retVal;
         }
 
-        public async Task<IEnumerable<NostrPost>> GetGlobalPostsAsync(int? limit = null, DateTime? since = null, List<string>? authors = null)
+        public async Task<IEnumerable<NostrPost>> GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default)
         {
-            var globalFilter = new NostrSubscriptionFilter()
-            {
-                Kinds = new[] { NostrKind.TextNote }
-            };
+            var globalFilter = new NostrSubscriptionFilter();
+            globalFilter.Kinds.Add(NostrKind.TextNote);
             if (limit > 0) globalFilter.Limit = limit;
             if (since != null)
             {
                 globalFilter.Since = since;
             }
-            if (authors?.Count > 0) globalFilter.Authors = authors.ToArray();
+            if (authors != null)
+            {
+                foreach (var author in authors)
+                {
+                    globalFilter.Authors.Add(author);
+                }
+            }
 
             var filters = new List<NostrSubscriptionFilter>()
             {
                 globalFilter
             };
 
-            var events = await GetEventsAsync(filters).ConfigureAwait(true);
+            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
             var posts = new List<NostrPost>();
             foreach (var nEvent in events)
             {
@@ -178,46 +197,45 @@ namespace NostrLib
             return posts.AsEnumerable();
         }
 
-        public async Task<IEnumerable<string>> GetFollowerInfoAsync(string publicKey)
+        public async Task<IEnumerable<NostrPost>> GetPostsAsync(CancellationToken cancellationToken = default)
         {
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter()
+            await EnsureConnectedAsync(cancellationToken).ConfigureAwait(true);
+
+            var posts = new List<NostrPost>();
+            if (!string.IsNullOrEmpty(PublicKey))
+            {
+                var filter = new NostrSubscriptionFilter();
+                filter.Kinds.Add(NostrKind.TextNote);
+                filter.Authors.Add(PublicKey);
+                var filters = new List<NostrSubscriptionFilter>() { filter };
+                var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+
+                foreach (var nEvent in events)
                 {
-                    Kinds = new[] { NostrKind.Contacts },
-                    PublicKey = new[]{ publicKey }
+                    posts.Add(EventToPost(nEvent.Value));
                 }
-            };
-            var events = await GetEventsAsync(filters);
-            return events.Values.ToList().ConvertAll(x => x.PublicKey);
-        }
-
-        public async Task<IEnumerable<NostrPost>> GetPostsAsync()
-        {
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter(){
-                    Kinds = new[] { NostrKind.TextNote },
-                    Authors = new string[] { PublicKey }
-                }
-            };
-            var events = await GetEventsAsync(filters);
-            var posts = new List<NostrPost>();
-            foreach (var nEvent in events)
-            {
-                posts.Add(EventToPost(nEvent.Value));
             }
+
             return posts.AsEnumerable();
         }
 
-        public async Task GetProfileAsync(string publicKey)
+        private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
         {
-            var filters = new List<NostrSubscriptionFilter>() {
-                new NostrSubscriptionFilter(){
-                    Kinds = new[] { NostrKind.SetMetadata },
-                    Authors = new[] { PublicKey },
-                    Limit = 1
-                }
-            };
-            var events = await GetEventsAsync(filters);
+            if (!_isConnected && _relayList.Count > 0)
+            {
+                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
+                await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+            }
+        }
+
+        public async Task GetProfileAsync(string publicKey, CancellationToken cancellationToken = default)
+        {
+            var filter = new NostrSubscriptionFilter();
+            filter.Kinds.Add(NostrKind.SetMetadata);
+            filter.Authors.Add(publicKey);
+            filter.Limit = 1;
+            var filters = new List<NostrSubscriptionFilter>() { filter };
+            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
             var profileInfo = new NostrProfile();
             var latest = events.OrderByDescending(x => x.Value.CreatedAt).FirstOrDefault();
             if (latest.Value is INostrEvent<string> latestProfile &&
@@ -251,7 +269,25 @@ namespace NostrLib
             //}
         }
 
-        internal void Log(JsonElement json)
+        public async Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default)
+        {
+            if (relayItems?.Length > 0)
+            {
+                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
+
+                _relayList.Clear();
+                for (var i = 0; i < relayItems.Length; i++)
+                {
+                    _relayList.Add(relayItems[i]);
+                }
+
+                if (shouldConnect)
+                    await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        internal static void Log(JsonElement json)
         {
             Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), json.ToString());
         }
@@ -281,57 +317,49 @@ namespace NostrLib
             }
         }
 
-        public async Task SetRelaysAsync(RelayItem[] relayItems)
-        {
-            await DisconnectAsync();
+        private static NostrPost EventToPost(INostrEvent evt) => new(evt);
 
-            _relayList.Clear();
-            for (var i = 0; i < relayItems.Length - 1; i++)
-            {
-                _relayList.Add(relayItems[i]);
-            }
-
-            await ConnectAsync();
-        }
-
-        private NostrPost EventToPost(INostrEvent evt) => new NostrPost(evt);
-
-        private async Task<ConcurrentDictionary<string, INostrEvent>> GetEventsAsync(List<NostrSubscriptionFilter> filters)
+        private async Task<ConcurrentDictionary<string, INostrEvent>> GetEventsAsync(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
         {
             var events = new ConcurrentDictionary<string, INostrEvent>();
-            var subEvents = _relayInstances.Values.Select(r => r.SubscribeAsync(PublicKey, filters.ToArray()));
-            var results = await subEvents.WhenAll(TimeSpan.FromSeconds(5));
-            foreach (var relayEvents in results)
+
+            if (!string.IsNullOrEmpty(PublicKey))
             {
-                foreach (var relayEvent in relayEvents)
+                var subEvents = _relayInstances.Values.Select(r => r.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
+                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(5)).ConfigureAwait(true);
+                foreach (var relayEvents in results)
                 {
-                    events.TryAdd(relayEvent.Id, relayEvent);
+                    foreach (var relayEvent in relayEvents)
+                    {
+                        events.TryAdd(relayEvent.Id, relayEvent);
+                    }
                 }
             }
+
             return events;
         }
 
-        private void Relay_RelayConnectionChanged(object sender, bool isConnected)
+        private void Relay_RelayConnectionChanged(object sender, RelayConnectionChangedEventArgs args)
         {
-            if (sender is Relay relay)
+            if (sender is NostrRelay relay)
             {
-                Debug.WriteLine($"Connection for '{relay.Url}' changed: {(isConnected ? "connected" : "disconnected")}");
+                Debug.WriteLine($"Connection for '{relay.Url}' changed: {(args.IsConnected ? "connected" : "disconnected")}");
             }
         }
 
-        private void Relay_RelayNotice(object sender, string e)
+        private void Relay_RelayNotice(object sender, RelayNoticeEventArgs args)
         {
-            if (sender is Relay relay)
+            if (sender is NostrRelay relay)
             {
-                Debug.WriteLineIf(!string.IsNullOrEmpty(e), $"RelayNotice from '{relay.Url}': {e}");
+                Debug.WriteLineIf(!string.IsNullOrEmpty(args.Message), $"RelayNotice from '{relay.Url}': {args.Message}");
             }
         }
 
-        private void Relay_RelayPost(object sender, RelayPost e)
+        private void Relay_RelayPost(object sender, RelayPostEventArgs args)
         {
-            if (sender is Relay relay)
+            if (sender is NostrRelay relay)
             {
-                //Debug.WriteLine($"Connection for '{relay.Url}' changed: {(isConnected ? "connected" : "disconnected")}");
+                Debug.WriteLine($"Relay message for '{relay.Url}': {(args.WasSuccessful ? "Success" : "Fail")} :: {args.Message}");
             }
         }
 

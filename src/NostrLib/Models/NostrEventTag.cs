@@ -1,21 +1,20 @@
-﻿using NostrLib.Converters;
-using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NostrLib.Converters;
 
 namespace NostrLib.Models
 {
     [JsonConverter(typeof(NostrEventTagJsonConverter))]
     public class NostrEventTag
     {
-        public string Id { get; set; }
-
-        public string EventId { get; set; }
-        public string TagIdentifier { get; set; }
-        public List<string> Data { get; set; } = new();
+        public Collection<string> Data { get; } = new();
         [JsonIgnore] public INostrEvent Event { get; set; }
+        public string EventId { get; set; }
+        public string Id { get; set; }
+        public string TagIdentifier { get; set; }
 
         public override string ToString()
         {

@@ -1,14 +1,6 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using NostrLib;
+﻿using NostrLib;
 using NostrLib.Models;
 using NuSocial.Core.Threading;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Contact = NuSocial.Models.Contact;
 
 namespace NuSocial.ViewModels
 {
@@ -25,18 +17,16 @@ namespace NuSocial.ViewModels
             _settingsService = settingsService;
         }
 
-        
-
-        public override Task<IEnumerable<NostrPost>> GetPosts()
+        public override Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
         {
-            return NostrClient.GetGlobalPostsAsync();
+            return NostrClient.GetGlobalPostsAsync(cancellationToken: cancellationToken);
         }
 
         public override async void OnAppearing()
         {
             base.OnAppearing();
 
-            await LoadDataAsync();
+            await LoadDataAsync().ConfigureAwait(false);
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using NostrLib.Converters;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using NostrLib.Converters;
 
 namespace NostrLib.Models
 {
@@ -14,32 +15,39 @@ namespace NostrLib.Models
         EncryptedDM = 4,
         Deletion = 5,
         Reaction = 7,
+
         /// <summary>
         /// nip-28
         /// </summary>
         ChannelCreate = 40,
+
         /// <summary>
         /// nip-28
         /// </summary>
         ChannelMetadata = 41,
+
         /// <summary>
         /// nip-28
         /// </summary>
         ChannelMessage = 42,
+
         /// <summary>
         /// nip-28
         /// </summary>
         HideMessage = 43,
+
         /// <summary>
         /// nip-28
         /// </summary>
         MuteUser = 44,
-        Reserved1 = 45,
-        Reserved2 = 46,
-        Reserved3 = 47,
-        Reserved4 = 48,
-        Reserved5 = 49,
+
+        //Reserved1 = 45,
+        //Reserved2 = 46,
+        //Reserved3 = 47,
+        //Reserved4 = 48,
+        //Reserved5 = 49,
     }
+
     public interface INostrEvent
     {
         DateTimeOffset? CreatedAt { get; set; }
@@ -48,7 +56,7 @@ namespace NostrLib.Models
         NostrKind Kind { get; set; }
         string PublicKey { get; set; }
         string Signature { get; set; }
-        List<NostrEventTag> Tags { get; set; }
+        Collection<NostrEventTag> Tags { get; }
     }
 
     public interface INostrEvent<TBody> : INostrEvent
@@ -82,7 +90,7 @@ namespace NostrLib.Models
         public string Signature { get; set; }
 
         [JsonPropertyName("tags")]
-        public List<NostrEventTag> Tags { get; set; }
+        public Collection<NostrEventTag> Tags { get; } = new();
 
         public bool Equals(NostrEvent<TBody>? x, NostrEvent<TBody>? y)
         {
@@ -93,7 +101,12 @@ namespace NostrLib.Models
 
         public int GetHashCode(NostrEvent<TBody> obj)
         {
-            return obj.Id.GetHashCode();
+            if (obj is null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            return obj.Id.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

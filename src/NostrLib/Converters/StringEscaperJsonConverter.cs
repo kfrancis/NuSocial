@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -52,7 +53,7 @@ namespace NostrLib.Converters
 
                 if ((c >= 0 && c <= 7) || c == 11 || (c >= 14 && c <= 31) || c == 39 || c == 60 || c == 62)
                 {
-                    sb.AppendFormat("\\u{0:x4}", (int)c);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "\\u{0:x4}", (int)c);
                 }
                 else
                 {
@@ -116,6 +117,11 @@ namespace NostrLib.Converters
 
         public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
         {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             if (value is null)
             {
                 writer.WriteNullValue();

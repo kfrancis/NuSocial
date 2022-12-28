@@ -1,42 +1,35 @@
-﻿using NBitcoin.Secp256k1;
-using NostrLib.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NBitcoin.Secp256k1;
+using NostrLib.Models;
 
 namespace NostrLib
 {
     internal static class NostrEventExtensions
     {
-        public static async Task<TResult[]> WhenAll<TResult>(this IEnumerable<Task<TResult>> tasks, TimeSpan timeout)
+        public static ECXOnlyPubKey GetPublicKey(this INostrEvent nostrEvent)
         {
-            var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(TResult));
-            var completedTasks =
-                (await Task.WhenAll(tasks.Select(task => Task.WhenAny(task, timeoutTask)))).
-                Where(task => task != timeoutTask);
-            return await Task.WhenAll(completedTasks);
+            return ParsePubKey(nostrEvent.PublicKey);
+        }
+
+        public static ECPrivKey ParseKey(this string key)
+        {
+            return ECPrivKey.Create(key.DecodHexData());
+        }
+
+        public static ECXOnlyPubKey ParsePubKey(this string key)
+        {
+            return Context.Instance.CreateXOnlyPubKey(key.DecodHexData());
         }
 
         public static string ToJson(this INostrEvent<string> nostrEvent, bool withoutId)
         {
             return
                 $"[{(withoutId ? 0 : $"\"{nostrEvent.Id}\"")},\"{nostrEvent.PublicKey}\",{nostrEvent.CreatedAt?.ToUnixTimeSeconds()},{(int)nostrEvent.Kind},[{string.Join(',', nostrEvent.Tags.Select(tag => tag))}],\"{nostrEvent.Content}\"]";
-        }
-        public static ECXOnlyPubKey GetPublicKey(this INostrEvent nostrEvent)
-        {
-            return ParsePubKey(nostrEvent.PublicKey);
-        }
-
-        public static ECPrivKey ParseKey(string key)
-        {
-            return ECPrivKey.Create(key.DecodHexData());
-        }
-
-        public static ECXOnlyPubKey ParsePubKey(string key)
-        {
-            return Context.Instance.CreateXOnlyPubKey(key.DecodHexData());
         }
 
         public static bool Verify(this INostrEvent<string> nostrEvent)
@@ -55,11 +48,47 @@ namespace NostrLib
 
             return pub.SigVerifyBIP340(sig, hash);
         }
-    }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "<Pending>")]
+        public static async Task<TResult[]> WhenAll<TResult>(this IEnumerable<Task<TResult>> tasks, TimeSpan timeout)
+        {
+            var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(TResult)) as Task<TResult>;
+            var completedTasks =
+                        (await Task.WhenAll(tasks.Select(task => Task.WhenAny(task, timeoutTask))).ConfigureAwait(true)).
+                        Where(task => task != timeoutTask);
+            return await Task.WhenAll(completedTasks).ConfigureAwait(true);
+        }
+    }
 
     internal static class StringExtensions
     {
+        public static int CharToDec(this char c)
+        {
+            if ('0' <= c && c <= '9')
+            {
+                return c - '0';
+            }
+            else if ('a' <= c && c <= 'f')
+            {
+                return c - 'a' + 10;
+            }
+            else if ('A' <= c && c <= 'F')
+            {
+                return c - 'A' + 10;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        public static byte[] ComputeSha256Hash(this string rawData)
+        {
+            // Create a SHA256
+            using var sha256Hash = System.Security.Cryptography.SHA256.Create();
+            // ComputeHash - returns byte array
+            return sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+        }
 
         public static byte[] DecodHexData(this string encoded)
         {
@@ -81,26 +110,6 @@ namespace NostrLib
             return result;
         }
 
-        public static int CharToDec(this char c)
-        {
-            if ('0' <= c && c <= '9')
-            {
-                return c - '0';
-            }
-            else if ('a' <= c && c <= 'f')
-            {
-                return c - 'a' + 10;
-            }
-            else if ('A' <= c && c <= 'F')
-            {
-                return c - 'A' + 10;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
         public static string ToHex(this byte[] bytes)
         {
             var builder = new StringBuilder();
@@ -110,11 +119,6 @@ namespace NostrLib
             }
 
             return builder.ToString();
-        }
-
-        private static string ToHex(this byte b)
-        {
-            return b.ToString("x2");
         }
 
         public static string ToHex(this Span<byte> bytes)
@@ -127,13 +131,10 @@ namespace NostrLib
 
             return builder.ToString();
         }
-        public static byte[] ComputeSha256Hash(this string rawData)
-        {
-            // Create a SHA256   
-            using var sha256Hash = System.Security.Cryptography.SHA256.Create();
-            // ComputeHash - returns byte array  
-            return sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-        }
 
+        private static string ToHex(this byte b)
+        {
+            return b.ToString("x2", CultureInfo.InvariantCulture);
+        }
     }
 }

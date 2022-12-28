@@ -26,9 +26,9 @@ public partial class TimelineViewModel : PostListViewModel
     [ObservableProperty]
     private string _key = string.Empty;
 
-    public override Task<IEnumerable<NostrPost>> GetPosts()
+    public override Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
     {
-        return NostrClient.GetPostsAsync();
+        return NostrClient.GetPostsAsync(cancellationToken);
     }
 
     [RelayCommand(CanExecute = "IsNotBusy")]

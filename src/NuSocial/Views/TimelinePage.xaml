@@ -35,8 +35,11 @@
             HorizontalOptions="CenterAndExpand"
             RowDefinitions="Auto"
             VerticalOptions="FillAndExpand">
-            <ListView ItemsSource="{Binding Items}" SeparatorVisibility="None">
-                <ListView.ItemTemplate>
+            <CollectionView
+                ItemsSource="{Binding Items}"
+                SelectionMode="Single"
+                VerticalOptions="Fill">
+                <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:Post">
                         <ViewCell>
                             <Frame
@@ -73,8 +76,8 @@
                             </Frame>
                         </ViewCell>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Grid>
     </VerticalStackLayout>
 

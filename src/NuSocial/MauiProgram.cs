@@ -3,6 +3,7 @@ using NuSocial.Core.Threading;
 using UraniumUI;
 using Microsoft.Extensions.Logging;
 using NostrLib;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace NuSocial;
 
@@ -40,13 +41,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDatabase, LocalStorage>();
 
         builder.Services.AddSingleton<ISettingsService>(settingsService);
-        builder.Services.AddSingleton<INostrClient, Client>(x => new Client("id", settingsService.GetRelays()));
+        builder.Services.AddSingleton<INostrClient, NostrClient>(x => new NostrClient(settingsService.GetId(), settingsService.GetRelays()));
 
         builder.Services.AddSingleton<ProfileViewModel>();
 
         builder.Services.AddSingleton<ProfilePage>();
 
-        builder.Services.AddTransient<SampleDataService>();
         builder.Services.AddTransient<TimelineDetailViewModel>();
         builder.Services.AddTransient<TimelineDetailPage>();
 
@@ -57,7 +57,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<GlobalPage>();
 
         builder.Services.AddSingleton<LocalizationViewModel>();
-
         builder.Services.AddSingleton<LocalizationPage>();
 
         return builder.Build();

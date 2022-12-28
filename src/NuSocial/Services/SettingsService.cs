@@ -24,6 +24,11 @@ namespace NuSocial.Services
         };
             return relays.ToArray();
         }
+
+        public string GetId()
+        {
+            return "1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f";
+        }
     }
 
     public interface ISettingsService

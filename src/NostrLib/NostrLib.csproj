@@ -3,24 +3,56 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<LangVersion>latest</LangVersion>
+		<Features>strict</Features>
 		<Nullable>enable</Nullable>
 		<IsPackable>true</IsPackable>
+		<Authors>Kori Francis</Authors>
+		<PackageProjectUrl>https://github.com/kfrancis/NuSocial</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/kfrancis/NuSocial</RepositoryUrl>
+		<PackageTags>nostr;social</PackageTags>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<!--<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>-->
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<NoWarn>$(NoWarn);CS1591;CA1014</NoWarn>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
-	  <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="NBitcoin.Secp256k1" Version="3.1.0" />
-	  <PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="System.Text.Json" Version="6.0.5" />
-	  <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
-	  <PackageReference Include="Websocket.Client" Version="4.4.43" />
+		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+		<PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NBitcoin.Secp256k1" Version="3.1.0" />
+		<PackageReference Include="Nerdbank.GitVersioning" Version="3.5.119">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Text.Json" Version="6.0.5" />
+		<PackageReference Include="System.Threading.Channels" Version="7.0.0" />
+		<PackageReference Include="Websocket.Client" Version="4.4.43" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="README.md">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>
