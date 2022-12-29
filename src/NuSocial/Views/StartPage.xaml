@@ -13,18 +13,28 @@
     x:TypeArguments="vm:StartViewModel"
     NavigationPage.HasNavigationBar="False">
 
-    <VerticalStackLayout Padding="20,0">
-        <Label
-            HeightRequest="200"
-            HorizontalOptions="Center"
-            Text="{mex:LocString StartDescription}"
-            VerticalOptions="CenterAndExpand" />
+    <Grid
+        Padding="20,0"
+        RowDefinitions="*,55,55"
+        RowSpacing="10">
+        <VerticalStackLayout Grid.Row="0">
+            <Label
+                FontSize="Title"
+                HorizontalOptions="Center"
+                Text="What is Nostr?" />
+            <Label
+                Margin="0,20,0,0"
+                HorizontalOptions="Center"
+                Text="{mex:LocString StartDescription}"
+                VerticalOptions="CenterAndExpand" />
+        </VerticalStackLayout>
         <Button
-            x:Name="createAccountBtn"
-            Margin="0,20,0,10"
+            Grid.Row="1"
             Command="{Binding GoToCreateAccountCommand}"
             Text="{mex:LocString CreateAccount}" />
-
-        <Button Command="{Binding GoToLoginCommand}" Text="{mex:LocString Login}" />
-    </VerticalStackLayout>
+        <Button
+            Grid.Row="2"
+            Command="{Binding GoToLoginCommand}"
+            Text="{mex:LocString Login}" />
+    </Grid>
 </local:BetterUraniumContentPage>

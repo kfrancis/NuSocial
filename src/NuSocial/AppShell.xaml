@@ -8,6 +8,7 @@
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:views="clr-namespace:NuSocial.Views"
     Shell.FlyoutBehavior="Disabled">
+
     <ShellItem Route="start">
         <ShellContent ContentTemplate="{DataTemplate views:StartPage}" Route="start" />
     </ShellItem>
@@ -17,8 +18,8 @@
     <ShellItem Route="createAccount">
         <ShellContent ContentTemplate="{DataTemplate views:CreateAccountPage}" Route="createAccount" />
     </ShellItem>
-    <TabBar>
 
+    <TabBar Route="main">
         <ShellContent Title="{mex:LocString Home}" ContentTemplate="{DataTemplate views:TimelinePage}">
             <ShellContent.Icon>
                 <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.House}" />

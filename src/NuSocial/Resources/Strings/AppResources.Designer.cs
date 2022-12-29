@@ -178,7 +178,7 @@ namespace NuSocial.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to the social network you control..
+        ///   Looks up a localized string similar to A decentralized network based on cryptographic keypairs and that is not peer-to-peer, it is super simple and scalable and therefore has a chance of working..
         /// </summary>
         internal static string StartDescription {
             get {
