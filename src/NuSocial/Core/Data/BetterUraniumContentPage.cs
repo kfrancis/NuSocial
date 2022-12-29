@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UraniumUI.Pages;
 
 namespace NuSocial
 {
-    public abstract class BetterUraniumContentPage : UraniumContentPage
-    {
-
-    }
-
-    public abstract class BetterUraniumContentPage<T> : BetterUraniumContentPage where T: BaseViewModel
+    public abstract class BetterUraniumContentPage<T> : UraniumContentPage where T : BaseViewModel
     {
         private bool _initialView = true;
         private bool _isInitialized;
-        T? _viewModel;
+        private T? _viewModel;
 
         protected BetterUraniumContentPage()
         {
@@ -35,17 +25,11 @@ namespace NuSocial
             }
         }
 
-        async void InitializeAsync()
-        {
-            if (ViewModel == null) return;
-
-            await ViewModel.InitializeAsync();
-        }
-
         protected virtual Guid PageInstanceId { get; set; }
+
         protected virtual string StyleSheet { get; set; } = string.Empty;
 
-        protected override async void OnAppearing()
+        protected override void OnAppearing()
         {
             try
             {
@@ -90,6 +74,13 @@ namespace NuSocial
             }
         }
 
+        private async void InitializeAsync()
+        {
+            if (ViewModel == null) return;
+
+            await ViewModel.InitializeAsync();
+        }
+
         private void LoadStyles()
         {
             if (!_initialView)
@@ -101,10 +92,13 @@ namespace NuSocial
             {
                 try
                 {
-                    if (Activator.CreateInstance(Type.GetType(this.StyleSheet)) is VisualElement styleSheet)
+                    if (Type.GetType(this.StyleSheet) is Type styleSheetType)
                     {
-                        foreach (var resource in styleSheet.Resources)
-                            this.Resources.Add(resource.Key, resource.Value);
+                        if (Activator.CreateInstance(styleSheetType) is VisualElement styleSheet)
+                        {
+                            foreach (var resource in styleSheet.Resources)
+                                this.Resources.Add(resource.Key, resource.Value);
+                        }
                     }
                 }
                 catch
