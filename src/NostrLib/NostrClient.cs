@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,6 +45,12 @@ namespace NostrLib
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
+        }
+
+        public void UpdateKey(string key)
+        {
+            PrivateKey = key;
+            PublicKey = key;
         }
 
         public Action<object, NostrPost> PostReceived { get; set; }

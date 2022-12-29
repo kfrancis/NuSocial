@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -30,5 +30,6 @@ namespace NostrLib
         Task GetProfileAsync(string publicKey, CancellationToken cancellationToken = default);
 
         Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default);
+        void UpdateKey(string key);
     }
 }

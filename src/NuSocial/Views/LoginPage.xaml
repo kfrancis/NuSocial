@@ -5,18 +5,34 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:NuSocial"
     xmlns:m="clr-namespace:NuSocial.Models"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:LoginViewModel"
     x:TypeArguments="vm:LoginViewModel">
-    <VerticalStackLayout Spacing="10">
-        <Label
-            HorizontalOptions="Center"
-            Text="{mex:LocString Login}"
-            VerticalOptions="Center" />
+    <Grid
+        Padding="20,10"
+        RowDefinitions="*,55,55"
+        RowSpacing="10">
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label
+                HorizontalOptions="Center"
+                Text="{mex:LocString Login}"
+                VerticalOptions="Center" />
 
-        <Entry Text="{Binding Key}" />
-        <Button Command="{Binding LoginCommand}" Text="{mex:LocString Login}" />
-    </VerticalStackLayout>
+            <material:TextField Title="{mex:LocString LoginPlaceholder}" Text="{Binding Key}" />
+
+        </VerticalStackLayout>
+        <Button
+            Grid.Row="1"
+            Command="{Binding LoginCommand}"
+            StyleClass="FilledButton"
+            Text="{mex:LocString Login}" />
+        <Button
+            Grid.Row="2"
+            Command="{Binding GoToStartCommand}"
+            StyleClass="OutlinedButton"
+            Text="{mex:LocString Back}" />
+    </Grid>
 </local:BetterUraniumContentPage>

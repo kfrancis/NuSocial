@@ -33,7 +33,7 @@ public static class MauiProgram
             })
             .ConfigureMauiHandlers(handlers =>
             {
-                handlers.AddUraniumUIHandlers(); 
+                handlers.AddUraniumUIHandlers();
                 handlers.AddInputKitHandlers();
             });
 
@@ -42,11 +42,12 @@ public static class MauiProgram
 #endif
 
         var mauiDispatcher = new MauiDispatcher();
-        var settingsService = new SettingsService();
+
         builder.Services.AddSingleton<ICustomDispatcher>(mauiDispatcher);
         builder.Services.AddSingleton<IDialogService>(new DialogService(mauiDispatcher));
-        builder.Services.AddSingleton<IDatabase, LocalStorage>();
-
+        var db = new LocalStorage();
+        builder.Services.AddSingleton<IDatabase>(db);
+        var settingsService = new SettingsService(db);
         builder.Services.AddSingleton<ISettingsService>(settingsService);
         builder.Services.AddSingleton<INostrClient, NostrClient>(x => new NostrClient(settingsService.GetId(), settingsService.GetRelays()));
 

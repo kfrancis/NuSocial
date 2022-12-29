@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:NuSocial"
     xmlns:m="clr-namespace:NuSocial.Models"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
@@ -17,52 +18,32 @@
             Text="{mex:LocString CreateAccountHeader}"
             VerticalOptions="Center" />
 
-        <Grid
-            Margin="0,0,0,10"
-            ColumnDefinitions="16,*"
-            RowDefinitions="Auto,Auto">
-            <Label
-                Grid.Row="0"
-                Grid.ColumnSpan="2"
-                Margin="0,0,0,5"
-                FontAttributes="Bold"
-                Text="{mex:LocString Username}" />
+        <Grid Margin="0,0,0,10" ColumnDefinitions="16,*">
             <Label
                 Grid.Row="1"
                 Grid.Column="0"
                 Text="@"
                 VerticalOptions="Center" />
-            <Entry
+            <material:TextField
+                Title="{mex:LocString UsernamePlaceholder}"
                 Grid.Row="1"
                 Grid.Column="1"
+                AllowClear="True"
                 HorizontalOptions="FillAndExpand"
-                Placeholder="{mex:LocString UsernamePlaceholder}"
                 Text="{Binding Username}" />
         </Grid>
 
-        <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
-            <Label
-                Grid.Row="0"
-                Margin="0,0,0,5"
-                FontAttributes="Bold"
-                Text="{mex:LocString DisplayName}" />
-            <Entry
-                Grid.Row="1"
-                Placeholder="{mex:LocString DisplayNamePlaceholder}"
-                Text="{Binding DisplayName}" />
-        </Grid>
+        <material:TextField
+            Title="{mex:LocString DisplayNamePlaceholder}"
+            Margin="0,0,0,10"
+            AllowClear="True"
+            Text="{Binding DisplayName}" />
 
-        <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
-            <Label
-                Grid.Row="0"
-                Margin="0,0,0,5"
-                FontAttributes="Bold"
-                Text="{mex:LocString About}" />
-            <Entry
-                Grid.Row="1"
-                Placeholder="{mex:LocString AboutPlaceholder}"
-                Text="{Binding About}" />
-        </Grid>
+        <material:TextField
+            Title="{mex:LocString AboutPlaceholder}"
+            Margin="0,0,0,10"
+            AllowClear="True"
+            Text="{Binding About}" />
 
         <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
             <Label
@@ -91,10 +72,12 @@
         <Button
             Margin="0,20,0,0"
             Command="{Binding CreateAccountCommand}"
+            StyleClass="FilledButton"
             Text="{mex:LocString Create}" />
         <Button
             Margin="0,10,0,0"
             Command="{Binding GoToStartCommand}"
+            StyleClass="OutlinedButton"
             Text="{mex:LocString Back}" />
     </VerticalStackLayout>
 </local:BetterUraniumContentPage>

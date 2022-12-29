@@ -1,4 +1,5 @@
-﻿using NostrLib;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NostrLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,19 @@ namespace NuSocial.Services
 {
     public class SettingsService : ISettingsService
     {
+        private readonly IDatabase _db;
+        private string _key = string.Empty;
+
+        public SettingsService(IDatabase db)
+        {
+            _db = db;
+        }
+
+        public SettingsService()
+            : this(Ioc.Default.GetRequiredService<IDatabase>())
+        {
+        }
+
         public int? GetLimit()
         {
             return 100;
@@ -27,7 +41,30 @@ namespace NuSocial.Services
 
         public string GetId()
         {
-            return "1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f";
+            return _key;
+        }
+
+        public async Task<bool> LoginAsync(string key)
+        {
+            try
+            {
+                _key = key;
+
+                var nostr = Ioc.Default.GetService<INostrClient>();
+                if (nostr != null)
+                {
+                    nostr.UpdateKey(_key);
+                }
+
+                //await _db.UpdateUserAsync(new User() { Key = key });
+
+                return true;
+            }
+            catch (Exception)
+            {
+                // TODO: Log
+            }
+            return false;
         }
     }
 
@@ -35,5 +72,6 @@ namespace NuSocial.Services
     {
         int? GetLimit();
         RelayItem[] GetRelays();
+        Task<bool> LoginAsync(string key);
     }
 }
