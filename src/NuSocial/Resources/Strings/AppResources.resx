@@ -120,6 +120,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
   <data name="CreateAccount" xml:space="preserve">
     <value>Create Account</value>
   </data>

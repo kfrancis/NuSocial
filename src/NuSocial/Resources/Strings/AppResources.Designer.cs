@@ -70,6 +70,15 @@ namespace NuSocial.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copied.
+        /// </summary>
+        internal static string Copied {
+            get {
+                return ResourceManager.GetString("Copied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Account.
         /// </summary>
         internal static string CreateAccount {
