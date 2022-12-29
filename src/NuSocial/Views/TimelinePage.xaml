@@ -30,56 +30,56 @@
                 CornerRadius="5"
                 Text="{Binding UnreadLabel}" />
         </Grid>
-        <Grid
+        <CollectionView
             Margin="0,15,0,0"
-            HorizontalOptions="CenterAndExpand"
-            RowDefinitions="Auto"
+            HorizontalOptions="FillAndExpand"
+            ItemSizingStrategy="MeasureFirstItem"
+            ItemsLayout="VerticalList"
+            ItemsSource="{Binding Items}"
+            SelectionMode="Single"
             VerticalOptions="FillAndExpand">
-            <CollectionView
-                ItemSizingStrategy="MeasureFirstItem"
-                ItemsSource="{Binding Items}"
-                SelectionMode="Single"
-                VerticalOptions="Fill">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="m:Post">
-                        <ViewCell>
-                            <Frame
-                                Margin="4"
-                                CornerRadius="5"
-                                HasShadow="False">
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
-                                </Frame.GestureRecognizers>
-                                <Grid ColumnDefinitions="50,Auto">
-                                    <Image
-                                        Grid.Column="0"
-                                        HeightRequest="32"
-                                        Source="iconlistdetail.png"
-                                        WidthRequest="32" />
-                                    <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                        <Label
-                                            HorizontalOptions="Start"
-                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Contact.Name}"
-                                            TextColor="{StaticResource Gray900}"
-                                            TextDecorations="Underline" />
-                                        <!--<Label
-                                            HorizontalOptions="Start"
-                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=CreatedAt}"
-                                            TextColor="{StaticResource Gray900}" />-->
-                                        <Label
-                                            HorizontalOptions="Start"
-                                            Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Content, Converter={StaticResource markdownConverter}}"
-                                            TextColor="{StaticResource Gray900}"
-                                            TextType="Html"
-                                            VerticalOptions="StartAndExpand" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Frame>
-                        </ViewCell>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="m:Post">
+                    <Grid Padding="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+                        <Image
+                            Grid.RowSpan="2"
+                            Aspect="AspectFill"
+                            HeightRequest="60"
+                            Source="iconblank.png"
+                            WidthRequest="60" />
+                        <Label
+                            Grid.Column="1"
+                            FontAttributes="Bold"
+                            Text="Author Name" />
+                        <Frame
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,10,0,0"
+                            Padding="5"
+                            CornerRadius="10"
+                            HorizontalOptions="StartAndExpand">
+                            <Label Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Content, Converter={StaticResource markdownConverter}}" TextType="Html" />
+                        </Frame>
+
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <BoxView
+            BackgroundColor="White"
+            HorizontalOptions="Start"
+            WidthRequest="1" />
     </VerticalStackLayout>
 
 </local:BetterUraniumContentPage>

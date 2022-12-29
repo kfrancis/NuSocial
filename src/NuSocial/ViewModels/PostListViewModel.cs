@@ -1,33 +1,30 @@
-﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using NostrLib;
 using NostrLib.Models;
 using NuSocial.Core.Threading;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NuSocial.ViewModels
 {
-    public partial class PostListViewModel : BaseViewModel
+    /// <summary>
+    /// Pages that show lists of nostr posts can use this as a base class
+    /// </summary>
+    public partial class PostListViewModel : BaseViewModel, IDisposable
     {
-        private readonly ISettingsService _settingsService;
         private readonly INostrClient _nostrClient;
+        private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _clientCts;
 
-        public string UnreadLabel => $"Load {(UnreadPostCount > 1000 ? "many" : UnreadPostCount)} unread";
+        private bool _disposedValue;
 
-        public INostrClient NostrClient => _nostrClient;
+        [ObservableProperty]
+        private ObservableCollection<Post> _items = new();
+
+        private readonly object _lock = new();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(UnreadLabel))]
         private int _unreadPostCount;
-        private object _lock = new();
-
-        [ObservableProperty]
-        private ObservableCollection<Post> _items = new();
 
         public PostListViewModel(IDialogService dialogService, ICustomDispatcher customDispatcher, ISettingsService settingsService, INostrClient nostrClient) : base(dialogService, customDispatcher)
         {
@@ -35,15 +32,66 @@ namespace NuSocial.ViewModels
             _nostrClient = nostrClient;
         }
 
+        ~PostListViewModel()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public INostrClient NostrClient => _nostrClient;
+        public string UnreadLabel => $"Load {(UnreadPostCount > 1000 ? "many" : UnreadPostCount)} unread";
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Override me to provide an implementation that makes sense for the page you're on
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task LoadDataAsync()
+        {
+            Debug.WriteLine("LoadDataAsync started");
+            lock (_lock)
+            {
+                _clientCts ??= new();
+            }
+            return SetBusyAsync(async () =>
+            {
+                await NostrClient.SetRelaysAsync(_settingsService.GetRelays(), false, _clientCts.Token).ConfigureAwait(true);
+
+                var posts = await GetPosts(_clientCts.Token).ConfigureAwait(true);
+                await Dispatcher.RunAsync(async () =>
+                {
+                    if (posts != null && posts.Any())
+                    {
+                        AddItems(posts.OrderBy(x => x.CreatedAt));
+                    }
+                    else
+                    {
+                        var message = $"Nothing new to fetch";
+                        await Snackbar.Make(message).Show(_clientCts.Token).ConfigureAwait(false);
+                    }
+                }).ConfigureAwait(true);
+
+                Debug.WriteLine("LoadDataAsync ended");
+            });
+        }
+
         [RelayCommand(CanExecute = "IsNotBusy")]
         public virtual Task LoadUnreadPosts()
         {
             return Task.CompletedTask;
-        }
-
-        public virtual Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
 
         public override void OnAppearing()
@@ -66,35 +114,17 @@ namespace NuSocial.ViewModels
             base.OnDisappearing();
         }
 
-        public Task LoadDataAsync()
+        protected virtual void Dispose(bool disposing)
         {
-            Debug.WriteLine("LoadDataAsync started");
-            lock (_lock)
+            if (!_disposedValue)
             {
-                _clientCts ??= new();
+                if (disposing)
+                {
+                    _clientCts?.Dispose();
+                }
+
+                _disposedValue = true;
             }
-            return SetBusyAsync(async () =>
-            {
-                await NostrClient.SetRelaysAsync(_settingsService.GetRelays(), false, _clientCts.Token).ConfigureAwait(true);
-
-                var posts = await GetPosts(_clientCts.Token).ConfigureAwait(true);
-                if (posts != null && posts.Any())
-                {
-                    await Dispatcher.RunAsync(async () =>
-                    {
-                        AddItems(posts.OrderBy(x => x.CreatedAt));
-                        await Snackbar.Make($"Found {posts.Count()} posts.", duration: TimeSpan.FromSeconds(5)).Show(_clientCts.Token).ConfigureAwait(false);
-                    }).ConfigureAwait(true);
-                }
-                else
-                {
-                    var message = $"Nothing new to fetch";
-                    var toast = Toast.Make(message, ToastDuration.Long, 30);
-                    await toast.Show(_clientCts.Token).ConfigureAwait(false);
-                }
-
-                Debug.WriteLine("LoadDataAsync ended");
-            });
         }
 
         private void AddItems(IOrderedEnumerable<NostrPost> nostrPosts)

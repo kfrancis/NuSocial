@@ -1,12 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <uranium:UraniumContentPage
     x:Class="NuSocial.Views.TimelineDetailPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:NuSocial"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:TimelineDetailViewModel">
     <uranium:UraniumContentPage.Resources>
+        <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
         <Style TargetType="Frame">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}" />
         </Style>
@@ -14,7 +16,10 @@
     <ScrollView>
         <VerticalStackLayout Margin="12">
             <Label FontSize="Header" Text="{Binding Item.Contact}" />
-            <Label FontSize="Default" Text="{Binding Item.Content}" />
+            <Label
+                FontSize="Default"
+                Text="{Binding Item.Content, Converter={StaticResource markdownConverter}}"
+                TextType="Html" />
         </VerticalStackLayout>
     </ScrollView>
 </uranium:UraniumContentPage>

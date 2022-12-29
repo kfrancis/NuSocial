@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
@@ -28,6 +28,13 @@ public partial class TimelineViewModel : PostListViewModel
 
     public override Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
     {
+        //var postContent = new NostrEvent<string>()
+        //{
+        //    Content = "_This is emphasized text!_\r\n\r\n__This is strong text!__\r\n\r\n*This is emphasized text!*\r\n\r\n**This is strong text!**",
+        //    CreatedAt = DateTimeOffset.UtcNow,
+        //    Kind = NostrKind.TextNote
+        //};
+        //return Task.FromResult(new List<NostrPost>() { new NostrPost(postContent)  }.AsEnumerable());
         return NostrClient.GetPostsAsync(cancellationToken);
     }
 
