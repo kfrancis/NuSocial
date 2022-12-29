@@ -1,9 +1,11 @@
-﻿using CommunityToolkit.Maui.Markup;
+using CommunityToolkit.Maui.Markup;
 using NuSocial.Core.Threading;
 using UraniumUI;
 using Microsoft.Extensions.Logging;
 using NostrLib;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Maui.Hosting;
+using InputKit.Handlers;
 
 namespace NuSocial;
 
@@ -28,6 +30,11 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFontAwesomeIconFonts();
+            })
+            .ConfigureMauiHandlers(handlers =>
+            {
+                handlers.AddUraniumUIHandlers(); 
+                handlers.AddInputKitHandlers();
             });
 
 #if DEBUG
@@ -50,9 +57,15 @@ public static class MauiProgram
         builder.Services.AddTransient<TimelineDetailViewModel>();
         builder.Services.AddTransient<TimelineDetailPage>();
 
+        builder.Services.AddSingleton<LoginViewModel>();
+        builder.Services.AddSingleton<CreateAccountViewModel>();
+        builder.Services.AddSingleton<StartViewModel>();
         builder.Services.AddSingleton<TimelineViewModel>();
         builder.Services.AddSingleton<GlobalViewModel>();
 
+        builder.Services.AddSingleton<LoginPage>();
+        builder.Services.AddSingleton<CreateAccountPage>();
+        builder.Services.AddSingleton<StartPage>();
         builder.Services.AddSingleton<TimelinePage>();
         builder.Services.AddSingleton<GlobalPage>();
 

@@ -70,6 +70,15 @@ namespace NuSocial.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Account.
+        /// </summary>
+        internal static string CreateAccount {
+            get {
+                return ResourceManager.GetString("CreateAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DMs.
         /// </summary>
         internal static string DMs {
@@ -124,6 +133,15 @@ namespace NuSocial.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        internal static string Login {
+            get {
+                return ResourceManager.GetString("Login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Notifications.
         /// </summary>
         internal static string Notifications {
@@ -147,6 +165,15 @@ namespace NuSocial.Resources.Strings {
         internal static string Profile {
             get {
                 return ResourceManager.GetString("Profile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to the social network you control..
+        /// </summary>
+        internal static string StartDescription {
+            get {
+                return ResourceManager.GetString("StartDescription", resourceCulture);
             }
         }
     }

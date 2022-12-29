@@ -5,9 +5,9 @@ namespace NuSocial;
 
 public partial class App : AppBase
 {
-	public App(IServiceProvider serviceProvider) : base(serviceProvider)
-	{
-		InitializeComponent();
+    public App(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+        InitializeComponent();
 
         MauiExceptions.UnhandledException += MauiExceptions_UnhandledException;
 

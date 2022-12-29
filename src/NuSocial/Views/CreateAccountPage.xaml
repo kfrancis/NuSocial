@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:BetterUraniumContentPage
+    x:Class="NuSocial.Views.CreateAccountPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:NuSocial"
+    xmlns:m="clr-namespace:NuSocial.Models"
+    xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:NuSocial.ViewModels"
+    x:DataType="vm:CreateAccountViewModel"
+    x:TypeArguments="vm:CreateAccountViewModel">
+    <VerticalStackLayout Padding="20,0">
+        <Label
+            Margin="0,0,0,20"
+            HorizontalOptions="Center"
+            Text="{mex:LocString CreateAccountHeader}"
+            VerticalOptions="Center" />
+
+        <Grid
+            Margin="0,0,0,10"
+            ColumnDefinitions="16,*"
+            RowDefinitions="Auto,Auto">
+            <Label
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Margin="0,0,0,5"
+                FontAttributes="Bold"
+                Text="{mex:LocString Username}" />
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                Text="@"
+                VerticalOptions="Center" />
+            <Entry
+                Grid.Row="1"
+                Grid.Column="1"
+                HorizontalOptions="FillAndExpand"
+                Placeholder="{mex:LocString UsernamePlaceholder}"
+                Text="{Binding Username}" />
+        </Grid>
+
+        <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
+            <Label
+                Grid.Row="0"
+                Margin="0,0,0,5"
+                FontAttributes="Bold"
+                Text="{mex:LocString DisplayName}" />
+            <Entry
+                Grid.Row="1"
+                Placeholder="{mex:LocString DisplayNamePlaceholder}"
+                Text="{Binding DisplayName}" />
+        </Grid>
+
+        <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
+            <Label
+                Grid.Row="0"
+                Margin="0,0,0,5"
+                FontAttributes="Bold"
+                Text="{mex:LocString About}" />
+            <Entry
+                Grid.Row="1"
+                Placeholder="{mex:LocString AboutPlaceholder}"
+                Text="{Binding About}" />
+        </Grid>
+
+        <Grid Margin="0,0,0,10" RowDefinitions="Auto,Auto">
+            <Label
+                Grid.Row="0"
+                Margin="0,0,0,5"
+                FontAttributes="Bold"
+                Text="{mex:LocString AccountId}" />
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,*">
+                <Label
+                    Grid.Column="0"
+                    LineBreakMode="TailTruncation"
+                    Text="{Binding Key}"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateAccountViewModel}}, Path=CopyKeyCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding RegenerateKeyCommand}"
+                    HorizontalOptions="End"
+                    Text="Regnerate" />
+            </Grid>
+        </Grid>
+        <Button
+            Margin="0,20,0,0"
+            Command="{Binding CreateAccountCommand}"
+            Text="{mex:LocString Create}" />
+        <Button
+            Margin="0,10,0,0"
+            Command="{Binding GoToStartCommand}"
+            Text="{mex:LocString Back}" />
+    </VerticalStackLayout>
+</local:BetterUraniumContentPage>

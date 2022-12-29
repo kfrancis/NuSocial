@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:BetterUraniumContentPage
+    x:Class="NuSocial.Views.StartPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:local="clr-namespace:NuSocial"
+    xmlns:m="clr-namespace:NuSocial.Models"
+    xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:NuSocial.ViewModels"
+    x:DataType="vm:StartViewModel"
+    x:TypeArguments="vm:StartViewModel"
+    NavigationPage.HasNavigationBar="False">
+
+    <VerticalStackLayout Padding="20,0">
+        <Label
+            HeightRequest="200"
+            HorizontalOptions="Center"
+            Text="{mex:LocString StartDescription}"
+            VerticalOptions="CenterAndExpand" />
+        <Button
+            x:Name="createAccountBtn"
+            Margin="0,20,0,10"
+            Command="{Binding GoToCreateAccountCommand}"
+            Text="{mex:LocString CreateAccount}" />
+
+        <Button Command="{Binding GoToLoginCommand}" Text="{mex:LocString Login}" />
+    </VerticalStackLayout>
+</local:BetterUraniumContentPage>

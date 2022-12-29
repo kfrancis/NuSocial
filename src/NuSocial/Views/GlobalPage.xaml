@@ -32,6 +32,7 @@
             RowDefinitions="Auto"
             VerticalOptions="FillAndExpand">
             <CollectionView
+                ItemSizingStrategy="MeasureFirstItem"
                 ItemsSource="{Binding Items}"
                 SelectionMode="Single"
                 VerticalOptions="Fill">

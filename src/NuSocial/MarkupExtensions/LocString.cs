@@ -1,4 +1,4 @@
-﻿using NuSocial.Resources.Strings;
+using NuSocial.Resources.Strings;
 
 namespace NuSocial.MarkupExtensions;
 
@@ -9,7 +9,7 @@ public class LocString : IMarkupExtension<string>
 
     public string ProvideValue(IServiceProvider serviceProvider)
     {
-        return AppResources.ResourceManager.GetString(Name);
+        return AppResources.ResourceManager.GetString(Name) ?? $"[{Name}]";
     }
 
     object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)

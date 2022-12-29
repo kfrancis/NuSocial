@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Shell
     x:Class="NuSocial.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -8,7 +8,15 @@
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:views="clr-namespace:NuSocial.Views"
     Shell.FlyoutBehavior="Disabled">
-
+    <ShellItem Route="start">
+        <ShellContent ContentTemplate="{DataTemplate views:StartPage}" Route="start" />
+    </ShellItem>
+    <ShellItem Route="login">
+        <ShellContent ContentTemplate="{DataTemplate views:LoginPage}" Route="login" />
+    </ShellItem>
+    <ShellItem Route="createAccount">
+        <ShellContent ContentTemplate="{DataTemplate views:CreateAccountPage}" Route="createAccount" />
+    </ShellItem>
     <TabBar>
 
         <ShellContent Title="{mex:LocString Home}" ContentTemplate="{DataTemplate views:TimelinePage}">

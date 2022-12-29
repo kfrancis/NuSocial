@@ -120,6 +120,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
   <data name="DMs" xml:space="preserve">
     <value>DMs</value>
   </data>
@@ -138,6 +141,9 @@
   <data name="Loading" xml:space="preserve">
     <value>Loading</value>
   </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
   <data name="Notifications" xml:space="preserve">
     <value>Notifications</value>
   </data>
@@ -146,5 +152,8 @@
   </data>
   <data name="Profile" xml:space="preserve">
     <value>Profile</value>
+  </data>
+  <data name="StartDescription" xml:space="preserve">
+    <value>Welcome to the social network you control.</value>
   </data>
 </root>
