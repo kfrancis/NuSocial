@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -54,9 +54,9 @@ namespace NostrLib
         {
             var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(TResult)) as Task<TResult>;
             var completedTasks =
-                        (await Task.WhenAll(tasks.Select(task => Task.WhenAny(task, timeoutTask))).ConfigureAwait(true)).
+                        (await Task.WhenAll(tasks.Select(task => Task.WhenAny(task, timeoutTask)))).
                         Where(task => task != timeoutTask);
-            return await Task.WhenAll(completedTasks).ConfigureAwait(true);
+            return await Task.WhenAll(completedTasks);
         }
     }
 

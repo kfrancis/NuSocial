@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -29,9 +31,11 @@ namespace NostrLib
     public class NostrRelay : INostrRelay, IDisposable
     {
         private readonly NostrClient _client;
-        private bool _connected;
+        private readonly TimeSpan _reconnectTimeout = TimeSpan.FromSeconds(30);
+        private int _currentMessageId;
         private bool _isDisposed;
         private ConcurrentDictionary<string, IListener> _listeners = new();
+        private IDisposable _pingSubscription;
         private WebsocketClient? _webSocket;
         private CancellationTokenSource _webSocketTokenSource = new();
 
@@ -56,28 +60,35 @@ namespace NostrLib
 
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
+        public bool IsAlive => _webSocket?.IsRunning ?? false;
         public string? Name { get; set; }
         public Uri? Url { get; set; }
 
         public async Task<bool> ConnectAsync(CancellationToken token = default)
         {
+            if (_webSocket != null)
+            {
+                await Close();
+            }
+
             _webSocketTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             _webSocket = new WebsocketClient(Url, () => new ClientWebSocket())
             {
                 MessageEncoding = Encoding.UTF8,
-                IsReconnectionEnabled = false
+                IsReconnectionEnabled = true,
+                ReconnectTimeout = _reconnectTimeout
             };
 
-            _webSocket.MessageReceived.Subscribe(WsReceived);
+            _webSocket.MessageReceived.Where(msg => msg.MessageType == WebSocketMessageType.Text).Select(msg => Observable.FromAsync(async () => await WsReceived(msg))).Concat().Subscribe();
             _webSocket.ReconnectionHappened.Subscribe(WsConnected);
             _webSocket.DisconnectionHappened.Subscribe(WsDisconnected);
 
-            await _webSocket.Start().ConfigureAwait(true);
+            await _webSocket.StartOrFail();
 
-            _connected = true;
+            StartSendingPing(_webSocket);
 
-            return _connected;
+            return IsAlive;
         }
 
         public void Dispose()
@@ -89,55 +100,49 @@ namespace NostrLib
 
         public async Task SendEvent(INostrEvent nostrEvent)
         {
-            if (_webSocket?.IsStarted == true)
-            {
-                var payload = JsonSerializer.Serialize(new object[] { "EVENT", nostrEvent });
-                await _webSocket.SendInstant(payload).ConfigureAwait(false);
-            }
+            var payload = JsonSerializer.Serialize(new object[] { "EVENT", nostrEvent });
+            await SendMessage(payload);
         }
 
         public async Task<List<INostrEvent>> SubscribeAsync(string subscribeId, NostrSubscriptionFilter[] filters, CancellationToken cancellationToken = default)
         {
-            await ConnectAsync(cancellationToken).ConfigureAwait(false);
-            if (_webSocket?.IsStarted == true)
+            if (!IsAlive)
             {
-                var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                await ConnectAsync(cancellationToken);
+            }
+
+            var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            var events = new ConcurrentBag<INostrEvent>();
+
+            void HandleMethod(INostrEvent? nEvent, bool eose)
+            {
+                if (nEvent != null)
+                {
+                    events.Add(nEvent);
+                }
+                else if (eose)
+                {
+                    linked.Cancel();
+                }
+            }
+
+            if (_listeners.ContainsKey(subscribeId) || _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
+            {
                 var payload = JsonSerializer.Serialize(new object[] { "REQ", subscribeId }.Concat(filters));
-                var events = new ConcurrentBag<INostrEvent>();
+                await SendMessage(payload);
 
-                void HandleMethod(INostrEvent? nEvent, bool eose)
+                while (!linked.IsCancellationRequested)
                 {
-                    if (nEvent != null)
-                    {
-                        events.Add(nEvent);
-                    }
-                    else if (eose)
-                    {
-                        linked.Cancel();
-                    }
+                    await Task.Yield();
                 }
 
-                if (_listeners.ContainsKey(subscribeId) || _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
-                {
-                    linked.CancelAfter(5000);
-                    await _webSocket.SendInstant(payload).ConfigureAwait(false);
-
-                    while (!linked.IsCancellationRequested)
-                    {
-                        await Task.Yield();
-                    }
-
-                    linked.Dispose();
-                    return events.ToList();
-                }
-                else
-                {
-                    throw new InvalidOperationException("Couldn't add listener for some reason");
-                }
+                linked.Dispose();
+                return events.ToList();
             }
             else
             {
-                throw new InvalidOperationException("Websocket not ready");
+                throw new InvalidOperationException("Couldn't add listener for some reason");
             }
         }
 
@@ -147,6 +152,7 @@ namespace NostrLib
             {
                 if (disposing)
                 {
+                    _pingSubscription?.Dispose();
                     _webSocket?.Dispose();
                     _webSocketTokenSource?.Dispose();
                 }
@@ -155,6 +161,12 @@ namespace NostrLib
 
                 _isDisposed = true;
             }
+        }
+
+        private Task Close()
+        {
+            _webSocket?.Dispose();
+            return Task.CompletedTask;
         }
 
         private void DeleteListener(string subscribeId)
@@ -250,6 +262,26 @@ namespace NostrLib
             }
         }
 
+        private async Task SendMessage(string? message)
+        {
+            if (!IsAlive) return;
+
+            if (_webSocket != null && !string.IsNullOrEmpty(message))
+            {
+                System.Threading.Interlocked.Increment(ref _currentMessageId);
+                Debug.WriteLine($"Sending {_currentMessageId}: {message}");
+                await _webSocket.SendInstant(message);
+            }
+        }
+
+        private void StartSendingPing(IWebsocketClient client)
+        {
+            _pingSubscription = Observable
+                .Interval(TimeSpan.FromSeconds(31000))
+                .Subscribe(_ => client.Send("ping"))
+            ;
+        }
+
         private void WsConnected(ReconnectionInfo obj)
         {
             RelayConnectionChanged?.Invoke(this, new(true));
@@ -260,11 +292,11 @@ namespace NostrLib
             RelayConnectionChanged?.Invoke(this, new(false));
         }
 
-        private void WsReceived(ResponseMessage obj)
+        private Task WsReceived(ResponseMessage obj)
         {
             using var doc = JsonDocument.Parse(obj.Text);
             var json = doc.RootElement;
-            NostrClient.Log(json);
+            NostrClient.Log(this, json);
             var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
             switch (messageType)
             {
@@ -302,6 +334,8 @@ namespace NostrLib
                     // future
                     break;
             }
+
+            return Task.CompletedTask;
         }
     }
 

@@ -279,6 +279,9 @@ csharp_preserve_single_line_statements = true
 # CS8618: Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 dotnet_diagnostic.CS8618.severity = silent
 
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
+
 [{*.Tests}.csproj]
 dotnet_diagnostic.VSTHRD200.severity = none
 dotnet_analyzer_diagnostic.VSTHRD200.severity = none

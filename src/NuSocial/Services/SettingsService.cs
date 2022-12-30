@@ -33,7 +33,7 @@ namespace NuSocial.Services
             var relays = new List<RelayItem>()
         {
             new RelayItem() { Name = "nostr.ethtozero.fr", Uri = new Uri("wss://nostr.ethtozero.fr") },
-            new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
+            //new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
             new RelayItem() { Name = "mule.platanito.org", Uri = new Uri("wss://mule.platanito.org") },
         };
             return relays.ToArray();

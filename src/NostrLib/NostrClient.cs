@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using NBitcoin;
 using NostrLib.Models;
 
 namespace NostrLib
@@ -15,8 +17,8 @@ namespace NostrLib
     {
         private readonly ConcurrentDictionary<Uri, NostrRelay> _relayInstances = new();
         private readonly ObservableCollection<RelayItem> _relayList = new();
-        private bool _isDisposed;
         private bool _isConnected;
+        private bool _isDisposed;
 
         public NostrClient(string privateKey)
             : this(privateKey, Array.Empty<RelayItem>())
@@ -47,14 +49,10 @@ namespace NostrLib
             Dispose(disposing: false);
         }
 
-        public void UpdateKey(string key)
-        {
-            PrivateKey = key;
-            PublicKey = key;
-        }
-
         public Action<object, NostrPost> PostReceived { get; set; }
+
         public string? PrivateKey { get; set; }
+
         public string? PublicKey { get; set; }
 
         /// <summary>
@@ -205,7 +203,7 @@ namespace NostrLib
 
         public async Task<IEnumerable<NostrPost>> GetPostsAsync(CancellationToken cancellationToken = default)
         {
-            await EnsureConnectedAsync(cancellationToken).ConfigureAwait(true);
+            await EnsureConnectedAsync(cancellationToken);
 
             var posts = new List<NostrPost>();
             if (!string.IsNullOrEmpty(PublicKey))
@@ -214,8 +212,9 @@ namespace NostrLib
                 filter.Kinds.Add(NostrKind.TextNote);
                 filter.Authors.Add(PublicKey);
                 var filters = new List<NostrSubscriptionFilter>() { filter };
-                var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+                var events = await GetEventsAsync(filters, cancellationToken);
 
+                // Hmm, we should have a list of events from all relays when we get here.
                 foreach (var nEvent in events)
                 {
                     posts.Add(EventToPost(nEvent.Value));
@@ -223,15 +222,6 @@ namespace NostrLib
             }
 
             return posts.AsEnumerable();
-        }
-
-        private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
-        {
-            if (!_isConnected && _relayList.Count > 0)
-            {
-                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
-                await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
-            }
         }
 
         public async Task GetProfileAsync(string publicKey, CancellationToken cancellationToken = default)
@@ -292,10 +282,16 @@ namespace NostrLib
             }
         }
 
-        [Conditional("DEBUG")]
-        internal static void Log(JsonElement json)
+        public void UpdateKey(string key)
         {
-            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), json.ToString());
+            PrivateKey = key;
+            PublicKey = key;
+        }
+
+        [Conditional("DEBUG")]
+        internal static void Log(NostrRelay sender, JsonElement json)
+        {
+            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), $"From {sender.Url}: {json.ToString()}");
         }
 
         protected virtual void Dispose(bool disposing)
@@ -325,6 +321,15 @@ namespace NostrLib
 
         private static NostrPost EventToPost(INostrEvent evt) => new(evt);
 
+        private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
+        {
+            if (!_isConnected && _relayList.Count > 0)
+            {
+                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
+                await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+            }
+        }
+
         private async Task<ConcurrentDictionary<string, INostrEvent>> GetEventsAsync(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
         {
             var events = new ConcurrentDictionary<string, INostrEvent>();
@@ -332,7 +337,8 @@ namespace NostrLib
             if (!string.IsNullOrEmpty(PublicKey))
             {
                 var subEvents = _relayInstances.Values.Select(r => r.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(5)).ConfigureAwait(true);
+                var results = await Task.WhenAll(subEvents);
+
                 foreach (var relayEvents in results)
                 {
                     foreach (var relayEvent in relayEvents)
@@ -343,6 +349,19 @@ namespace NostrLib
             }
 
             return events;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "<Pending>")]
+        public static string GenerateKey()
+        {
+            // Generate a new random mnemonic phrase
+            var mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
+            string mnemonicString = mnemonic.ToString();
+
+            // Convert the mnemonic to a seed
+            byte[] seed = mnemonic.DeriveSeed();
+
+            return BitConverter.ToString(seed).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase).ToLowerInvariant();
         }
 
         private void Relay_RelayConnectionChanged(object sender, RelayConnectionChangedEventArgs args)
