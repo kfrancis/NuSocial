@@ -7,7 +7,7 @@
 - [x] proper disconnect
 - [ ] handle profile images using blurhash
 - [ ] handle tags
-- [ ] multi-relay support
+- [x] multi-relay support
 - [ ] markdown parsing
 
 ## Thoughts
