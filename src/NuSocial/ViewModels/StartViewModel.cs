@@ -1,7 +1,20 @@
+using NBitcoin;
+using NuSocial.Core.Threading;
+
 namespace NuSocial.ViewModels
 {
     public partial class StartViewModel : BaseViewModel
     {
+        private readonly ISettingsService _settingsService;
+
+        public StartViewModel(IDialogService dialogService,
+                              ICustomDispatcher customDispatcher,
+                              ISettingsService settingsService)
+            : base(dialogService, customDispatcher)
+        {
+            _settingsService = settingsService;
+        }
+
         [RelayCommand(CanExecute = "IsNotBusy")]
         private Task GoToCreateAccountAsync()
         {

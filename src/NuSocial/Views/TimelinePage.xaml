@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:NuSocial"
     xmlns:m="clr-namespace:NuSocial.Models"
+    xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:TimelineViewModel"
@@ -18,10 +19,12 @@
     </uranium:UraniumContentPage.Resources>
     <VerticalStackLayout>
         <Grid ColumnDefinitions="*,150">
-            <Entry
+            <SearchBar
+                x:Name="searchBar"
                 Grid.Column="0"
-                Placeholder="Key"
-                Text="{Binding Key}" />
+                Placeholder="{mex:LocString Filter}"
+                SearchCommand="{Binding PerformFilterCommand}"
+                SearchCommandParameter="{Binding Source={x:Reference searchBar}, Path=Text}" />
             <Button
                 Grid.Column="1"
                 Margin="5,0"
@@ -37,7 +40,7 @@
             ItemsLayout="VerticalList"
             ItemsSource="{Binding Items}"
             SelectionMode="Single"
-            VerticalOptions="FillAndExpand">
+            VerticalOptions="StartAndExpand">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Post">
                     <Grid Padding="10">
@@ -54,14 +57,33 @@
                         </Grid.GestureRecognizers>
                         <Image
                             Grid.RowSpan="2"
+                            Margin="0,0,10,0"
                             Aspect="AspectFill"
                             HeightRequest="60"
-                            Source="iconblank.png"
-                            WidthRequest="60" />
-                        <Label
-                            Grid.Column="1"
-                            FontAttributes="Bold"
-                            Text="Author Name" />
+                            VerticalOptions="Start"
+                            WidthRequest="60">
+                            <Image.Source>
+                                <UriImageSource CacheValidity="00:00:15:00" Uri="{Binding Contact.Picture.Url}" />
+                            </Image.Source>
+                        </Image>
+                        <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,*">
+                            <Label
+                                Grid.Column="0"
+                                FontAttributes="Bold"
+                                Text="{Binding Contact.PetName}" />
+                            <Label
+                                Grid.Column="1"
+                                Margin="5,0"
+                                Text="{Binding Contact.Nip05}"
+                                TextColor="Gray" />
+                            <Label
+                                Grid.Column="2"
+                                FontSize="10"
+                                HorizontalOptions="End"
+                                Text="{Binding CreatedAt}"
+                                TextColor="Gray" />
+                        </Grid>
+
                         <Frame
                             Grid.Row="1"
                             Grid.Column="1"
@@ -75,6 +97,17 @@
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.EmptyViewTemplate>
+                <DataTemplate>
+                    <Label
+                        Margin="10,25,10,10"
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        HorizontalOptions="Fill"
+                        HorizontalTextAlignment="Center"
+                        Text="{Binding Filter, StringFormat='Your filter term of {0} did not match any records.'}" />
+                </DataTemplate>
+            </CollectionView.EmptyViewTemplate>
         </CollectionView>
         <BoxView
             BackgroundColor="White"

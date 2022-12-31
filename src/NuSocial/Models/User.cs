@@ -1,4 +1,4 @@
-﻿using NBitcoin.Secp256k1;
+using NBitcoin.Secp256k1;
 using SQLite;
 using System.Text.Json.Serialization;
 
@@ -50,8 +50,14 @@ namespace NuSocial.Models
         [JsonPropertyName("name")]
         public Name Name { get; set; }
 
+        [JsonIgnore]
+        public string PetName { get; set; }
+
         [JsonPropertyName("email")]
         public string Email { get; set; }
+
+        [JsonIgnore]
+        public string? Nip05 { get; set; }
 
         [JsonIgnore]
         public string PublicKey { get; set; }

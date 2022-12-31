@@ -7,10 +7,20 @@ namespace NuSocial.ViewModels
         [ObservableProperty]
         private string _key = string.Empty;
         private readonly ISettingsService _settingsService;
+        private readonly IDatabase _db;
 
-        public LoginViewModel(IDialogService dialogService, ICustomDispatcher customDispatcher, ISettingsService settingsService) : base(dialogService, customDispatcher)
+        public LoginViewModel(IDialogService dialogService, ICustomDispatcher customDispatcher, ISettingsService settingsService, IDatabase db) : base(dialogService, customDispatcher)
         {
             _settingsService = settingsService;
+            _db = db;
+        }
+
+        public override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // If we already have a key stored, use it.
+            Key = await SecureStorage.Default.GetAsync("key");
         }
 
         [RelayCommand(CanExecute = "IsNotBusy")]

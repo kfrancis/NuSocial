@@ -27,7 +27,7 @@ namespace NostrLib
 
         Task<IEnumerable<NostrPost>> GetPostsAsync(CancellationToken cancellationToken = default);
 
-        Task GetProfileAsync(string publicKey, CancellationToken cancellationToken = default);
+        Task<NostrProfile> GetProfileAsync(string publicKey, CancellationToken cancellationToken = default);
 
         Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default);
         void UpdateKey(string key);

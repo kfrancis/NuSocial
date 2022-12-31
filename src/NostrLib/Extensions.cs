@@ -28,8 +28,10 @@ namespace NostrLib
 
         public static string ToJson(this INostrEvent<string> nostrEvent, bool withoutId)
         {
-            return
+            var retVal =
                 $"[{(withoutId ? 0 : $"\"{nostrEvent.Id}\"")},\"{nostrEvent.PublicKey}\",{nostrEvent.CreatedAt?.ToUnixTimeSeconds()},{(int)nostrEvent.Kind},[{string.Join(',', nostrEvent.Tags.Select(tag => tag))}],\"{nostrEvent.Content}\"]";
+
+            return retVal;
         }
 
         public static bool Verify(this INostrEvent<string> nostrEvent)
@@ -132,9 +134,10 @@ namespace NostrLib
             return builder.ToString();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "<Pending>")]
         private static string ToHex(this byte b)
         {
-            return b.ToString("x2", CultureInfo.InvariantCulture);
+            return b.ToString("x2");
         }
     }
 }

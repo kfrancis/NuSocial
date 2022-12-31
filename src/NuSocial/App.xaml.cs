@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NBitcoin;
 using NuSocial.Core.Exceptions;
 
 namespace NuSocial;
@@ -24,6 +25,7 @@ public partial class App : AppBase
     protected override Window CreateWindow(IActivationState? activationState)
     {
         MainPage = new AppShell();
+
         return base.CreateWindow(activationState);
     }
 }

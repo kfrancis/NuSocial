@@ -1,4 +1,4 @@
-﻿using NostrLib;
+using NostrLib;
 using NostrLib.Models;
 using NuSocial.Core.Threading;
 
@@ -11,8 +11,9 @@ namespace NuSocial.ViewModels
         public GlobalViewModel(IDialogService dialogService,
                                ICustomDispatcher customDispatcher,
                                ISettingsService settingsService,
-                               INostrClient nostrClient)
-            : base(dialogService, customDispatcher, settingsService, nostrClient)
+                               INostrClient nostrClient,
+                               IAuthorService authorService)
+            : base(dialogService, customDispatcher, settingsService, nostrClient, authorService)
         {
             _settingsService = settingsService;
         }

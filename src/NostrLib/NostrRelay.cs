@@ -84,7 +84,7 @@ namespace NostrLib
             _webSocket.ReconnectionHappened.Subscribe(WsConnected);
             _webSocket.DisconnectionHappened.Subscribe(WsDisconnected);
 
-            await _webSocket.StartOrFail();
+            await _webSocket.Start();
 
             StartSendingPing(_webSocket);
 
@@ -106,14 +106,16 @@ namespace NostrLib
 
         public async Task<List<INostrEvent>> SubscribeAsync(string subscribeId, NostrSubscriptionFilter[] filters, CancellationToken cancellationToken = default)
         {
-            if (!IsAlive)
-            {
-                await ConnectAsync(cancellationToken);
-            }
-
             var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+            if (!IsAlive)
+            {
+                await ConnectAsync(linked.Token);
+            }
+
             var events = new ConcurrentBag<INostrEvent>();
+
+            //using var receivedEvent = new ManualResetEvent(false);
 
             void HandleMethod(INostrEvent? nEvent, bool eose)
             {
@@ -123,14 +125,17 @@ namespace NostrLib
                 }
                 else if (eose)
                 {
+                    //receivedEvent.Set();
                     linked.Cancel();
                 }
             }
 
-            if (_listeners.ContainsKey(subscribeId) || _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
+            if (!_listeners.ContainsKey(subscribeId) && _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
             {
                 var payload = JsonSerializer.Serialize(new object[] { "REQ", subscribeId }.Concat(filters));
                 await SendMessage(payload);
+
+                //receivedEvent.WaitOne(TimeSpan.FromSeconds(60));
 
                 while (!linked.IsCancellationRequested)
                 {
@@ -264,13 +269,11 @@ namespace NostrLib
 
         private async Task SendMessage(string? message)
         {
-            if (!IsAlive) return;
-
-            if (_webSocket != null && !string.IsNullOrEmpty(message))
+            if (IsAlive && !string.IsNullOrEmpty(message))
             {
                 System.Threading.Interlocked.Increment(ref _currentMessageId);
                 Debug.WriteLine($"Sending {_currentMessageId}: {message}");
-                await _webSocket.SendInstant(message);
+                await _webSocket!.SendInstant(message);
             }
         }
 
@@ -278,8 +281,7 @@ namespace NostrLib
         {
             _pingSubscription = Observable
                 .Interval(TimeSpan.FromSeconds(31000))
-                .Subscribe(_ => client.Send("ping"))
-            ;
+                .Subscribe(_ => client.Send("ping"));
         }
 
         private void WsConnected(ReconnectionInfo obj)
@@ -302,10 +304,10 @@ namespace NostrLib
             {
                 case "EVENT":
                     var subId = json[1].GetString() ?? string.Empty;
-                    var ev = json[2].Deserialize<NostrEvent<string>>();
+                    var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2].ToString());
                     if (ev?.Verify() is true)
                     {
-                        HandleEvent(subId, ev);
+                        HandleEvent(subId, ev!);
                     }
                     break;
 

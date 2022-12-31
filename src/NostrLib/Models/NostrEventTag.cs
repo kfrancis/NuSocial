@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -10,9 +11,11 @@ namespace NostrLib.Models
     [JsonConverter(typeof(NostrEventTagJsonConverter))]
     public class NostrEventTag
     {
-        public Collection<string> Data { get; } = new();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
+        public List<string> Data { get; } = new();
         [JsonIgnore] public INostrEvent Event { get; set; }
         public string EventId { get; set; }
+
         public string Id { get; set; }
         public string TagIdentifier { get; set; }
 

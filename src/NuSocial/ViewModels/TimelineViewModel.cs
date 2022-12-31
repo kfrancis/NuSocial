@@ -18,23 +18,15 @@ public partial class TimelineViewModel : PostListViewModel
     public TimelineViewModel(IDialogService dialogService,
                              ICustomDispatcher customDispatcher,
                              ISettingsService settingsService,
-                             INostrClient nostrClient)
-        : base(dialogService, customDispatcher, settingsService, nostrClient)
+                             INostrClient nostrClient,
+                             IAuthorService authorService)
+        : base(dialogService, customDispatcher, settingsService, nostrClient, authorService)
     {
     }
 
-    [ObservableProperty]
-    private string _key = string.Empty;
 
     public override Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
     {
-        //var postContent = new NostrEvent<string>()
-        //{
-        //    Content = "_This is emphasized text!_\r\n\r\n__This is strong text!__\r\n\r\n*This is emphasized text!*\r\n\r\n**This is strong text!**",
-        //    CreatedAt = DateTimeOffset.UtcNow,
-        //    Kind = NostrKind.TextNote
-        //};
-        //return Task.FromResult(new List<NostrPost>() { new NostrPost(postContent)  }.AsEnumerable());
         return NostrClient.GetPostsAsync(cancellationToken);
     }
 

@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
+using NostrLib.Converters;
 using NostrLib.Models;
 
 namespace NostrLib
@@ -172,8 +173,11 @@ namespace NostrLib
 
         public async Task<IEnumerable<NostrPost>> GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default)
         {
+            await EnsureConnectedAsync(cancellationToken);
+
             var globalFilter = new NostrSubscriptionFilter();
             globalFilter.Kinds.Add(NostrKind.TextNote);
+
             if (limit > 0) globalFilter.Limit = limit;
             if (since != null)
             {
@@ -192,7 +196,7 @@ namespace NostrLib
                 globalFilter
             };
 
-            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+            var events = await GetEventsAsync(filters, cancellationToken);
             var posts = new List<NostrPost>();
             foreach (var nEvent in events)
             {
@@ -224,7 +228,7 @@ namespace NostrLib
             return posts.AsEnumerable();
         }
 
-        public async Task GetProfileAsync(string publicKey, CancellationToken cancellationToken = default)
+        public async Task<NostrProfile> GetProfileAsync(string publicKey, CancellationToken cancellationToken = default)
         {
             var filter = new NostrSubscriptionFilter();
             filter.Kinds.Add(NostrKind.SetMetadata);
@@ -237,7 +241,7 @@ namespace NostrLib
             if (latest.Value is INostrEvent<string> latestProfile &&
                 !string.IsNullOrEmpty(latestProfile.Content))
             {
-                using var doc = JsonDocument.Parse(latestProfile.Content);
+                using var doc = JsonDocument.Parse(latestProfile.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
                 var json = doc.RootElement;
                 if (json.TryGetProperty("name", out var nameJson))
                 {
@@ -249,7 +253,19 @@ namespace NostrLib
                 }
                 if (json.TryGetProperty("picture", out var pictureJson))
                 {
-                    profileInfo.Picture = aboutJson.GetString();
+                    profileInfo.Picture = pictureJson.GetString();
+                }
+                if (json.TryGetProperty("website", out var websiteJson))
+                {
+                    profileInfo.Website = websiteJson.GetString();
+                }
+                if (json.TryGetProperty("display_name", out var displayNameJson))
+                {
+                    profileInfo.DisplayName = displayNameJson.GetString();
+                }
+                if (json.TryGetProperty("nip05", out var nip05Json))
+                {
+                    profileInfo.Nip05 = nip05Json.GetString();
                 }
             }
             //var followingInfo = await GetFollowingInfoAsync(publicKey);
@@ -263,6 +279,8 @@ namespace NostrLib
             //        profileInfo.Relays.Add(new { "", true, true });
             //    }
             //}
+
+            return profileInfo;
         }
 
         public async Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default)

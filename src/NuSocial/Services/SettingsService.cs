@@ -34,7 +34,7 @@ namespace NuSocial.Services
         {
             new RelayItem() { Name = "nostr.ethtozero.fr", Uri = new Uri("wss://nostr.ethtozero.fr") },
             //new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
-            new RelayItem() { Name = "mule.platanito.org", Uri = new Uri("wss://mule.platanito.org") },
+            //new RelayItem() { Name = "nostr.pwnshop.cloud", Uri = new Uri("wss://nostr.pwnshop.cloud") },
         };
             return relays.ToArray();
         }
@@ -51,11 +51,9 @@ namespace NuSocial.Services
                 _key = key;
 
                 var nostr = Ioc.Default.GetService<INostrClient>();
-                if (nostr != null)
-                {
-                    nostr.UpdateKey(_key);
-                }
+                nostr?.UpdateKey(_key);
 
+                await SecureStorage.Default.SetAsync("key", key);
                 //await _db.UpdateUserAsync(new User() { Key = key });
 
                 return true;

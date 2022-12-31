@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -50,7 +50,7 @@ namespace NostrLib.Converters
 
             writer.WriteStartArray();
             writer.WriteStringValue(value.TagIdentifier);
-            new List<string>(value.Data).ForEach(writer.WriteStringValue);
+            value.Data?.ForEach(writer.WriteStringValue);
             writer.WriteEndArray();
         }
     }

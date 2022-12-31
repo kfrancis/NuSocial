@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
@@ -56,7 +56,10 @@ namespace NostrLib.Models
         NostrKind Kind { get; set; }
         string PublicKey { get; set; }
         string Signature { get; set; }
-        Collection<NostrEventTag> Tags { get; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
+        List<NostrEventTag> Tags { get; set; }
     }
 
     public interface INostrEvent<TBody> : INostrEvent
@@ -90,7 +93,9 @@ namespace NostrLib.Models
         public string Signature { get; set; }
 
         [JsonPropertyName("tags")]
-        public Collection<NostrEventTag> Tags { get; } = new();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
+        public List<NostrEventTag> Tags { get; set; }
 
         public bool Equals(NostrEvent<TBody>? x, NostrEvent<TBody>? y)
         {

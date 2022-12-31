@@ -1,5 +1,5 @@
-using Newtonsoft.Json;
 using System.Reflection;
+using System.Text.Json;
 using Xunit.Abstractions;
 
 namespace NostrLib.Tests
@@ -59,7 +59,7 @@ namespace NostrLib.Tests
                     componentsCount--;
                 }
 
-                var values = JsonConvert.DeserializeObject<Dictionary<String, String>>(File.ReadAllText(keyPath)) ?? new();
+                var values = JsonSerializer.Deserialize<Dictionary<String, String>>(File.ReadAllText(keyPath)) ?? new();
                 retval = values[variableName];
             }
             catch
