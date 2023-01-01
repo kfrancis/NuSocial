@@ -1,3 +1,4 @@
+using NostrLib;
 using NuSocial.Core.Threading;
 
 namespace NuSocial.ViewModels
@@ -8,6 +9,9 @@ namespace NuSocial.ViewModels
         private string _key = string.Empty;
         private readonly ISettingsService _settingsService;
         private readonly IDatabase _db;
+
+        [ObservableProperty]
+        private ObservableCollection<RelayItem> _relayItems = new();
 
         public LoginViewModel(IDialogService dialogService, ICustomDispatcher customDispatcher, ISettingsService settingsService, IDatabase db) : base(dialogService, customDispatcher)
         {
@@ -21,6 +25,8 @@ namespace NuSocial.ViewModels
 
             // If we already have a key stored, use it.
             Key = await SecureStorage.Default.GetAsync("key");
+
+
         }
 
         [RelayCommand(CanExecute = "IsNotBusy")]

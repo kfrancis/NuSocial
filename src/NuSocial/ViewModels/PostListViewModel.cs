@@ -1,6 +1,4 @@
 using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using Microsoft.Maui.Platform;
 using NostrLib;
 using NostrLib.Models;
 using NuSocial.Core.Threading;
@@ -12,20 +10,19 @@ namespace NuSocial.ViewModels
     /// </summary>
     public partial class PostListViewModel : BaseViewModel, IDisposable
     {
-        private readonly INostrClient _nostrClient;
         private readonly IAuthorService _authorService;
+        private readonly object _lock = new();
+        private readonly INostrClient _nostrClient;
         private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _clientCts;
 
         private bool _disposedValue;
 
         [ObservableProperty]
-        private ObservableCollection<Post> _items = new();
-
-        [ObservableProperty]
         private string _filter;
 
-        private readonly object _lock = new();
+        [ObservableProperty]
+        private ObservableCollection<Post> _items = new();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(UnreadLabel))]
@@ -100,7 +97,25 @@ namespace NuSocial.ViewModels
         }
 
         [RelayCommand(CanExecute = "IsNotBusy")]
-        public Task PerformFilter(string filter)
+        public virtual Task Refresh()
+        {
+            return Task.CompletedTask;
+        }
+
+        [RelayCommand(CanExecute = "IsNotBusy")]
+        public virtual Task ReplyToPost(Post item)
+        {
+            return Task.CompletedTask;
+        }
+
+        [RelayCommand(CanExecute = "IsNotBusy")]
+        public virtual Task BoostPost(Post item)
+        {
+            return Task.CompletedTask;
+        }
+
+        [RelayCommand(CanExecute = "IsNotBusy")]
+        public virtual Task ReactToPost(Post item)
         {
             return Task.CompletedTask;
         }
@@ -110,6 +125,9 @@ namespace NuSocial.ViewModels
         {
             return Task.CompletedTask;
         }
+
+        [ObservableProperty]
+        private bool _isRefreshing = false;
 
         public override void OnAppearing()
         {
@@ -129,6 +147,26 @@ namespace NuSocial.ViewModels
             //}
 
             base.OnDisappearing();
+        }
+
+        [RelayCommand(CanExecute = "IsNotBusy")]
+        public async Task PerformFilter(string filter)
+        {
+            await SetBusyAsync(async () =>
+            {
+                if (Items.Count > 0 && !string.IsNullOrEmpty(filter))
+                {
+                    var filterItems = Items.Where(x => x.Content.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                    await Dispatcher.RunAsync(() =>
+                    {
+                        Items.Clear();
+                        foreach (var item in filterItems)
+                        {
+                            Items.Add(item);
+                        }
+                    });
+                }
+            });
         }
 
         protected virtual void Dispose(bool disposing)
@@ -166,6 +204,7 @@ namespace NuSocial.ViewModels
                 {
                     contact.Nip05 = contact.Nip05.Replace(author.DisplayName, string.Empty, StringComparison.OrdinalIgnoreCase);
                 }
+
                 var post = new Post()
                 {
                     CreatedAt = nostrPost.CreatedAt ?? DateTime.UtcNow,

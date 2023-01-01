@@ -12,31 +12,33 @@
     x:DataType="vm:StartViewModel"
     x:TypeArguments="vm:StartViewModel"
     NavigationPage.HasNavigationBar="False">
-
-    <Grid
-        Padding="20,10"
-        RowDefinitions="*,55,55"
-        RowSpacing="10">
-        <VerticalStackLayout Grid.Row="0">
-            <Label
-                FontSize="Title"
-                HorizontalOptions="Center"
-                Text="What is Nostr?" />
-            <Label
-                Margin="0,20,0,0"
-                HorizontalOptions="Center"
-                Text="{mex:LocString StartDescription}"
-                VerticalOptions="CenterAndExpand" />
-        </VerticalStackLayout>
-        <Button
-            Grid.Row="1"
-            Command="{Binding GoToCreateAccountCommand}"
-            StyleClass="FilledButton"
-            Text="{mex:LocString CreateAccount}" />
-        <Button
-            Grid.Row="2"
-            Command="{Binding GoToLoginCommand}"
-            StyleClass="OutlinedButton"
-            Text="{mex:LocString Login}" />
-    </Grid>
+    <StackLayout>
+        <Grid
+            Padding="20,10"
+            RowDefinitions="*,55,55"
+            RowSpacing="10">
+            <VerticalStackLayout Grid.Row="0">
+                <Label
+                    FontSize="Title"
+                    HorizontalOptions="Center"
+                    Text="What is Nostr?" />
+                <Label
+                    Margin="0,20,0,0"
+                    HorizontalOptions="Center"
+                    Text="{mex:LocString StartDescription}"
+                    VerticalOptions="CenterAndExpand" />
+            </VerticalStackLayout>
+            <Button
+                Grid.Row="1"
+                Command="{Binding GoToCreateAccountCommand}"
+                StyleClass="FilledButton"
+                Text="{mex:LocString CreateAccount}" />
+            <Button
+                Grid.Row="2"
+                Command="{Binding GoToLoginCommand}"
+                StyleClass="OutlinedButton"
+                Text="{mex:LocString Login}" />
+        </Grid>
+        <ActivityIndicator IsRunning="{Binding IsBusy}" VerticalOptions="CenterAndExpand" />
+    </StackLayout>
 </local:BetterUraniumContentPage>

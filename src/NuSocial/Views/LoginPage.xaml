@@ -20,7 +20,6 @@
                 HorizontalOptions="Center"
                 Text="{mex:LocString Login}"
                 VerticalOptions="Center" />
-
             <material:TextField Title="{mex:LocString LoginPlaceholder}" Text="{Binding Key}" />
 
         </VerticalStackLayout>

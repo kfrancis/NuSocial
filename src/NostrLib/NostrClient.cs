@@ -60,6 +60,7 @@ namespace NostrLib
         /// The time to wait after a connection drops to try reconnecting.
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
+        public bool IsConnected { get => _isConnected; set => _isConnected = value; }
 
         public async Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default)
         {
@@ -205,6 +206,12 @@ namespace NostrLib
             return posts.AsEnumerable();
         }
 
+        /// <summary>
+        /// Fetch posts for the current key
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<IEnumerable<NostrPost>> GetPostsAsync(CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
@@ -223,6 +230,9 @@ namespace NostrLib
                 {
                     posts.Add(EventToPost(nEvent.Value));
                 }
+            } else
+            {
+                throw new InvalidOperationException("Need a key");
             }
 
             return posts.AsEnumerable();
