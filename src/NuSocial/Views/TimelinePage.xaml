@@ -87,10 +87,11 @@
                             <FontImageSource
                                 FontFamily="FARegular"
                                 Glyph="{x:Static fa:Regular.Comment}"
-                                Color="Gray" />
+                                Color="LightGray" />
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReplyToPostCommand}" CommandParameter="{Binding .}" />
+                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -100,11 +101,12 @@
                         <Image.Source>
                             <FontImageSource
                                 FontFamily="FARegular"
-                                Glyph="{x:Static fa:Regular.Snowflake}"
-                                Color="Gray" />
+                                Glyph="{x:Static fa:Regular.HandPointUp}"
+                                Color="LightGray" />
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=BoostPostCommand}" CommandParameter="{Binding .}" />
+                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -115,10 +117,11 @@
                             <FontImageSource
                                 FontFamily="FARegular"
                                 Glyph="{x:Static fa:Regular.Heart}"
-                                Color="Gray" />
+                                Color="LightGray" />
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />
+                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -129,10 +132,11 @@
                             <FontImageSource
                                 FontFamily="FARegular"
                                 Glyph="{x:Static fa:Regular.CircleDot}"
-                                Color="Gray" />
+                                Color="LightGray" />
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />-->
+                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                 </Grid>
