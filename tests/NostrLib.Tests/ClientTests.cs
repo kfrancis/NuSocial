@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using NostrLib.Models;
 using Shouldly;
 using Xunit.Abstractions;
 
@@ -71,6 +73,27 @@ namespace NostrLib.Tests
         }
 
         [Fact]
+        public async Task Client_CanPost()
+        {
+            // Arrange
+            using var client = await Connect(TestPubKey);
+            var message = Guid.NewGuid().ToString();
+
+            // Act
+            var result = await client.SendTextPostAsync(message);
+
+            // Assert
+            result.ShouldSatisfyAllConditions(
+                x => x.ShouldNotBeNull(),
+                x => (x is INostrEvent<string>).ShouldBeTrue(),
+                x => (x as INostrEvent<string>)!.Content.ShouldBe(message),
+                x => x.Id.ShouldNotBeNullOrEmpty(),
+                x => x.Signature.ShouldNotBeNullOrEmpty(),
+                x => x.Kind.ShouldBe(NostrKind.TextNote)
+            );
+        }
+
+        [Fact]
         public async Task Client_GetProfile()
         {
             // Arrange
@@ -91,14 +114,16 @@ namespace NostrLib.Tests
         {
             // Arrange
             using var client = await Connect(TestPubKey);
+            var postFetchCount = 10;
 
             // Act
-            var posts = await client.GetGlobalPostsAsync(10);
+            var posts = await client.GetGlobalPostsAsync(postFetchCount);
 
             // Assert
             posts.ShouldSatisfyAllConditions(
                 p => p.ShouldNotBeNull(),
-                p => p.Any().ShouldBeTrue()
+                p => p.Any().ShouldBeTrue(),
+                p => p.Count().ShouldBeLessThanOrEqualTo(postFetchCount)
             );
         }
 

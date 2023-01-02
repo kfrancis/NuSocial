@@ -12,7 +12,7 @@ namespace NuSocial.Services
     public class AuthorService : IAuthorService
     {
         private readonly INostrClient _nostrClient;
-        private static ConcurrentDictionary<string, NostrProfile> _cache = new();
+        private static readonly ConcurrentDictionary<string, NostrProfile> s_cache = new();
 
         public AuthorService(INostrClient nostrClient)
         {
@@ -21,7 +21,7 @@ namespace NuSocial.Services
 
         public async Task<NostrProfile> GetInfoAsync(string key, CancellationToken cancellationToken = default)
         {
-            if (_cache.TryGetValue(key, out var info))
+            if (s_cache.TryGetValue(key, out var info))
             {
                 return info;
             }
@@ -30,7 +30,7 @@ namespace NuSocial.Services
                 try
                 {
                     var result = await _nostrClient.GetProfileAsync(key, cancellationToken);
-                    _cache.TryAdd(key, result);
+                    s_cache.TryAdd(key, result);
                     return result;
                 }
                 catch (Exception)

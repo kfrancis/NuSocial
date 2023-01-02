@@ -18,7 +18,6 @@ namespace NostrLib
     {
         private readonly ConcurrentDictionary<Uri, NostrRelay> _relayInstances = new();
         private readonly ObservableCollection<RelayItem> _relayList = new();
-        private bool _isConnected;
         private bool _isDisposed;
 
         public NostrClient(string privateKey)
@@ -50,7 +49,7 @@ namespace NostrLib
             Dispose(disposing: false);
         }
 
-        public Action<object, NostrPost> PostReceived { get; set; }
+        //public Action<object, NostrPost> PostReceived { get; set; }
 
         public string? PrivateKey { get; set; }
 
@@ -60,7 +59,7 @@ namespace NostrLib
         /// The time to wait after a connection drops to try reconnecting.
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
-        public bool IsConnected { get => _isConnected; set => _isConnected = value; }
+        public bool IsConnected { get; set; }
 
         public async Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default)
         {
@@ -81,10 +80,10 @@ namespace NostrLib
                     relay.RelayPost += Relay_RelayPost;
                     relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                     relay.RelayNotice += Relay_RelayNotice;
-                    if (await relay.ConnectAsync(cancellationToken).ConfigureAwait(false))
+                    if (await relay.ConnectAsync(cancellationToken))
                     {
                         _relayInstances.TryAdd(relay.Url, relay);
-                        _isConnected = true;
+                        IsConnected = true;
                         cb?.Invoke(this);
                     }
                     else
@@ -104,9 +103,9 @@ namespace NostrLib
                         relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                         relay.RelayNotice -= Relay_RelayNotice;
                         relay.RelayNotice += Relay_RelayNotice;
-                        if (await existingRelay.ConnectAsync(cancellationToken).ConfigureAwait(false))
+                        if (await existingRelay.ConnectAsync(cancellationToken))
                         {
-                            _isConnected = true;
+                            IsConnected = true;
                             cb?.Invoke(this);
                         }
                     }
@@ -131,7 +130,7 @@ namespace NostrLib
                 _relayInstances.Clear();
             }
 
-            _isConnected = false;
+            IsConnected = false;
 
             return Task.CompletedTask;
         }
@@ -148,7 +147,7 @@ namespace NostrLib
             filter.Kinds.Add((int)NostrKind.Contacts);
             filter.Authors.Add(publicKey);
             var filters = new List<NostrSubscriptionFilter>() { filter };
-            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+            var events = await GetEventsAsync(filters, cancellationToken);
             return events.Values.ToList().ConvertAll(x => x.PublicKey);
         }
 
@@ -159,7 +158,7 @@ namespace NostrLib
             filter.Authors = new Collection<string>() { publicKey };
             var filters = new List<NostrSubscriptionFilter>() { filter };
             var createdAt = DateTimeOffset.MinValue;
-            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+            var events = await GetEventsAsync(filters, cancellationToken);
             INostrEvent? retVal = null;
             foreach (var evt in events.Values)
             {
@@ -199,11 +198,11 @@ namespace NostrLib
 
             var events = await GetEventsAsync(filters, cancellationToken);
             var posts = new List<NostrPost>();
-            foreach (var nEvent in events)
+            foreach (var nEvent in events.OrderByDescending(x => x.Value.CreatedAt))
             {
                 posts.Add(EventToPost(nEvent.Value));
             }
-            return posts.AsEnumerable();
+            return posts.Take(limit ?? int.MaxValue).AsEnumerable();
         }
 
         /// <summary>
@@ -226,7 +225,7 @@ namespace NostrLib
                 var events = await GetEventsAsync(filters, cancellationToken);
 
                 // Hmm, we should have a list of events from all relays when we get here.
-                foreach (var nEvent in events)
+                foreach (var nEvent in events.OrderByDescending(x => x.Value.CreatedAt))
                 {
                     posts.Add(EventToPost(nEvent.Value));
                 }
@@ -279,6 +278,7 @@ namespace NostrLib
                     profileInfo.Nip05 = nip05Json.GetString();
                 }
             }
+
             var followingInfo = await GetFollowingInfoAsync(publicKey, cancellationToken);
             if (followingInfo is INostrEvent<string> followInfoStr &&
                 !string.IsNullOrEmpty(followInfoStr.Content))
@@ -298,7 +298,7 @@ namespace NostrLib
         {
             if (relayItems?.Length > 0)
             {
-                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
+                await DisconnectAsync(cancellationToken);
 
                 _relayList.Clear();
                 for (var i = 0; i < relayItems.Length; i++)
@@ -307,7 +307,7 @@ namespace NostrLib
                 }
 
                 if (shouldConnect)
-                    await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+                    await ConnectAsync(cancellationToken: cancellationToken);
             }
         }
 
@@ -320,7 +320,7 @@ namespace NostrLib
         [Conditional("DEBUG")]
         internal static void Log(NostrRelay sender, JsonElement json)
         {
-            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), $"From {sender.Url}: {json.ToString()}");
+            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), $"From {sender.Url}: {json}");
         }
 
         protected virtual void Dispose(bool disposing)
@@ -352,10 +352,10 @@ namespace NostrLib
 
         private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
         {
-            if (!_isConnected && _relayList.Count > 0)
+            if (!IsConnected && _relayList.Count > 0)
             {
-                await DisconnectAsync(cancellationToken).ConfigureAwait(true);
-                await ConnectAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+                await DisconnectAsync(cancellationToken);
+                await ConnectAsync(cancellationToken: cancellationToken);
             }
         }
 
@@ -366,7 +366,7 @@ namespace NostrLib
             if (!string.IsNullOrEmpty(PublicKey))
             {
                 var subEvents = _relayInstances.Values.Select(r => r.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-                var results = await Task.WhenAll(subEvents);
+                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
 
                 foreach (var relayEvents in results)
                 {
@@ -385,10 +385,10 @@ namespace NostrLib
         {
             // Generate a new random mnemonic phrase
             var mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
-            string mnemonicString = mnemonic.ToString();
+            var mnemonicString = mnemonic.ToString();
 
             // Convert the mnemonic to a seed
-            byte[] seed = mnemonic.DeriveSeed();
+            var seed = mnemonic.DeriveSeed();
 
             return BitConverter.ToString(seed).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase).ToLowerInvariant();
         }
@@ -415,6 +415,84 @@ namespace NostrLib
             {
                 Debug.WriteLine($"Relay message for '{relay.Url}': {(args.WasSuccessful ? "Success" : "Fail")} :: {args.Message}");
             }
+        }
+
+        public Task<INostrEvent> SendTextPostAsync(string message)
+        {
+            return SendPostAsync(message);
+        }
+
+        public Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e)
+        {
+            return SendPostAsync(message, "rootReference", "reference");
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task", Justification = "<Pending>")]
+        public async Task<INostrEvent> SendPostAsync(string content, string? rootReference = null, string? reference = null, string? mention = null)
+        {
+            if (string.IsNullOrEmpty(PublicKey))
+            {
+                throw new InvalidOperationException($"'{nameof(PublicKey)}' cannot be null or empty.");
+            }
+
+            var postEvent = new NostrEvent<string>()
+            {
+                Content = content,
+                CreatedAt = DateTime.Now,
+                Kind = NostrKind.TextNote,
+                PublicKey = PublicKey,
+            };
+
+            if (!string.IsNullOrEmpty(rootReference))
+            {
+                postEvent.Tags = new() {
+                    new()
+                    {
+                        TagIdentifier = "e",
+                        Data = new List<string>()
+                        {
+                            rootReference,
+                            "",
+                            "root"
+                        }
+                    }
+                };
+                if (!string.IsNullOrEmpty(reference))
+                {
+                    postEvent.Tags.Add(new()
+                    {
+                        TagIdentifier = "e",
+                        Data = new List<string>()
+                        {
+                            reference,
+                            "",
+                            "reply"
+                        }
+                    });
+                }
+            }
+            var sendTasks = _relayInstances.Values.Select(r => r.SendEvent(GenerateRelayEvent(r, postEvent)));
+            await Task.WhenAll(sendTasks);
+
+            return postEvent;
+        }
+
+        private INostrEvent GenerateRelayEvent(NostrRelay r, NostrEvent<string> postEvent)
+        {
+            var relayEvent = postEvent.Clone();
+            relayEvent.Id = CalculateId(relayEvent);
+            relayEvent.Signature = CalculateSignature(relayEvent);
+            return relayEvent;
+        }
+
+        private string CalculateSignature(NostrEvent<string> relayEvent)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string CalculateId(NostrEvent<string> relayEvent)
+        {
+            throw new NotImplementedException();
         }
 
         //protected void WsSend<T>(NostrKind evKind, T body)

@@ -120,6 +120,11 @@ namespace NostrLib
 
             void HandleMethod(INostrEvent? nEvent, bool eose)
             {
+                //if (nEvent is NostrEvent<string> sEvent && sEvent.Verify())
+                //{
+                //    events.Add(sEvent);
+                //}
+                //else
                 if (nEvent != null)
                 {
                     events.Add(nEvent);

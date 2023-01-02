@@ -12,7 +12,9 @@ namespace NostrLib.Models
     public class NostrEventTag
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
-        public List<string> Data { get; } = new();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
+        public List<string> Data { get; set; } = new();
+
         [JsonIgnore] public INostrEvent Event { get; set; }
         public string EventId { get; set; }
 

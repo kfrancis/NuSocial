@@ -113,5 +113,20 @@ namespace NostrLib.Models
 
             return obj.Id.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
         }
+
+        public NostrEvent<TBody> Clone()
+        {
+            return new NostrEvent<TBody>()
+            {
+                Content = this.Content,
+                Kind = this.Kind,
+                Tags = this.Tags,
+                Signature = this.Signature,
+                CreatedAt = this.CreatedAt,
+                PublicKey = this.PublicKey,
+                Deleted = this.Deleted,
+                Id = this.Id
+            };
+        }
     }
 }
