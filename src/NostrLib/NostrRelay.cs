@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using NostrLib.Converters;
 using NostrLib.Models;
 using Websocket.Client;
 using Websocket.Client.Models;

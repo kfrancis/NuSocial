@@ -27,9 +27,16 @@ namespace NuSocial.Services
             }
             else
             {
-                var result = await _nostrClient.GetProfileAsync(key, cancellationToken);
-                _cache.TryAdd(key, result);
-                return result;
+                try
+                {
+                    var result = await _nostrClient.GetProfileAsync(key, cancellationToken);
+                    _cache.TryAdd(key, result);
+                    return result;
+                }
+                catch (Exception)
+                {
+                    return new NostrProfile() { Name = key };
+                }
             }
         }
     }

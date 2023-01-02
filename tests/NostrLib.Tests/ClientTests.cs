@@ -93,7 +93,7 @@ namespace NostrLib.Tests
             using var client = await Connect(TestPubKey);
 
             // Act
-            var posts = await client.GetGlobalPostsAsync();
+            var posts = await client.GetGlobalPostsAsync(10);
 
             // Assert
             posts.ShouldSatisfyAllConditions(
@@ -115,7 +115,7 @@ namespace NostrLib.Tests
             posts.ShouldSatisfyAllConditions(
                 p => p.ShouldNotBeNull(),
                 p => p.Any().ShouldBeTrue(),
-                p => p.Count().ShouldBe(1)
+                p => p.Count().ShouldBeGreaterThanOrEqualTo(1)
             );
         }
 

@@ -145,7 +145,7 @@ namespace NostrLib
         public async Task<IEnumerable<string>> GetFollowerInfoAsync(string publicKey, CancellationToken cancellationToken = default)
         {
             var filter = new NostrSubscriptionFilter();
-            filter.Kinds.Add(NostrKind.Contacts);
+            filter.Kinds.Add((int)NostrKind.Contacts);
             filter.Authors.Add(publicKey);
             var filters = new List<NostrSubscriptionFilter>() { filter };
             var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
@@ -155,8 +155,8 @@ namespace NostrLib
         public async Task<INostrEvent?> GetFollowingInfoAsync(string publicKey, CancellationToken cancellationToken = default)
         {
             var filter = new NostrSubscriptionFilter();
-            filter.Kinds.Add(NostrKind.Contacts);
-            filter.Authors.Add(publicKey);
+            filter.Kinds.Add((int)NostrKind.Contacts);
+            filter.Authors = new Collection<string>() { publicKey };
             var filters = new List<NostrSubscriptionFilter>() { filter };
             var createdAt = DateTimeOffset.MinValue;
             var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
@@ -177,7 +177,7 @@ namespace NostrLib
             await EnsureConnectedAsync(cancellationToken);
 
             var globalFilter = new NostrSubscriptionFilter();
-            globalFilter.Kinds.Add(NostrKind.TextNote);
+            globalFilter.Kinds.Add((int)NostrKind.TextNote);
 
             if (limit > 0) globalFilter.Limit = limit;
             if (since != null)
@@ -220,8 +220,8 @@ namespace NostrLib
             if (!string.IsNullOrEmpty(PublicKey))
             {
                 var filter = new NostrSubscriptionFilter();
-                filter.Kinds.Add(NostrKind.TextNote);
-                filter.Authors.Add(PublicKey);
+                filter.Kinds.Add((int)NostrKind.TextNote);
+                filter.Authors = new Collection<string>() { PublicKey };
                 var filters = new List<NostrSubscriptionFilter>() { filter };
                 var events = await GetEventsAsync(filters, cancellationToken);
 
@@ -230,7 +230,8 @@ namespace NostrLib
                 {
                     posts.Add(EventToPost(nEvent.Value));
                 }
-            } else
+            }
+            else
             {
                 throw new InvalidOperationException("Need a key");
             }
@@ -241,11 +242,11 @@ namespace NostrLib
         public async Task<NostrProfile> GetProfileAsync(string publicKey, CancellationToken cancellationToken = default)
         {
             var filter = new NostrSubscriptionFilter();
-            filter.Kinds.Add(NostrKind.SetMetadata);
-            filter.Authors.Add(publicKey);
+            filter.Kinds.Add((int)NostrKind.SetMetadata);
+            filter.Authors = new Collection<string>() { publicKey };
             filter.Limit = 1;
             var filters = new List<NostrSubscriptionFilter>() { filter };
-            var events = await GetEventsAsync(filters, cancellationToken).ConfigureAwait(true);
+            var events = await GetEventsAsync(filters, cancellationToken);
             var profileInfo = new NostrProfile();
             var latest = events.OrderByDescending(x => x.Value.CreatedAt).FirstOrDefault();
             if (latest.Value is INostrEvent<string> latestProfile &&
@@ -278,17 +279,17 @@ namespace NostrLib
                     profileInfo.Nip05 = nip05Json.GetString();
                 }
             }
-            //var followingInfo = await GetFollowingInfoAsync(publicKey);
-            //if (followingInfo is INostrEvent<string> followInfoStr &&
-            //    !string.IsNullOrEmpty(followInfoStr.Content))
-            //{
-            //    using var doc = JsonDocument.Parse(followInfoStr.Content);
-            //    var json = doc.RootElement;
-            //    foreach (var key in json.EnumerateObject())
-            //    {
-            //        profileInfo.Relays.Add(new { "", true, true });
-            //    }
-            //}
+            var followingInfo = await GetFollowingInfoAsync(publicKey, cancellationToken);
+            if (followingInfo is INostrEvent<string> followInfoStr &&
+                !string.IsNullOrEmpty(followInfoStr.Content))
+            {
+                using var doc = JsonDocument.Parse(followInfoStr.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
+                var json = doc.RootElement;
+                foreach (var key in json.EnumerateObject())
+                {
+                    profileInfo.Relays.Add((key.Name, key.Value.GetProperty("read").GetBoolean(), key.Value.GetProperty("write").GetBoolean()));
+                }
+            }
 
             return profileInfo;
         }
