@@ -161,14 +161,12 @@ namespace NostrKey
                 {
                     threads[i] = Task.Run(() => workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix));
                 }
-                AnsiConsole.Status().Start("Thinking...", ctx =>
+
+                workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix);
+                for (var i = 0; i < threads.Length; i++)
                 {
-                    workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix);
-                    for (var i = 0; i < threads.Length; i++)
-                    {
-                        threads[i].Wait();
-                    }
-                });
+                    threads[i].Wait();
+                }
             }
             else
             {
@@ -299,7 +297,7 @@ namespace NostrKey
                 var pubKeyStr = pubKey.ToBytes().ToHex();
                 var privKeyStr = privKeyc.ToHex()[..64];
 
-                AnsiConsole.MarkupLine($"Public Key: [green]{pubKeyStr}[/]");
+                AnsiConsole.MarkupLine($"\nPublic Key: [green]{pubKeyStr}[/]");
                 AnsiConsole.MarkupLine($"Private Key: [green]{privKeyStr}[/]");
 
                 AnsiConsole.WriteLine("{0} iterations (about {1}x10^{2} hashes) in {3} seconds. Avg rate {4} hashes/second",
@@ -312,7 +310,7 @@ namespace NostrKey
         {
             [Description("Difficulty")]
             [CommandArgument(0, "[difficulty]")]
-            [DefaultValue(0)]
+            [DefaultValue(10)]
             public int Difficulty { get; init; }
 
             [Description("Vanity Prefix")]
