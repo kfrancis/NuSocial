@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "NostrKey": {
+      "commandName": "Project",
+      "commandLineArgs": "0"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}
