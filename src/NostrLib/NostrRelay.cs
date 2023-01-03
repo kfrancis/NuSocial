@@ -116,22 +116,14 @@ namespace NostrLib
 
             var events = new ConcurrentBag<INostrEvent>();
 
-            //using var receivedEvent = new ManualResetEvent(false);
-
             void HandleMethod(INostrEvent? nEvent, bool eose)
             {
-                //if (nEvent is NostrEvent<string> sEvent && sEvent.Verify())
-                //{
-                //    events.Add(sEvent);
-                //}
-                //else
                 if (nEvent != null)
                 {
                     events.Add(nEvent);
                 }
                 else if (eose)
                 {
-                    //receivedEvent.Set();
                     linked.Cancel();
                 }
             }
@@ -140,8 +132,6 @@ namespace NostrLib
             {
                 var payload = JsonSerializer.Serialize(new object[] { "REQ", subscribeId }.Concat(filters));
                 await SendMessage(payload);
-
-                //receivedEvent.WaitOne(TimeSpan.FromSeconds(60));
 
                 while (!linked.IsCancellationRequested)
                 {

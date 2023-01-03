@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="NuSocial.Views.KeyView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
+    xmlns:models="clr-namespace:NostrLib.Models;assembly=NostrLib"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+    <VerticalStackLayout>
+        <Label Text="{mex:LocString PublicKey}" />
+        <Label Text="{mex:LocString PublicKeyDescription}" />
+        <Grid RowDefinitions="24,*">
+            <CheckBox />
+            <Label Text="{Binding PublicKey}" />
+        </Grid>
+        <Label Text="{mex:LocString PrivateKey}" />
+        <Label Text="{mex:LocString PrivateKeyDescription}" />
+        <Grid RowDefinitions="24,*">
+            <CheckBox />
+            <Label Text="{Binding PrivateKey}" />
+        </Grid>
+    </VerticalStackLayout>
+</toolkit:Popup>

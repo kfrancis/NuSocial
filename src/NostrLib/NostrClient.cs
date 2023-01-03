@@ -5,10 +5,13 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NBitcoin;
+using NBitcoin.DataEncoders;
+using NBitcoin.Secp256k1;
 using NostrLib.Converters;
 using NostrLib.Models;
 
@@ -32,8 +35,9 @@ namespace NostrLib
                 throw new ArgumentNullException(nameof(relays));
             }
 
-            PrivateKey = privateKey;
-            PublicKey = privateKey;
+            var hex = new HexEncoder();
+            PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(privateKey));
+            PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
 
             ReconnectDelay = TimeSpan.FromSeconds(2);
 
@@ -51,7 +55,7 @@ namespace NostrLib
 
         //public Action<object, NostrPost> PostReceived { get; set; }
 
-        public string? PrivateKey { get; set; }
+        public ECPrivKey? PrivateKey { get; set; }
 
         public string? PublicKey { get; set; }
 
@@ -311,10 +315,18 @@ namespace NostrLib
             }
         }
 
-        public void UpdateKey(string key)
+        public void UpdateKey(string key, bool isPrivateKey = false)
         {
-            PrivateKey = key;
-            PublicKey = key;
+            if (isPrivateKey)
+            {
+                var hex = new HexEncoder();
+                PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(key));
+                PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
+            }
+            else
+            {
+                PublicKey = key;
+            }
         }
 
         [Conditional("DEBUG")]
@@ -380,17 +392,48 @@ namespace NostrLib
             return events;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "<Pending>")]
-        public static string GenerateKey()
+        private static Scalar GenerateScalar()
         {
-            // Generate a new random mnemonic phrase
-            var mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
-            var mnemonicString = mnemonic.ToString();
+            Scalar scalar = Scalar.Zero;
+            Span<byte> output = stackalloc byte[32];
+            do
+            {
+                RandomUtils.GetBytes(output);
+                scalar = new Scalar(output, out int overflow);
+                if (overflow != 0 || scalar.IsZero)
+                {
+                    continue;
+                }
+                break;
+            } while (true);
+            return scalar;
+        }
 
-            // Convert the mnemonic to a seed
-            var seed = mnemonic.DeriveSeed();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "<Pending>")]
+        public static NostrKeyPair GenerateKey()
+        {
+            var key = GenerateScalar();
 
-            return BitConverter.ToString(seed).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase).ToLowerInvariant();
+            ECPrivKey? privKey = null;
+
+            try
+            {
+                if (Context.Instance.TryCreateECPrivKey(key, out privKey))
+                {
+                    var pubKey = privKey.CreateXOnlyPubKey();
+                    Span<byte> privKeyc = stackalloc byte[65];
+                    privKey.WriteToSpan(privKeyc);
+                    return new NostrKeyPair(pubKey.ToBytes().ToHex(), privKeyc.ToHex()[..64]);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            finally
+            {
+                privKey?.Dispose();
+            }
         }
 
         private void Relay_RelayConnectionChanged(object sender, RelayConnectionChangedEventArgs args)
@@ -427,7 +470,6 @@ namespace NostrLib
             return SendPostAsync(message, "rootReference", "reference");
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task", Justification = "<Pending>")]
         public async Task<INostrEvent> SendPostAsync(string content, string? rootReference = null, string? reference = null, string? mention = null)
         {
             if (string.IsNullOrEmpty(PublicKey))
@@ -442,6 +484,7 @@ namespace NostrLib
                 Kind = NostrKind.TextNote,
                 PublicKey = PublicKey,
             };
+            postEvent.Tags = new List<NostrEventTag>();
 
             if (!string.IsNullOrEmpty(rootReference))
             {
@@ -487,30 +530,38 @@ namespace NostrLib
 
         private string CalculateSignature(NostrEvent<string> relayEvent)
         {
-            throw new NotImplementedException();
+            if (PrivateKey != null)
+            {
+                var idHash = relayEvent.Id.ComputeSha256Hash();
+                if (PrivateKey.TrySignBIP340(idHash, null, out var sig))
+                {
+                    if (PrivateKey.CreateXOnlyPubKey().SigVerifyBIP340(sig, idHash))
+                    {
+                        return sig.ToBytes().ToHex();
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        private string CalculateId(NostrEvent<string> relayEvent)
+        private static string CalculateId(NostrEvent<string> relayEvent)
         {
-            throw new NotImplementedException();
+            var commit = relayEvent.ToJson(true);
+            var hash = commit.ComputeSha256Hash();
+            return Encoding.UTF8.GetString(hash);
         }
-
-        //protected void WsSend<T>(NostrKind evKind, T body)
-        //                            where T : class
-        //{
-        //    if (_webSocket == null) return;
-
-        //    _msgSeq++;
-
-        //    var clientMessage = new NostrEvent<T>
-        //    {
-        //        Kind = evKind,
-        //        Content = body
-        //    };
-
-        //    var msg = JsonSerializer.Serialize(clientMessage);
-        //    _webSocket.Send(msg);
-        //}
     }
 
     public class RelayItem

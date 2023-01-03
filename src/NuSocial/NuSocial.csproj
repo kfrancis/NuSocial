@@ -69,6 +69,10 @@
 	  <PackageReference Include="InputKit.Maui" Version="4.2.1" />
 	  <PackageReference Include="Markdig" Version="0.30.4" />
 	  <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+	  <PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="Secp256k1.Native" Version="0.1.24-alpha" />
 	  <PackageReference Include="Secp256k1.Net" Version="0.1.55" />
 	  <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
@@ -127,6 +131,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\GlobalPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\KeyView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\LoadingIndicatorPopup.xaml">

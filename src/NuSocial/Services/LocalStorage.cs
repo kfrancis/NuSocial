@@ -179,9 +179,9 @@ namespace NuSocial.Services
                 var db = await GetDatabase();
                 await db.RunInTransactionAsync((dbc) =>
                 {
-                    for (int i = 0; i < items.Count; i++)
+                    for (var i = 0; i < items.Count; i++)
                     {
-                        T? item = items[i];
+                        var item = items[i];
                         if (item == null) continue;
 
                         dbc.InsertOrReplace(item);

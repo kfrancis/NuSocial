@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using NBitcoin.Secp256k1;
 using NostrLib.Models;
 using Shouldly;
 using Xunit.Abstractions;
@@ -73,10 +74,20 @@ namespace NostrLib.Tests
         }
 
         [Fact]
+        public void CanHandlePrivatePublicKeyFormats()
+        {
+            var privKeyHex = "7f4c11a9742721d66e40e321ca50b682c27f7422190c14a187525e69e604836a";
+            Assert.True(Context.Instance.TryCreateECPrivKey(privKeyHex.DecodHexData(), out var privKey));
+
+            var pubKey = privKey.CreateXOnlyPubKey();
+            Assert.Equal("7cef86754ddf07395c289c30fe31219de938c6d707d6b478a8682fc75795e8b9", pubKey.ToBytes().ToHex());
+        }
+
+        [Fact]
         public async Task Client_CanPost()
         {
             // Arrange
-            using var client = await Connect(TestPubKey);
+            using var client = await Connect();
             var message = Guid.NewGuid().ToString();
 
             // Act
@@ -86,6 +97,7 @@ namespace NostrLib.Tests
             result.ShouldSatisfyAllConditions(
                 x => x.ShouldNotBeNull(),
                 x => (x is INostrEvent<string>).ShouldBeTrue(),
+                x => (x as INostrEvent<string>)!.Verify().ShouldBeTrue(),
                 x => (x as INostrEvent<string>)!.Content.ShouldBe(message),
                 x => x.Id.ShouldNotBeNullOrEmpty(),
                 x => x.Signature.ShouldNotBeNullOrEmpty(),
@@ -146,6 +158,14 @@ namespace NostrLib.Tests
 
         private async Task<NostrClient> Connect(string key = "")
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                var keys = NostrClient.GenerateKey();
+                key = keys.PrivateKey;
+
+                Output.WriteLine($"Public: {keys.PublicKey}");
+                Output.WriteLine($"Private: {keys.PrivateKey}");
+            }
             var client = new NostrClient(key, _relays);
             var cts = new CancellationTokenSource();
             await client.ConnectAsync(cancellationToken: cts.Token);

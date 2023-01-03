@@ -1,13 +1,17 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using NostrLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NuSocial.Services
 {
+    public interface ISettingsService
+    {
+        int? GetLimit();
+
+        RelayItem[] GetRelays();
+
+        Task<bool> LoginAsync(string key);
+    }
+
     public class SettingsService : ISettingsService
     {
         private readonly IDatabase _db;
@@ -23,6 +27,11 @@ namespace NuSocial.Services
         {
         }
 
+        public string GetId()
+        {
+            return _key;
+        }
+
         public int? GetLimit()
         {
             return 100;
@@ -31,17 +40,12 @@ namespace NuSocial.Services
         public RelayItem[] GetRelays()
         {
             var relays = new List<RelayItem>()
-        {
-            new RelayItem() { Name = "nostr.ethtozero.fr", Uri = new Uri("wss://nostr.ethtozero.fr") },
-            //new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
-            //new RelayItem() { Name = "nostr.pwnshop.cloud", Uri = new Uri("wss://nostr.pwnshop.cloud") },
-        };
+            {
+                new RelayItem() { Name = "nostr.ethtozero.fr", Uri = new Uri("wss://nostr.ethtozero.fr") },
+                //new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
+                //new RelayItem() { Name = "nostr.pwnshop.cloud", Uri = new Uri("wss://nostr.pwnshop.cloud") },
+            };
             return relays.ToArray();
-        }
-
-        public string GetId()
-        {
-            return _key;
         }
 
         public async Task<bool> LoginAsync(string key)
@@ -64,12 +68,5 @@ namespace NuSocial.Services
             }
             return false;
         }
-    }
-
-    public interface ISettingsService
-    {
-        int? GetLimit();
-        RelayItem[] GetRelays();
-        Task<bool> LoginAsync(string key);
     }
 }

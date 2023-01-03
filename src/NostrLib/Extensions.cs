@@ -9,10 +9,15 @@ using NostrLib.Models;
 
 namespace NostrLib
 {
-    internal static class NostrEventExtensions
+    public static class NostrEventExtensions
     {
         public static ECXOnlyPubKey GetPublicKey(this INostrEvent nostrEvent)
         {
+            if (nostrEvent is null)
+            {
+                throw new ArgumentNullException(nameof(nostrEvent));
+            }
+
             return ParsePubKey(nostrEvent.PublicKey);
         }
 
@@ -28,6 +33,11 @@ namespace NostrLib
 
         public static string ToJson(this INostrEvent<string> nostrEvent, bool withoutId)
         {
+            if (nostrEvent is null)
+            {
+                throw new ArgumentNullException(nameof(nostrEvent));
+            }
+
             var retVal =
                 $"[{(withoutId ? 0 : $"\"{nostrEvent.Id}\"")},\"{nostrEvent.PublicKey}\",{nostrEvent.CreatedAt?.ToUnixTimeSeconds()},{(int)nostrEvent.Kind},[{string.Join(',', nostrEvent.Tags.Select(tag => tag))}],\"{nostrEvent.Content}\"]";
 
@@ -36,6 +46,11 @@ namespace NostrLib
 
         public static bool Verify(this INostrEvent<string> nostrEvent)
         {
+            if (nostrEvent is null)
+            {
+                throw new ArgumentNullException(nameof(nostrEvent));
+            }
+
             var hash = nostrEvent.ToJson(true).ComputeSha256Hash();
             if (hash.ToHex() != nostrEvent.Id)
             {
@@ -62,7 +77,7 @@ namespace NostrLib
         }
     }
 
-    internal static class StringExtensions
+    public static class StringExtensions
     {
         public static int CharToDec(this char c)
         {
@@ -114,6 +129,11 @@ namespace NostrLib
 
         public static string ToHex(this byte[] bytes)
         {
+            if (bytes is null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
             var builder = new StringBuilder();
             foreach (var t in bytes)
             {

@@ -193,7 +193,7 @@ namespace NuSocial.ViewModels
             foreach (var nostrPost in nostrPosts)
             {
                 var author = await _authorService.GetInfoAsync(nostrPost.Author, cancellationToken);
-                var contact = new Models.Contact() { PublicKey = nostrPost.Author, PetName = author.DisplayName ?? author.Name };
+                var contact = new Models.Contact() { PublicKey = nostrPost.Author, PetName = author.DisplayName ?? author.Name ?? string.Empty };
                 if (!string.IsNullOrEmpty(author.Picture))
                 {
                     contact.Picture = new Picture(new Uri(author.Picture));

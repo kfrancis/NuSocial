@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2017 Pieter Wuille
+/* Copyright (c) 2017 Pieter Wuille
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ using System.Security.Cryptography;
 
 namespace Bech32_Csharp
 {
-    class Bech32ConversionException : Exception
+    public class Bech32ConversionException : Exception
     {
         public Bech32ConversionException()
             : base()
@@ -34,6 +34,10 @@ namespace Bech32_Csharp
         }
         public Bech32ConversionException(String message)
             : base(message)
+        {
+        }
+
+        public Bech32ConversionException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -56,7 +60,7 @@ namespace Bech32_Csharp
             uint startValue = 1;
             for (uint i = 0; i < input.Length; i++)
             {
-                uint c0 = startValue >> 25;
+                var c0 = startValue >> 25;
                 startValue = (uint)(((startValue & 0x1ffffff) << 5) ^
                     (input[i]) ^
                     (-((c0 >> 0) & 1) & 0x3b6a57b2) ^
@@ -69,27 +73,27 @@ namespace Bech32_Csharp
         }
         private static void hrpExpand(string hrp, byte[] ret)
         {
-            int len = hrp.Length;
+            var len = hrp.Length;
             //byte[] ret = new byte[len * 2 + 1];
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 ret[i] = (byte)(hrp[i] >> 5);
             }
             ret[len] = 0;
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 ret[len + 1 + i] = (byte)(hrp[i] & 31);
             }
         }
         private static byte[] createChecksum(string hrp, byte[] data, int dataLen)
         {
-            int hrpLen = hrp.Length * 2 + 1;
-            byte[] values = new byte[hrpLen + dataLen + 6];
+            var hrpLen = hrp.Length * 2 + 1;
+            var values = new byte[hrpLen + dataLen + 6];
             hrpExpand(hrp, values);
             System.Buffer.BlockCopy(data, 0, values, hrpLen, dataLen);
-            uint mod = PolyMod(values);
-            byte[] ret = new byte[6];
-            for (int i = 0; i < 6; i++)
+            var mod = PolyMod(values);
+            var ret = new byte[6];
+            for (var i = 0; i < 6; i++)
             {
                 ret[i] = (byte)((mod >> (5 * (5 - i))) & 31);
             }
@@ -97,7 +101,7 @@ namespace Bech32_Csharp
         }
         private static bool verifyChecksum(string hrp, byte[] dataWithChecksum)
         {
-            byte[] values = new byte[hrp.Length * 2 + 1 + dataWithChecksum.Length];
+            var values = new byte[hrp.Length * 2 + 1 + dataWithChecksum.Length];
             hrpExpand(hrp, values);
             System.Buffer.BlockCopy(dataWithChecksum, 0, values, hrp.Length * 2 + 1, dataWithChecksum.Length);
             return PolyMod(values) == 0;
@@ -143,8 +147,8 @@ namespace Bech32_Csharp
                 throw new Bech32ConversionException("Invalid witness program!");
             }
             System.Text.StringBuilder ret;
-            byte[] data = new byte[80];
-            int len = convertBits(witnessProgram, 8, 5, true, data, 0, 1, witnessProgram.Length);
+            var data = new byte[80];
+            var len = convertBits(witnessProgram, 8, 5, true, data, 0, 1, witnessProgram.Length);
             data[0] = witnessVersion;
             byte[] checksum;
             if (mainnet)
@@ -158,7 +162,7 @@ namespace Bech32_Csharp
                 checksum = createChecksum("tb", data, len);
             }
             ret.Append('1');
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 ret.Append((char)data[i]);
             }
@@ -166,7 +170,7 @@ namespace Bech32_Csharp
             {
                 ret[i] = CHARSET_BECH32[ret[i]];
             }
-            for (int i = 0; i < 6; i++)
+            for (var i = 0; i < 6; i++)
             {
                 ret.Append(CHARSET_BECH32[checksum[i]]);
             }
@@ -176,8 +180,8 @@ namespace Bech32_Csharp
         // isP2PKH is 0 for P2PKH, 1 for P2SH, 2 for "couldn't determine"
         public static byte[] DecodeBech32(string addr, out byte witnessVersion, out byte isP2PKH, out bool mainnet)
         {
-            string addr2 = addr.ToLower();
-            string hrp = "bc";
+            var addr2 = addr.ToLower();
+            var hrp = "bc";
             if (addr2.StartsWith("bc1q"))
             {
                 mainnet = true;
@@ -192,16 +196,16 @@ namespace Bech32_Csharp
                 throw new Bech32ConversionException("Invalid Bech32 address!");
             }
             witnessVersion = 0;
-            int dataLen = addr2.Length - 3;
-            byte[] data = new byte[dataLen];
-            for (int i = 0; i < dataLen; i++)
+            var dataLen = addr2.Length - 3;
+            var data = new byte[dataLen];
+            for (var i = 0; i < dataLen; i++)
             {
                 data[i] = (byte)addr2[3 + i];
             }
             sbyte err = 0;
-            for (int i = 0; i < dataLen; i++)
+            for (var i = 0; i < dataLen; i++)
             {
-                sbyte k = DICT_BECH32[data[i]];
+                var k = DICT_BECH32[data[i]];
                 err |= k;
                 data[i] = unchecked((byte)k);
             }
@@ -209,8 +213,8 @@ namespace Bech32_Csharp
             {
                 throw new Bech32ConversionException("Invalid Bech32 address!");
             }
-            byte[] decoded = new byte[60];
-            int decodedLen = convertBits(data, 5, 8, false, decoded, 1, 0, dataLen - 1 - 6);
+            var decoded = new byte[60];
+            var decodedLen = convertBits(data, 5, 8, false, decoded, 1, 0, dataLen - 1 - 6);
             switch (decodedLen)
             {
                 case 20:
@@ -223,7 +227,7 @@ namespace Bech32_Csharp
                     isP2PKH = 2;
                     break;
             }
-            byte[] final = new byte[decodedLen];
+            var final = new byte[decodedLen];
             System.Buffer.BlockCopy(decoded, 0, final, 0, decodedLen);
             return final;
         }

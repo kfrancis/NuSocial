@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace NuSocial;
 
@@ -10,7 +10,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(TimelineDetailPage), typeof(TimelineDetailPage));
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
 

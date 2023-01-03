@@ -17,7 +17,7 @@ namespace NuSocial.Services
 
         public static string Encrypt(byte[] data, string passphrase)
         {
-            using Aes aes = Aes.Create();
+            using var aes = Aes.Create();
             aes.Padding = PaddingMode.PKCS7;
             aes.KeySize = 128; // in bits
             aes.Key = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(passphrase));
@@ -34,12 +34,12 @@ namespace NuSocial.Services
 
         public static string Decrypt(string data, string passphrase)
         {
-            int NumberChars = data.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-            for (int i = 0; i < NumberChars; i += 2)
+            var NumberChars = data.Length;
+            var bytes = new byte[NumberChars / 2];
+            for (var i = 0; i < NumberChars; i += 2)
                 bytes[i / 2] = Convert.ToByte(data.Substring(i, 2), 16);
             var dataB = bytes;
-            using Aes aes = Aes.Create();
+            using var aes = Aes.Create();
             aes.Padding = PaddingMode.PKCS7;
             aes.KeySize = 128; // in bits
             aes.Key = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(passphrase));
