@@ -39,6 +39,10 @@ jobs:
         id: nbgv
         with:
           setAllVars: true
+
+      # workload install maui-tizen
+      - name: workload install maui-tizen
+        run: dotnet workload install maui-tizen
       
       - name: Restore dependancies
         run: dotnet restore
