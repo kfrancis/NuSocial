@@ -32,6 +32,20 @@ Public Key: 70c847ff3522ca7a626c0ff280db2e8dfea63e6425580c3aa55530921cc40e4d
 Private Key: 303298dd83b8db5d56a4e8901107a8bf88a5706e82177c0ed9d9af3eed579f3a
 ```
 
+## NostrLib
+
+Based on NNostr, but I couldn't quite understand how it was meant to be used so I've written a new one.
+
+### Features
+
+- [x] connect
+- [x] disconnect
+- [x] fetch events of varying filters
+- [x] get profiles
+- [x] get global posts
+- [x] get individual feed
+- [ ] handle the varying way markdown is packed into profiles
+
 ## Thoughts
 
 ### Images

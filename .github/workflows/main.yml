@@ -1,0 +1,78 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+concurrency: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+
+env:
+  DOTNET_VERSION: '7.x'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: 🛒 Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: ⚙️ Setup dotnet {{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: ⚙️ Setup GIT versioning
+        uses: dotnet/nbgv@master
+        env: 
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        id: nbgv
+        with:
+          setAllVars: true
+      
+      - name: Restore dependancies
+        run: dotnet restore
+      
+      - name: 🛠️ Building library in release mode
+        run: dotnet build --no-restore --configuration Release     
+
+      # pack and publish the nuget package
+      - name: Pack tool
+        run: dotnet pack src/NostrKey/NostrKey.csproj --configuration Release --no-build --output nupkgs -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=${{env.NBGV_SemVer1}}
+
+        # pack and publish the nuget package
+      - name: Pack lib
+        run: dotnet pack src/NostrLib/NostrLib.csproj --configuration Release --no-build --output nupkgs -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=${{env.NBGV_SemVer1}}
+
+      - name: Get NuGet
+        uses: nuget/setup-nuget@v1.1.1
+        with:
+          nuget-api-key: ${{secrets.NUGET_API_KEY}}
+          
+      - name: Release artifacts to NuGet
+        working-directory: ./nupkgs
+        run : |
+          nuget push *.nupkg -Source https://api.nuget.org/v3/index.json -SkipDuplicate
+
+      - name: Create Release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body: |
+            [NostrKey NuGet Release v${{ steps.nbgv.outputs.SemVer2 }}](https://www.nuget.org/packages/NostrKey/${{ steps.nbgv.outputs.SemVer2 }})
+            [NostrLib NuGet Release v${{ steps.nbgv.outputs.SemVer2 }}](https://www.nuget.org/packages/NostrLib/${{ steps.nbgv.outputs.SemVer2 }})
+          tag_name: ${{ steps.nbgv.outputs.SemVer2 }}
+          release_name: Release v${{ steps.nbgv.outputs.SemVer2 }}
+          draft: true
+          prerelease: false
