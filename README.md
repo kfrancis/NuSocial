@@ -10,6 +10,28 @@
 - [x] multi-relay support
 - [ ] markdown parsing
 
+## NostrKey
+
+Simple console app, should be able to run anywhere .NET 7 can.
+
+### Features
+
+- [x] generates diff 0 keys
+- [ ] generating keys with prefixes
+- [ ] publish as dotnet tool
+- [ ] meaningfully generating keys with varying difficulty
+
+#### Example
+
+Running `NostrKey 0` gives the following type of output:
+```
+Started mining process with a difficulty of: 0
+Benchmarking a single core for 5 seconds...
+A single core can mine roughly 2704.92 h/s!
+Public Key: 70c847ff3522ca7a626c0ff280db2e8dfea63e6425580c3aa55530921cc40e4d
+Private Key: 303298dd83b8db5d56a4e8901107a8bf88a5706e82177c0ed9d9af3eed579f3a
+```
+
 ## Thoughts
 
 ### Images

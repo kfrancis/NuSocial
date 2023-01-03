@@ -310,7 +310,7 @@ namespace NostrKey
         {
             [Description("Difficulty")]
             [CommandArgument(0, "[difficulty]")]
-            [DefaultValue(10)]
+            [DefaultValue(0)]
             public int Difficulty { get; init; }
 
             [Description("Vanity Prefix")]
