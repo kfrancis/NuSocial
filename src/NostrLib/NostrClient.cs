@@ -23,21 +23,28 @@ namespace NostrLib
         private readonly ObservableCollection<RelayItem> _relayList = new();
         private bool _isDisposed;
 
-        public NostrClient(string privateKey)
-            : this(privateKey, Array.Empty<RelayItem>())
+        public NostrClient(string key, bool isPrivateKey = false)
+            : this(key, isPrivateKey, Array.Empty<RelayItem>())
         {
         }
 
-        public NostrClient(string privateKey, RelayItem[] relays)
+        public NostrClient(string key, bool isPrivateKey = false, RelayItem[]? relays = null)
         {
             if (relays is null)
             {
                 throw new ArgumentNullException(nameof(relays));
             }
 
-            var hex = new HexEncoder();
-            PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(privateKey));
-            PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
+            if (isPrivateKey)
+            {
+                var hex = new HexEncoder();
+                PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(key));
+                PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
+            }
+            else
+            {
+                PublicKey = key;
+            }
 
             ReconnectDelay = TimeSpan.FromSeconds(2);
 

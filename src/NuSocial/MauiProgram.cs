@@ -49,7 +49,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDatabase>(db);
         var settingsService = new SettingsService(db);
         builder.Services.AddSingleton<ISettingsService>(settingsService);
-        var nostrClient = new NostrClient(settingsService.GetId(), settingsService.GetRelays());
+        var nostrClient = new NostrClient(settingsService.GetId(), false, settingsService.GetRelays());
         builder.Services.AddSingleton<INostrClient, NostrClient>(x => nostrClient);
         builder.Services.AddSingleton<IAuthorService>(new AuthorService(nostrClient));
 

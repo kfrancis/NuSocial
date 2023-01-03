@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using NBitcoin;
 using NBitcoin.Secp256k1;
 using NostrLib.Models;
 using Shouldly;
@@ -25,7 +26,7 @@ namespace NostrLib.Tests
         public async Task Client_CanConnect()
         {
             // Arrange
-            using var client = new NostrClient(TestPubKey, _relays);
+            using var client = new NostrClient(TestPubKey, relays: _relays);
             var didCallbackRun = false;
             var cb = (object sender) => { didCallbackRun = true; };
             var cts = new CancellationTokenSource();
@@ -42,7 +43,7 @@ namespace NostrLib.Tests
         public async Task Client_CanDisconnect()
         {
             // Arrange
-            using var client = new NostrClient(TestPubKey, _relays);
+            using var client = new NostrClient(TestPubKey, false, _relays);
             var cts = new CancellationTokenSource();
             await client.ConnectAsync(cancellationToken: cts.Token);
 
@@ -57,7 +58,9 @@ namespace NostrLib.Tests
         public async Task Client_GetPostsNeedsKey()
         {
             // Arrange
-            using var client = await Connect();
+            using var client = new NostrClient("", false, _relays);
+            var cts = new CancellationTokenSource();
+            await client.ConnectAsync(cancellationToken: cts.Token);
 
             // Act
             try
@@ -158,6 +161,7 @@ namespace NostrLib.Tests
 
         private async Task<NostrClient> Connect(string key = "")
         {
+            bool isPrivateKey = false;
             if (string.IsNullOrEmpty(key))
             {
                 var keys = NostrClient.GenerateKey();
@@ -165,8 +169,9 @@ namespace NostrLib.Tests
 
                 Output.WriteLine($"Public: {keys.PublicKey}");
                 Output.WriteLine($"Private: {keys.PrivateKey}");
+                isPrivateKey = true;
             }
-            var client = new NostrClient(key, _relays);
+            var client = new NostrClient(key, isPrivateKey, _relays);
             var cts = new CancellationTokenSource();
             await client.ConnectAsync(cancellationToken: cts.Token);
             return client;
