@@ -12,7 +12,8 @@
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:CreateAccountViewModel"
-    x:TypeArguments="vm:CreateAccountViewModel">
+    x:TypeArguments="vm:CreateAccountViewModel"
+    Shell.FlyoutBehavior="Disabled">
     <input:FormView SubmitCommand="{Binding CreateAccountCommand}">
         <VerticalStackLayout Padding="20,0">
             <Label

@@ -7,39 +7,100 @@
     xmlns:local="clr-namespace:NuSocial"
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:views="clr-namespace:NuSocial.Views"
-    Shell.FlyoutBehavior="Disabled">
+    Shell.FlyoutBehavior="{OnIdiom Desktop=Locked,
+                                   Default=Flyout}">
 
-    <ShellItem Route="start">
+    <Shell.FlyoutHeader>
+        <VerticalStackLayout Padding="5,4,5,4" StyleClass="PrimaryContainer">
+
+            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <Label
+                    Margin="0,0,10,0"
+                    Text="{mex:LocString Light}"
+                    VerticalOptions="Center">
+                    <Label.Triggers>
+                        <DataTrigger
+                            Binding="{Binding Source={x:Reference themeSwitch}, Path=IsToggled}"
+                            TargetType="Label"
+                            Value="true">
+                            <Setter Property="Text" Value="{mex:LocString Dark}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Switch
+                    x:Name="themeSwitch"
+                    Toggled="ThemeToggled"
+                    VerticalOptions="Center" />
+
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
+
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="5">
+            <Button StyleClass="TextButton" Text="{mex:LocString Logout}" />
+            <Label
+                Margin="10"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center"
+                Text="NuSocial" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
+    <ShellItem FlyoutItemIsVisible="False" Route="start">
         <ShellContent ContentTemplate="{DataTemplate views:StartPage}" Route="start" />
     </ShellItem>
-    <ShellItem Route="login">
+    <ShellItem FlyoutItemIsVisible="False" Route="login">
         <ShellContent ContentTemplate="{DataTemplate views:LoginPage}" Route="login" />
     </ShellItem>
-    <ShellItem Route="createAccount">
+    <ShellItem FlyoutItemIsVisible="False" Route="createAccount">
         <ShellContent ContentTemplate="{DataTemplate views:CreateAccountPage}" Route="createAccount" />
     </ShellItem>
 
-    <TabBar Route="main">
-        <ShellContent Title="{mex:LocString Home}" ContentTemplate="{DataTemplate views:TimelinePage}">
+    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
+        <ShellContent
+            Title="{mex:LocString Timeline}"
+            ContentTemplate="{DataTemplate views:TimelinePage}"
+            Route="timeline">
             <ShellContent.Icon>
-                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.House}" />
+                <FontImageSource
+                    FontFamily="FASolid"
+                    Glyph="{x:Static fa:Solid.House}"
+                    Color="{StaticResource Primary}" />
             </ShellContent.Icon>
         </ShellContent>
-        <ShellContent Title="{mex:LocString Global}" ContentTemplate="{DataTemplate views:GlobalPage}">
+        <ShellContent
+            Title="{mex:LocString Global}"
+            ContentTemplate="{DataTemplate views:GlobalPage}"
+            Route="global">
             <ShellContent.Icon>
-                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Globe}" />
+                <FontImageSource
+                    FontFamily="FASolid"
+                    Glyph="{x:Static fa:Solid.Globe}"
+                    Color="{StaticResource Primary}" />
             </ShellContent.Icon>
         </ShellContent>
-        <ShellContent Title="{mex:LocString Notifications}" ContentTemplate="{DataTemplate views:NotificationsPage}">
+        <ShellContent
+            Title="{mex:LocString Notifications}"
+            ContentTemplate="{DataTemplate views:NotificationsPage}"
+            Route="notifications">
             <ShellContent.Icon>
-                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Bell}" />
+                <FontImageSource
+                    FontFamily="FASolid"
+                    Glyph="{x:Static fa:Solid.Bell}"
+                    Color="{StaticResource Primary}" />
             </ShellContent.Icon>
         </ShellContent>
-        <ShellContent Title="{mex:LocString DMs}" ContentTemplate="{DataTemplate views:DirectMessagesPage}">
+        <ShellContent
+            Title="{mex:LocString DMs}"
+            ContentTemplate="{DataTemplate views:DirectMessagesPage}"
+            Route="dms">
             <ShellContent.Icon>
-                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Message}" />
+                <FontImageSource
+                    FontFamily="FASolid"
+                    Glyph="{x:Static fa:Solid.Message}"
+                    Color="{StaticResource Primary}" />
             </ShellContent.Icon>
         </ShellContent>
-
-    </TabBar>
+    </FlyoutItem>
 </Shell>

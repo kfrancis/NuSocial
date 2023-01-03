@@ -9,7 +9,6 @@
     xmlns:mex="clr-namespace:NuSocial.MarkupExtensions"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
-    Title="{mex:LocString Home}"
     x:DataType="vm:TimelineViewModel"
     x:TypeArguments="vm:TimelineViewModel">
 

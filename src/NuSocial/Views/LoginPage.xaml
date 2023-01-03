@@ -10,7 +10,8 @@
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:LoginViewModel"
-    x:TypeArguments="vm:LoginViewModel">
+    x:TypeArguments="vm:LoginViewModel"
+    Shell.FlyoutBehavior="Disabled">
     <Grid
         Padding="20,10"
         RowDefinitions="*,55,55"

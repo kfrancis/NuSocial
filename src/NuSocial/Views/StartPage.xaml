@@ -11,7 +11,8 @@
     xmlns:vm="clr-namespace:NuSocial.ViewModels"
     x:DataType="vm:StartViewModel"
     x:TypeArguments="vm:StartViewModel"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.FlyoutBehavior="Disabled">
     <StackLayout>
         <Grid
             Padding="20,10"
