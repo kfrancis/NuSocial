@@ -1,8 +1,7 @@
 {
   "profiles": {
     "NostrKey": {
-      "commandName": "Project",
-      "commandLineArgs": "0"
+      "commandName": "Project"
     },
     "WSL": {
       "commandName": "WSL2",
