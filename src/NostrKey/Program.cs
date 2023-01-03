@@ -200,7 +200,7 @@ namespace NostrKey
 
         private static void BenchmarkCores(int numCores, int powDifficulty)
         {
-            var hashes_per_second_per_core = 0;
+            var hashes_per_second_per_core = 0d;
 
             AnsiConsole.WriteLine("Benchmarking a single core for 5 seconds...");
             var sw = new Stopwatch();
@@ -223,14 +223,13 @@ namespace NostrKey
             }
 
             hashes_per_second_per_core /= numCores;
-            AnsiConsole.WriteLine($"A single core can mine roughly {hashes_per_second_per_core} h/s!");
+            AnsiConsole.WriteLine($"A single core can mine roughly {hashes_per_second_per_core:F2} h/s!");
         }
 
         private static (ECPrivKey privateKey, ECXOnlyPubKey publicKey) GenerateKeyPair(Scalar rng)
         {
-            ECPrivKey? privKey = null;
 
-            if (Context.Instance.TryCreateECPrivKey(rng, out privKey))
+            if (Context.Instance.TryCreateECPrivKey(rng, out var privKey))
             {
                 var pubKey = privKey.CreateXOnlyPubKey();
 
