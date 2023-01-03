@@ -19,10 +19,11 @@ namespace NuSocial.Services
     public class RelayService : IRelayService
     {
         private static ConcurrentDictionary<Uri, Uri> s_blockedRelays = new();
+        private const string BlockedKey = "blocked-relays";
 
         public RelayService()
         {
-            var saved = Preferences.Default.Get<Dictionary<Uri, Uri>>("blocked-relays", new Dictionary<Uri, Uri>());
+            var saved = Preferences.Default.Get(BlockedKey, new Dictionary<Uri, Uri>());
             if (saved != null)
             {
                 s_blockedRelays = new ConcurrentDictionary<Uri, Uri>(saved);
@@ -36,7 +37,7 @@ namespace NuSocial.Services
                 var isSuccess = s_blockedRelays.TryAdd(uri, uri);
                 if (isSuccess)
                 {
-                    Preferences.Default.Set<Dictionary<Uri, Uri>>("blocked-relays", s_blockedRelays.ToDictionary(x => x.Key, x => x.Value));
+                    Preferences.Default.Set(BlockedKey, s_blockedRelays.ToDictionary(x => x.Key, x => x.Value));
                 }
                 return isSuccess;
             }
@@ -70,7 +71,7 @@ namespace NuSocial.Services
                 var tryRemoveResult = s_blockedRelays.TryRemove(uri, out _);
 
                 if (tryRemoveResult)
-                    Preferences.Default.Set<Dictionary<Uri, Uri>>("blocked-relays", s_blockedRelays.ToDictionary(x => x.Key, x => x.Value));
+                    Preferences.Default.Set(BlockedKey, s_blockedRelays.ToDictionary(x => x.Key, x => x.Value));
 
                 return tryRemoveResult;
             }
