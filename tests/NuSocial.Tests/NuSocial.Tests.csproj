@@ -21,8 +21,4 @@
 		</PackageReference>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\src\NuSocial\NuSocial.csproj" />
-	</ItemGroup>
-
 </Project>
