@@ -5,6 +5,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Kori Francis</Authors>
     <PackageProjectUrl>https://github.com/kfrancis/NuSocial</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kfrancis/NuSocial</RepositoryUrl>
@@ -17,6 +18,7 @@
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +39,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Spectre.Console.Cli" Version="0.45.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>True</Pack>
+    </None>
   </ItemGroup>
 
 </Project>

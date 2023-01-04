@@ -6,6 +6,7 @@
 		<Features>strict</Features>
 		<Nullable>enable</Nullable>
 		<IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>Kori Francis</Authors>
 		<PackageProjectUrl>https://github.com/kfrancis/NuSocial</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/kfrancis/NuSocial</RepositoryUrl>
