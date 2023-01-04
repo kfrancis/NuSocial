@@ -6,10 +6,13 @@
 - [x] serialize event
 - [x] deserialize event
 - [x] proper disconnect
+- [x] multi-relay support
+- [x] blocking relays
+- [x] blocking users
 - [ ] handle profile images using blurhash
 - [ ] handle tags
-- [x] multi-relay support
 - [ ] markdown parsing
+- [ ] eula
 
 ## NostrKey
 
