@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
@@ -9,12 +9,12 @@
 		<Authors>Kori Francis</Authors>
 		<PackageProjectUrl>https://github.com/kfrancis/NuSocial</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/kfrancis/NuSocial</RepositoryUrl>
-		<PackageTags>nostr;social</PackageTags>
+		<PackageTags>nostr;social;nusocial;client</PackageTags>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -25,6 +25,8 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
 	</PropertyGroup>
 
 	<ItemGroup>

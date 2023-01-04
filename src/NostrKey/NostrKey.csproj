@@ -5,9 +5,18 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>Kori Francis</Authors>
+    <PackageProjectUrl>https://github.com/kfrancis/NuSocial</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kfrancis/NuSocial</RepositoryUrl>
+    <PackageTags>nostr;social;nusocial;client</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>botsay</ToolCommandName>
+    <ToolCommandName>nostrkey</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
