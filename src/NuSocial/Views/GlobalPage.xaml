@@ -90,7 +90,6 @@
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReplyToPostCommand}" CommandParameter="{Binding .}" />
-                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -105,7 +104,6 @@
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=BoostPostCommand}" CommandParameter="{Binding .}" />
-                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -120,7 +118,6 @@
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />
-                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                     <Image
@@ -135,7 +132,6 @@
                         </Image.Source>
                         <Image.GestureRecognizers>
                             <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />-->
-                            <PointerGestureRecognizer PointerEntered="PointerGestureRecognizer_PointerEntered" PointerExited="PointerGestureRecognizer_PointerExited" />
                         </Image.GestureRecognizers>
                     </Image>
                 </Grid>
@@ -143,9 +139,9 @@
         </DataTemplate>
         <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
-    <VerticalStackLayout>
-        <Grid ColumnDefinitions="*,150">
-            <Entry Grid.Column="0" Placeholder="Key" />
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,150">
+            <SearchBar Grid.Column="0" />
             <Button
                 Grid.Column="1"
                 Margin="5,0"
@@ -153,14 +149,23 @@
                 CornerRadius="5"
                 Text="{Binding UnreadLabel}" />
         </Grid>
-        <CollectionView
-            Margin="0,15,0,0"
-            HorizontalOptions="FillAndExpand"
-            ItemSizingStrategy="MeasureFirstItem"
-            ItemTemplate="{StaticResource postTemplate}"
-            ItemsLayout="VerticalList"
-            ItemsSource="{Binding Items}"
-            SelectionMode="Single"
-            VerticalOptions="FillAndExpand" />
-    </VerticalStackLayout>
+        <RefreshView
+            Grid.Row="1"
+            Command="{Binding RefreshCommand}"
+            RefreshColor="Teal">
+            <CollectionView
+                x:Name="collectionView"
+                HorizontalOptions="StartAndExpand"
+                ItemTemplate="{StaticResource postTemplate}"
+                ItemsSource="{Binding Items}"
+                ItemsUpdatingScrollMode="KeepScrollOffset">
+                <CollectionView.EmptyView>
+                    <Label
+                        FontAttributes="Italic"
+                        Opacity="0.5"
+                        Text="No recent posts" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
 </local:BetterUraniumContentPage>

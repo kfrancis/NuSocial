@@ -23,11 +23,23 @@ namespace NostrLib
         private readonly ObservableCollection<RelayItem> _relayList = new();
         private bool _isDisposed;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="key">The hex private or public key</param>
+        /// <param name="isPrivateKey">If the key is the private key, then true. Otherwise, false.</param>
         public NostrClient(string key, bool isPrivateKey = false)
             : this(key, isPrivateKey, Array.Empty<RelayItem>())
         {
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="key">The hex private or public key</param>
+        /// <param name="isPrivateKey">If the key is the private key, then true. Otherwise, false.</param>
+        /// <param name="relays">The list of nostr relays to utilize</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public NostrClient(string key, bool isPrivateKey = false, RelayItem[]? relays = null)
         {
             if (relays is null)
@@ -60,9 +72,22 @@ namespace NostrLib
             Dispose(disposing: false);
         }
 
-        //public Action<object, NostrPost> PostReceived { get; set; }
+        public event EventHandler<NostrPostReceivedEventArgs> PostReceived;
 
-        public ECPrivKey? PrivateKey { get; set; }
+        // Wrap event invocations inside a protected virtual method
+        // to allow derived classes to override the event invocation behavior
+        protected virtual void OnRaisePostReceived(NostrPostReceivedEventArgs e)
+        {
+            // Make a temporary copy of the event to avoid possibility of
+            // a race condition if the last subscriber unsubscribes
+            // immediately after the null check and before the event is raised.
+            var raiseEvent = PostReceived;
+
+            // Event will be null if there are no subscribers
+            raiseEvent?.Invoke(this, e);
+        }
+
+        private ECPrivKey? PrivateKey { get; set; }
 
         public string? PublicKey { get; set; }
 
@@ -91,6 +116,7 @@ namespace NostrLib
                     relay.RelayPost += Relay_RelayPost;
                     relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                     relay.RelayNotice += Relay_RelayNotice;
+                    relay.PostReceived += Relay_PostReceived;
                     if (await relay.ConnectAsync(cancellationToken))
                     {
                         _relayInstances.TryAdd(relay.Url, relay);
@@ -114,6 +140,8 @@ namespace NostrLib
                         relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
                         relay.RelayNotice -= Relay_RelayNotice;
                         relay.RelayNotice += Relay_RelayNotice;
+                        relay.PostReceived -= Relay_PostReceived;
+                        relay.PostReceived += Relay_PostReceived;
                         if (await existingRelay.ConnectAsync(cancellationToken))
                         {
                             IsConnected = true;
@@ -122,6 +150,11 @@ namespace NostrLib
                     }
                 }
             }
+        }
+
+        private void Relay_PostReceived(object sender, NostrPostReceivedEventArgs e)
+        {
+            OnRaisePostReceived(e);
         }
 
         public Task DisconnectAsync(CancellationToken cancellationToken = default)
@@ -135,6 +168,7 @@ namespace NostrLib
                         relay.RelayPost -= Relay_RelayPost;
                         relay.RelayConnectionChanged -= Relay_RelayConnectionChanged;
                         relay.RelayNotice -= Relay_RelayNotice;
+                        relay.PostReceived -= Relay_PostReceived;
                     }
                     relay?.Dispose();
                 }
@@ -182,7 +216,7 @@ namespace NostrLib
             return retVal;
         }
 
-        public async Task<IEnumerable<NostrPost>> GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default)
+        public async Task GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
 
@@ -207,13 +241,7 @@ namespace NostrLib
                 globalFilter
             };
 
-            var events = await GetEventsAsync(filters, cancellationToken);
-            var posts = new List<NostrPost>();
-            foreach (var nEvent in events.OrderByDescending(x => x.Value.CreatedAt))
-            {
-                posts.Add(EventToPost(nEvent.Value));
-            }
-            return posts.Take(limit ?? int.MaxValue).AsEnumerable();
+            StartStreamEvents(filters, cancellationToken);
         }
 
         /// <summary>
@@ -362,6 +390,8 @@ namespace NostrLib
                             relay?.Dispose();
                         }
                     }
+                    PrivateKey?.Dispose();
+                    PublicKey = null;
                 }
 
                 _isDisposed = true;
@@ -376,6 +406,14 @@ namespace NostrLib
             {
                 await DisconnectAsync(cancellationToken);
                 await ConnectAsync(cancellationToken: cancellationToken);
+            }
+        }
+
+        private void StartStreamEvents(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
+        {
+            if (!string.IsNullOrEmpty(PublicKey))
+            {
+                _ = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
             }
         }
 

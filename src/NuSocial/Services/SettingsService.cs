@@ -10,7 +10,7 @@ namespace NuSocial.Services
 
         RelayItem[] GetRelays();
 
-        Task<bool> LoginAsync(string key);
+        Task<bool> LoginAsync(string key, bool isPrivate);
     }
 
     public class SettingsService : ISettingsService
@@ -53,14 +53,20 @@ namespace NuSocial.Services
             return relays.ToArray();
         }
 
-        public async Task<bool> LoginAsync(string key)
+        /// <summary>
+        /// Login by updating the Nostr client key and setting the SecureStorage key for easy re-login
+        /// </summary>
+        /// <param name="key">The hex key</param>
+        /// <param name="isPrivate">Is the key being passed a private key? If so, true. If not (if it's a public key), then false.</param>
+        /// <returns>True if successful, false otherwise</returns>
+        public async Task<bool> LoginAsync(string key, bool isPrivate)
         {
             try
             {
                 _key = key;
 
                 var nostr = Ioc.Default.GetService<INostrClient>();
-                nostr?.UpdateKey(_key);
+                nostr?.UpdateKey(key, isPrivate);
 
                 await SecureStorage.Default.SetAsync("key", key);
                 //await _db.UpdateUserAsync(new User() { Key = key });

@@ -6,6 +6,16 @@ using NostrLib.Converters;
 
 namespace NostrLib.Models
 {
+    public class NostrPostReceivedEventArgs : EventArgs
+    {
+        public NostrPostReceivedEventArgs(NostrPost post)
+        {
+            Post = post;
+        }
+
+        public NostrPost Post { get; set; }
+    }
+
     public enum NostrKind
     {
         SetMetadata = 0,

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using CommunityToolkit.Maui.Alerts;
 using NostrLib;
 using NostrLib.Models;
@@ -15,6 +16,7 @@ namespace NuSocial.ViewModels
         private readonly INostrClient _nostrClient;
         private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _clientCts;
+        private ConcurrentQueue<NostrPost> _pending = new();
 
         private bool _disposedValue;
 
@@ -39,6 +41,8 @@ namespace NuSocial.ViewModels
             _nostrClient = nostrClient;
             _authorService = authorService;
         }
+
+        protected bool IsAsync = true;
 
         ~PostListViewModel()
         {
@@ -67,6 +71,17 @@ namespace NuSocial.ViewModels
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Override me to provide an implementation that makes sense for the page you're on
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual Task StartGettingPosts(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task LoadDataAsync()
         {
             Debug.WriteLine("LoadDataAsync started");
@@ -78,19 +93,26 @@ namespace NuSocial.ViewModels
             {
                 await NostrClient.SetRelaysAsync(_settingsService.GetRelays(), false, _clientCts.Token).ConfigureAwait(true);
 
-                var posts = await GetPosts(_clientCts.Token).ConfigureAwait(true);
-                await Dispatcher.RunAsync(async () =>
+                if (IsAsync)
                 {
-                    if (posts != null && posts.Any())
+                    var posts = await GetPosts(_clientCts.Token).ConfigureAwait(true);
+                    await Dispatcher.RunAsync(async () =>
                     {
-                        await AddItems(posts.OrderByDescending(x => x.CreatedAt), _clientCts.Token);
-                    }
-                    else
-                    {
-                        var message = $"Nothing new to fetch";
-                        await Snackbar.Make(message).Show(_clientCts.Token).ConfigureAwait(false);
-                    }
-                }).ConfigureAwait(true);
+                        if (posts != null && posts.Any())
+                        {
+                            await AddItems(posts.OrderByDescending(x => x.CreatedAt), _clientCts.Token);
+                        }
+                        else
+                        {
+                            var message = $"Nothing new to fetch";
+                            await Snackbar.Make(message).Show(_clientCts.Token).ConfigureAwait(false);
+                        }
+                    }).ConfigureAwait(true);
+                }
+                else
+                {
+                    await StartGettingPosts(_clientCts.Token);
+                }
 
                 Debug.WriteLine("LoadDataAsync ended");
             });
@@ -142,15 +164,25 @@ namespace NuSocial.ViewModels
             lock (_lock)
             {
                 _clientCts ??= new();
+
+                // sub
+                _nostrClient.PostReceived += NostrPostReceived;
             }
+        }
+
+        private void NostrPostReceived(object? sender, NostrPostReceivedEventArgs e)
+        {
+            _pending.Enqueue(e.Post);
+            UnreadPostCount++;
         }
 
         public override void OnDisappearing()
         {
-            //lock (_lock)
-            //{
-            //    _clientCts?.Cancel();
-            //}
+            lock (_lock)
+            {
+                // unsub
+                _nostrClient.PostReceived -= NostrPostReceived;
+            }
 
             base.OnDisappearing();
         }

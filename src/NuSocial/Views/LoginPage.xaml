@@ -18,10 +18,17 @@
         RowSpacing="10">
         <VerticalStackLayout Grid.Row="0" Spacing="10">
             <Label
+                Margin="0,0,0,20"
                 HorizontalOptions="Center"
                 Text="{mex:LocString Login}"
                 VerticalOptions="Center" />
             <material:TextField Title="{mex:LocString LoginPlaceholder}" Text="{Binding Key}" />
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="{mex:LocString IsPrivate}" VerticalOptions="Center" />
+                <Label Text="{Binding IsPrivateLabel}" VerticalOptions="Center" />
+                <Switch HorizontalOptions="Center" IsToggled="{Binding IsPrivate}" />
+
+            </HorizontalStackLayout>
 
         </VerticalStackLayout>
         <Button

@@ -1,18 +1,8 @@
-﻿using System;
+using System;
 using NostrLib.Models;
 
 namespace NostrLib
 {
-    public class PostReceivedEventArgs : EventArgs
-    {
-        public PostReceivedEventArgs(NostrPost nostrPost)
-        {
-            NostrPost = nostrPost;
-        }
-
-        public NostrPost NostrPost { get; }
-    }
-
     public class RelayPostEventArgs : EventArgs
     {
         public RelayPostEventArgs(string? eventId, bool wasSuccessful, string? message)

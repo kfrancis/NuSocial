@@ -10,9 +10,10 @@ namespace NostrLib
 {
     public interface INostrClient
     {
-        ECPrivKey? PrivateKey { get; set; }
         string? PublicKey { get; set; }
         TimeSpan ReconnectDelay { get; set; }
+
+        event EventHandler<NostrPostReceivedEventArgs> PostReceived;
 
         Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default);
 
@@ -24,7 +25,7 @@ namespace NostrLib
 
         Task<INostrEvent?> GetFollowingInfoAsync(string publicKey, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<NostrPost>> GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default);
+        Task GetGlobalPostsAsync(int? limit = null, DateTime? since = null, Collection<string>? authors = null, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<NostrPost>> GetPostsAsync(CancellationToken cancellationToken = default);
 

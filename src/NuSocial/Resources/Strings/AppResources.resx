@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="CreateAccount" xml:space="preserve">
     <value>Create Account</value>
+  </data>
+  <data name="Dark" xml:space="preserve">
+    <value>Dark</value>
   </data>
   <data name="DMs" xml:space="preserve">
     <value>DMs</value>
@@ -141,11 +147,29 @@
   <data name="Home" xml:space="preserve">
     <value>Home</value>
   </data>
+  <data name="IsPrivate" xml:space="preserve">
+    <value>Private key?</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Login</value>
+  </data>
+  <data name="LoginFailure" xml:space="preserve">
+    <value>Could not login</value>
+  </data>
+  <data name="LoginPlaceholder" xml:space="preserve">
+    <value>Public or Private Key</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
   </data>
   <data name="Notifications" xml:space="preserve">
     <value>Notifications</value>
@@ -153,10 +177,22 @@
   <data name="OK" xml:space="preserve">
     <value>Ok</value>
   </data>
+  <data name="Oops" xml:space="preserve">
+    <value>Oops</value>
+  </data>
   <data name="Profile" xml:space="preserve">
     <value>Profile</value>
   </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
   <data name="StartDescription" xml:space="preserve">
     <value>A decentralized network based on cryptographic keypairs and that is not peer-to-peer, it is super simple and scalable and therefore has a chance of working.</value>
+  </data>
+  <data name="Timeline" xml:space="preserve">
+    <value>Timeline</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
   </data>
 </root>

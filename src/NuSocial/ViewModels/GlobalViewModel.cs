@@ -16,9 +16,11 @@ namespace NuSocial.ViewModels
             : base(dialogService, customDispatcher, settingsService, nostrClient, authorService)
         {
             _settingsService = settingsService;
+
+            IsAsync = false; // Stream posts
         }
 
-        public override Task<IEnumerable<NostrPost>> GetPosts(CancellationToken cancellationToken = default)
+        public override Task StartGettingPosts(CancellationToken cancellationToken = default)
         {
             return NostrClient.GetGlobalPostsAsync(cancellationToken: cancellationToken);
         }

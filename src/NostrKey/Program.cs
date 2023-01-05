@@ -176,7 +176,7 @@ namespace NostrKey
 
                 try
                 {
-                    if (Context.Instance.TryCreateECPrivKey(key, out privKey))
+                    if (Context.Instance.TryCreateECPrivKey(GenerateScalar(), out privKey))
                     {
                         var pubKey = privKey.CreateXOnlyPubKey();
 

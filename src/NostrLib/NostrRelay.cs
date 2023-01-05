@@ -51,7 +51,7 @@ namespace NostrLib
             Dispose(disposing: false);
         }
 
-        public event EventHandler<PostReceivedEventArgs>? PostReceived;
+        public event EventHandler<NostrPostReceivedEventArgs>? PostReceived;
 
         public event EventHandler<RelayConnectionChangedEventArgs>? RelayConnectionChanged;
 
@@ -129,6 +129,7 @@ namespace NostrLib
                 if (nEvent != null)
                 {
                     events.Add(nEvent);
+                    HandleEvent(subscribeId, nEvent);
                 }
                 else if (eose)
                 {
