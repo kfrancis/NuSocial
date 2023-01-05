@@ -5,6 +5,7 @@ namespace NuSocial.Services
 {
     public interface ISettingsService
     {
+        string GetId();
         int? GetLimit();
 
         RelayItem[] GetRelays();
@@ -41,9 +42,13 @@ namespace NuSocial.Services
         {
             var relays = new List<RelayItem>()
             {
-                new RelayItem() { Name = "nostr.ethtozero.fr", Uri = new Uri("wss://nostr.ethtozero.fr") },
-                //new RelayItem() { Name = "relay.damus.io", Uri = new Uri("wss://relay.damus.io") },
-                //new RelayItem() { Name = "nostr.pwnshop.cloud", Uri = new Uri("wss://nostr.pwnshop.cloud") },
+                //new RelayItem("relay.damus.io"),
+                new RelayItem("nostr-relay.wlvs.space"),
+                //new RelayItem("nostr-fmt.wiz.biz"),
+                //new RelayItem("relay.nostr.bg"),
+                //new RelayItem("nostr-oxtr.dev"),
+                //new RelayItem("nostr-v0l.io"),
+                //new RelayItem("brb.io"),
             };
             return relays.ToArray();
         }

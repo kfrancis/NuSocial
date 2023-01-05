@@ -1,4 +1,4 @@
-﻿using SQLite;
+using SQLite;
 
 namespace NuSocial.Services
 {
@@ -30,15 +30,14 @@ namespace NuSocial.Services
 
         private readonly Task _constructionTask;
 
-        private SemaphoreSlim? _semaphore = new(1, 1);
-
         /// <summary>
         /// The database connection.
         /// </summary>
         private SQLiteAsyncConnection? _database;
 
-        private bool _isInitialized;
         private bool _isDisposed;
+        private bool _isInitialized;
+        private SemaphoreSlim? _semaphore = new(1, 1);
 
         /// <summary>
         /// Initializes the database manager.
@@ -60,6 +59,12 @@ namespace NuSocial.Services
             });
         }
 
+        ~LocalStorage()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
         /// <summary>
         /// Deletes and resets all database data.
         /// </summary>
@@ -72,6 +77,13 @@ namespace NuSocial.Services
 
             // delete data
             await db.DeleteAllAsync<User>();
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         public async Task<User?> GetUserAsync(string key)
@@ -95,6 +107,20 @@ namespace NuSocial.Services
         public Task UpdateUsersAsync(ObservableCollection<User> users)
         {
             return UpdateIfPossible(users);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    _semaphore?.Dispose();
+                }
+
+                _semaphore = null;
+                _isDisposed = true;
+            }
         }
 
         /// <summary>
@@ -166,10 +192,7 @@ namespace NuSocial.Services
         private async Task UpdateIfPossible<T>(T item)
         {
             var db = await GetDatabase();
-            await db.RunInTransactionAsync((dbc) =>
-            {
-                dbc.InsertOrReplace(item);
-            });
+            await db.RunInTransactionAsync((dbc) => dbc.InsertOrReplace(item));
         }
 
         private async Task UpdateIfPossible<T>(ObservableCollection<T> items)
@@ -188,34 +211,6 @@ namespace NuSocial.Services
                     }
                 });
             }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_isDisposed)
-            {
-                if (disposing)
-                {
-                    _semaphore?.Dispose();
-                }
-
-                _semaphore = null;
-                _isDisposed = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~LocalStorage()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

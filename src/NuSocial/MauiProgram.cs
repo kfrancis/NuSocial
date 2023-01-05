@@ -6,6 +6,7 @@ using NostrLib;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Hosting;
 using InputKit.Handlers;
+using Microsoft.Maui.LifecycleEvents;
 
 namespace NuSocial;
 
@@ -41,40 +42,47 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        var mauiDispatcher = new MauiDispatcher();
+        SetupServices(builder);
+        SetupPages(builder);
 
-        builder.Services.AddSingleton<ICustomDispatcher>(mauiDispatcher);
-        builder.Services.AddSingleton<IDialogService>(new DialogService(mauiDispatcher));
-        var db = new LocalStorage();
-        builder.Services.AddSingleton<IDatabase>(db);
-        var settingsService = new SettingsService(db);
-        builder.Services.AddSingleton<ISettingsService>(settingsService);
-        var nostrClient = new NostrClient(settingsService.GetId(), false, settingsService.GetRelays());
-        builder.Services.AddSingleton<INostrClient, NostrClient>(x => nostrClient);
-        builder.Services.AddSingleton<IAuthorService>(new AuthorService(nostrClient));
+        return builder.Build();
+    }
 
-        builder.Services.AddSingleton<ProfileViewModel>();
-
-        builder.Services.AddSingleton<ProfilePage>();
+    private static void SetupPages(MauiAppBuilder builder)
+    {
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<ProfilePage>();
 
         builder.Services.AddTransient<TimelineDetailViewModel>();
         builder.Services.AddTransient<TimelineDetailPage>();
 
-        builder.Services.AddSingleton<LoginViewModel>();
-        builder.Services.AddSingleton<CreateAccountViewModel>();
-        builder.Services.AddSingleton<StartViewModel>();
-        builder.Services.AddSingleton<TimelineViewModel>();
-        builder.Services.AddSingleton<GlobalViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
+        builder.Services.AddTransient<LoginPage>();
 
-        builder.Services.AddSingleton<LoginPage>();
-        builder.Services.AddSingleton<CreateAccountPage>();
-        builder.Services.AddSingleton<StartPage>();
-        builder.Services.AddSingleton<TimelinePage>();
-        builder.Services.AddSingleton<GlobalPage>();
+        builder.Services.AddTransient<CreateAccountViewModel>();
+        builder.Services.AddTransient<CreateAccountPage>();
 
-        builder.Services.AddSingleton<LocalizationViewModel>();
-        builder.Services.AddSingleton<LocalizationPage>();
+        builder.Services.AddTransient<StartViewModel>();
+        builder.Services.AddTransient<StartPage>();
 
-        return builder.Build();
+        builder.Services.AddTransient<TimelineViewModel>();
+        builder.Services.AddTransient<TimelinePage>();
+
+        builder.Services.AddTransient<GlobalViewModel>();
+        builder.Services.AddTransient<GlobalPage>();
+    }
+
+    private static void SetupServices(MauiAppBuilder builder)
+    {
+        builder.Services.AddSingleton<ICustomDispatcher, MauiDispatcher>();
+        builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<IDatabase, LocalStorage>();
+        builder.Services.AddSingleton<ISettingsService, SettingsService>();
+        builder.Services.AddSingleton<INostrClient, NostrClient>(x =>
+        {
+            var settings = x.GetRequiredService<ISettingsService>();
+            return new NostrClient(settings.GetId(), false, settings.GetRelays());
+        });
+        builder.Services.AddSingleton<IAuthorService, AuthorService>();
     }
 }

@@ -240,6 +240,7 @@ namespace NostrLib
                 {
                     posts.Add(EventToPost(nEvent.Value));
                 }
+                Debug.WriteLine($"Event total: {events.Count}");
             }
             else
             {
@@ -384,15 +385,13 @@ namespace NostrLib
 
             if (!string.IsNullOrEmpty(PublicKey))
             {
-                var subEvents = _relayInstances.Values.Select(r => r.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
+                var subEvents = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
+                //var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
+                var results = await Task.WhenAll(subEvents);
 
-                foreach (var relayEvents in results)
+                foreach (var relayEvent in results.SelectMany(relayEvents => relayEvents))
                 {
-                    foreach (var relayEvent in relayEvents)
-                    {
-                        events.TryAdd(relayEvent.Id, relayEvent);
-                    }
+                    events.TryAdd(relayEvent.Id, relayEvent);
                 }
             }
 
@@ -401,22 +400,21 @@ namespace NostrLib
 
         private static Scalar GenerateScalar()
         {
-            Scalar scalar = Scalar.Zero;
+            var scalar = Scalar.Zero;
             Span<byte> output = stackalloc byte[32];
-            do
+            while (true)
             {
                 RandomUtils.GetBytes(output);
-                scalar = new Scalar(output, out int overflow);
+                scalar = new Scalar(output, out var overflow);
                 if (overflow != 0 || scalar.IsZero)
                 {
                     continue;
                 }
                 break;
-            } while (true);
+            }
             return scalar;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "<Pending>")]
         public static NostrKeyPair GenerateKey()
         {
             var key = GenerateScalar();
@@ -484,14 +482,14 @@ namespace NostrLib
                 throw new InvalidOperationException($"'{nameof(PublicKey)}' cannot be null or empty.");
             }
 
-            var postEvent = new NostrEvent<string>()
+            var postEvent = new NostrEvent<string>
             {
                 Content = content,
                 CreatedAt = DateTime.Now,
                 Kind = NostrKind.TextNote,
                 PublicKey = PublicKey,
+                Tags = new List<NostrEventTag>()
             };
-            postEvent.Tags = new List<NostrEventTag>();
 
             if (!string.IsNullOrEmpty(rootReference))
             {
@@ -521,13 +519,13 @@ namespace NostrLib
                     });
                 }
             }
-            var sendTasks = _relayInstances.Values.Select(r => r.SendEvent(GenerateRelayEvent(r, postEvent)));
+            var sendTasks = _relayInstances.Values.Select(relay => relay.SendEventAsync(GenerateRelayEvent(postEvent)));
             await Task.WhenAll(sendTasks);
 
             return postEvent;
         }
 
-        private INostrEvent GenerateRelayEvent(NostrRelay r, NostrEvent<string> postEvent)
+        private INostrEvent GenerateRelayEvent(NostrEvent<string> postEvent)
         {
             var relayEvent = postEvent.Clone();
             relayEvent.Id = CalculateId(relayEvent);
@@ -573,6 +571,15 @@ namespace NostrLib
 
     public class RelayItem
     {
+        public RelayItem(string? link = null)
+        {
+            if (!string.IsNullOrEmpty(link))
+            {
+                Uri = new Uri($"wss://{link}");
+                Name = link;
+            }
+        }
+
         public string Name { get; set; }
         public Uri Uri { get; set; }
     }

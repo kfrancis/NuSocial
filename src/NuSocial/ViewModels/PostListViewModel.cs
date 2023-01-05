@@ -109,6 +109,12 @@ namespace NuSocial.ViewModels
         }
 
         [RelayCommand(CanExecute = "IsNotBusy")]
+        public virtual Task Block(Post item)
+        {
+            return Task.CompletedTask;
+        }
+
+        [RelayCommand(CanExecute = "IsNotBusy")]
         public virtual Task BoostPost(Post item)
         {
             return Task.CompletedTask;

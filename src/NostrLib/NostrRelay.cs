@@ -59,6 +59,8 @@ namespace NostrLib
 
         public event EventHandler<RelayPostEventArgs>? RelayPost;
 
+        private static readonly object GATE1 = new object();
+
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
         public bool IsAlive => _webSocket?.IsRunning ?? false;
@@ -74,14 +76,20 @@ namespace NostrLib
 
             _webSocketTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
 
-            _webSocket = new WebsocketClient(Url, () => new ClientWebSocket())
+            _webSocket = new WebsocketClient(Url, () => new ClientWebSocket()
+            {
+                Options =
+                {
+                    KeepAliveInterval = TimeSpan.FromSeconds(5)
+                }
+            })
             {
                 MessageEncoding = Encoding.UTF8,
                 IsReconnectionEnabled = true,
-                ReconnectTimeout = _reconnectTimeout
+                ReconnectTimeout = _reconnectTimeout,
             };
 
-            _webSocket.MessageReceived.Where(msg => msg.MessageType == WebSocketMessageType.Text).Select(msg => Observable.FromAsync(async () => await WsReceived(msg))).Concat().Subscribe();
+            _webSocket.MessageReceived.Where(msg => msg.MessageType == WebSocketMessageType.Text).Select(msg => Observable.FromAsync(async () => await WsReceived(msg))).Synchronize(GATE1).Concat().Subscribe();
             _webSocket.ReconnectionHappened.Subscribe(WsConnected);
             _webSocket.DisconnectionHappened.Subscribe(WsDisconnected);
 
@@ -99,10 +107,10 @@ namespace NostrLib
             GC.SuppressFinalize(this);
         }
 
-        public async Task SendEvent(INostrEvent nostrEvent)
+        public async Task SendEventAsync(INostrEvent nostrEvent)
         {
-            var payload = JsonSerializer.Serialize(new object[] { "EVENT", nostrEvent });
-            await SendMessage(payload);
+            var payload = JsonSerializer.Serialize(new object[] { NostrConsts.EVENT, nostrEvent });
+            await SendMessageAsync(payload);
         }
 
         public async Task<List<INostrEvent>> SubscribeAsync(string subscribeId, NostrSubscriptionFilter[] filters, CancellationToken cancellationToken = default)
@@ -130,8 +138,8 @@ namespace NostrLib
 
             if (!_listeners.ContainsKey(subscribeId) && _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
             {
-                var payload = JsonSerializer.Serialize(new object[] { "REQ", subscribeId }.Concat(filters));
-                await SendMessage(payload);
+                var payload = JsonSerializer.Serialize(new object[] { NostrConsts.REQ, subscribeId }.Concat(filters));
+                await SendMessageAsync(payload);
 
                 while (!linked.IsCancellationRequested)
                 {
@@ -263,13 +271,13 @@ namespace NostrLib
             }
         }
 
-        private async Task SendMessage(string? message)
+        private async Task SendMessageAsync(string? message)
         {
             if (IsAlive && !string.IsNullOrEmpty(message))
             {
                 System.Threading.Interlocked.Increment(ref _currentMessageId);
                 Debug.WriteLine($"Sending {_currentMessageId}: {message}");
-                await _webSocket!.SendInstant(message);
+                await Task.Run(() => _webSocket!.Send(message));
             }
         }
 
@@ -298,7 +306,7 @@ namespace NostrLib
             var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
             switch (messageType)
             {
-                case "EVENT":
+                case NostrConsts.EVENT:
                     var subId = json[1].GetString() ?? string.Empty;
                     var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2].ToString());
                     if (ev?.Verify() is true)
@@ -307,7 +315,7 @@ namespace NostrLib
                     }
                     break;
 
-                case "NOTICE":
+                case NostrConsts.NOTICE:
                     var msg = json[1].GetString();
                     if (!string.IsNullOrEmpty(msg))
                     {
@@ -315,14 +323,14 @@ namespace NostrLib
                     }
                     break;
 
-                case "EOSE":
+                case NostrConsts.EOSE:
                     // NIP-15 :: End of Stored Events Notice
                     // https://github.com/nostr-protocol/nips/blob/master/15.md
                     // used to notify clients all stored events have been sent
                     DeleteListener(json[1].GetString() ?? string.Empty);
                     break;
 
-                case "OK":
+                case NostrConsts.OK:
                     // NIP-20 :: Command Results
                     // https://github.com/nostr-protocol/nips/blob/master/20.md
                     RelayPost?.Invoke(this, new(json[1].GetString(), json[2].GetBoolean(), json[3].GetString()));
