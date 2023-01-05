@@ -29,7 +29,7 @@
                                 <FontImageSource
                                     FontFamily="FARegular"
                                     Glyph="{x:Static fa:Regular.CircleDot}"
-                                    Color="LightGray" />
+                                    Color="White" />
                             </SwipeItem.IconImageSource>
                         </SwipeItem>
                     </SwipeItems>
@@ -44,9 +44,6 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
-                    </Grid.GestureRecognizers>
                     <Image
                         Grid.RowSpan="2"
                         Margin="0,0,10,0"
@@ -86,6 +83,9 @@
                         Padding="10"
                         CornerRadius="10"
                         HorizontalOptions="StartAndExpand">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TimelineViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
                         <Label Text="{Binding Source={RelativeSource AncestorType={x:Type m:Post}}, Path=Content}" />
                     </Frame>
                     <Grid
@@ -145,8 +145,8 @@
         </DataTemplate>
         <local:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
     </uranium:UraniumContentPage.Resources>
-    <VerticalStackLayout>
-        <Grid ColumnDefinitions="*,150">
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,150">
             <SearchBar
                 x:Name="searchBar"
                 Grid.Column="0"
@@ -161,11 +161,13 @@
                 CornerRadius="5"
                 Text="{Binding UnreadLabel}" />
         </Grid>
-        <RefreshView Command="{Binding RefreshCommand}" RefreshColor="Teal">
+        <RefreshView
+            Grid.Row="1"
+            Command="{Binding RefreshCommand}"
+            RefreshColor="Teal">
             <CollectionView
                 x:Name="collectionView"
                 HorizontalOptions="StartAndExpand"
-                ItemSizingStrategy="MeasureAllItems"
                 ItemTemplate="{StaticResource postTemplate}"
                 ItemsSource="{Binding Items}"
                 ItemsUpdatingScrollMode="KeepScrollOffset">
@@ -204,6 +206,6 @@
             BackgroundColor="White"
             HorizontalOptions="Start"
             WidthRequest="1" />
-    </VerticalStackLayout>
+    </Grid>
 
 </local:BetterUraniumContentPage>
