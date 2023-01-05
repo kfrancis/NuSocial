@@ -69,6 +69,7 @@ namespace NuSocial.Services
                 nostr?.UpdateKey(key, isPrivate);
 
                 await SecureStorage.Default.SetAsync("key", key);
+                await SecureStorage.Default.SetAsync("isPrivate", isPrivate ? "true" : "false");
                 //await _db.UpdateUserAsync(new User() { Key = key });
 
                 return true;

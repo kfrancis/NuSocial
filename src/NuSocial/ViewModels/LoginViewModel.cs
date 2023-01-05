@@ -40,6 +40,7 @@ namespace NuSocial.ViewModels
 
             // If we already have a key stored, use it.
             Key = await SecureStorage.Default.GetAsync("key");
+            IsPrivate = await SecureStorage.Default.GetAsync("isPrivate") == "true";
         }
 
         [RelayCommand(CanExecute = "IsNotBusy")]
