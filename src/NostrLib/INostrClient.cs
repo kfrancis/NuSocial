@@ -31,9 +31,9 @@ namespace NostrLib
 
         Task<NostrProfile> GetProfileAsync(string publicKey, CancellationToken cancellationToken = default);
 
-        Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e);
+        Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e, string? clientId = null);
 
-        Task<INostrEvent> SendTextPostAsync(string message);
+        Task<INostrEvent> SendTextPostAsync(string message, string? clientId = null);
 
         Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default);
 

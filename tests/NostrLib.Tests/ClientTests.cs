@@ -16,9 +16,9 @@ namespace NostrLib.Tests
         {
             _relays = new[] {
                 new RelayItem() { Uri = new Uri("wss://nostr-relay.wlvs.space") },
-                new RelayItem() { Uri = new Uri("wss://nostr.onsats.org") },
-                new RelayItem() { Uri = new Uri("wss://relay.nostr.info") },
-                new RelayItem() { Uri = new Uri("wss://nostr-pub.semisol.dev") },
+                //new RelayItem() { Uri = new Uri("wss://nostr.onsats.org") },
+                //new RelayItem() { Uri = new Uri("wss://relay.nostr.info") },
+                //new RelayItem() { Uri = new Uri("wss://nostr-pub.semisol.dev") },
             };
         }
 
@@ -115,12 +115,18 @@ namespace NostrLib.Tests
             using var client = await Connect(TestPubKey);
 
             // Act
-            var profile = await client.GetProfileAsync(TestPubKey);
+            var profile = await client.GetProfileAsync("1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f");
 
             // Assert
             profile.ShouldSatisfyAllConditions(
                 p => p.Name.ShouldNotBeNullOrEmpty(),
-                p => p.Name.ShouldBe("testNuSocialName")
+                p => p.Name.ShouldBe("testNuSocialName"),
+                p => p.Following.ShouldNotBeNull(),
+                p => p.Following.Any().ShouldBeTrue(),
+                p => p.Following.Count.ShouldBe(1),
+                p => p.Followers.ShouldNotBeNull(),
+                p => p.Followers.Any().ShouldBeFalse(),
+                p => p.Followers.Count.ShouldBe(0)
             );
         }
 
@@ -131,8 +137,14 @@ namespace NostrLib.Tests
             using var client = await Connect(TestPubKey);
             var postFetchCount = 10;
 
+            List<NostrPost> posts = new();
+            client.PostReceived += (s, e) =>
+            {
+                posts.Add(e.Post);
+            };
+
             // Act
-            var posts = await client.GetGlobalPostsAsync(postFetchCount);
+            await client.GetGlobalPostsAsync(postFetchCount);
 
             // Assert
             posts.ShouldSatisfyAllConditions(
@@ -140,6 +152,11 @@ namespace NostrLib.Tests
                 p => p.Any().ShouldBeTrue(),
                 p => p.Count().ShouldBeLessThanOrEqualTo(postFetchCount)
             );
+
+            client.PostReceived -= (s, e) =>
+            {
+                posts.Add(e.Post);
+            };
         }
 
         [Fact]

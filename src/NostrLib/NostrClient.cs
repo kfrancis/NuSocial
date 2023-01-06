@@ -424,8 +424,8 @@ namespace NostrLib
             if (!string.IsNullOrEmpty(PublicKey))
             {
                 var subEvents = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-                //var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
-                var results = await Task.WhenAll(subEvents);
+                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
+                //var results = await Task.WhenAll(subEvents);
 
                 foreach (var relayEvent in results.SelectMany(relayEvents => relayEvents))
                 {
@@ -503,17 +503,17 @@ namespace NostrLib
             }
         }
 
-        public Task<INostrEvent> SendTextPostAsync(string message)
+        public Task<INostrEvent> SendTextPostAsync(string message, string? clientId = null)
         {
-            return SendPostAsync(message);
+            return SendPostAsync(message, clientId: clientId);
         }
 
-        public Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e)
+        public Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e, string? clientId = null)
         {
-            return SendPostAsync(message, "rootReference", "reference");
+            return SendPostAsync(message, "rootReference", "reference", clientId: clientId);
         }
 
-        public async Task<INostrEvent> SendPostAsync(string content, string? rootReference = null, string? reference = null, string? mention = null)
+        public async Task<INostrEvent> SendPostAsync(string content, string? rootReference = null, string? reference = null, string? mention = null, string? clientId = null)
         {
             if (string.IsNullOrEmpty(PublicKey))
             {
@@ -529,20 +529,24 @@ namespace NostrLib
                 Tags = new List<NostrEventTag>()
             };
 
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                postEvent.Tags.Add(new NostrEventTag() { TagIdentifier = "client", Data = new List<string>() { clientId } });
+            }
+
             if (!string.IsNullOrEmpty(rootReference))
             {
-                postEvent.Tags = new() {
-                    new()
+                postEvent.Tags.Add(new()
+                {
+                    TagIdentifier = "e",
+                    Data = new List<string>()
                     {
-                        TagIdentifier = "e",
-                        Data = new List<string>()
-                        {
-                            rootReference,
-                            "",
-                            "root"
-                        }
+                        rootReference,
+                        "",
+                        "root"
                     }
-                };
+                });
+
                 if (!string.IsNullOrEmpty(reference))
                 {
                     postEvent.Tags.Add(new()
