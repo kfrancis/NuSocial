@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using NBitcoin.Secp256k1;
@@ -79,6 +80,37 @@ namespace NostrLib
 
     public static class StringExtensions
     {
+        /// <summary>
+        /// convert a secure string into a normal plain text string
+        /// </summary>
+        /// <param name="secureStr"></param>
+        /// <returns></returns>
+        public static string ToPlainString(this System.Security.SecureString secureStr)
+        {
+            string plainStr = new System.Net.NetworkCredential(string.Empty,
+                              secureStr).Password;
+            return plainStr;
+        }
+
+        /// <summary>
+        ///     A String extension method that converts the @this to a secure string.
+        /// </summary>
+        /// <param name="str">The @this to act on.</param>
+        /// <returns>str as a SecureString.</returns>
+        public static SecureString ToSecureString(this string str)
+        {
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            var secureString = new SecureString();
+            foreach (var c in str)
+                secureString.AppendChar(c);
+
+            return secureString;
+        }
+
         public static int CharToDec(this char c)
         {
             if ('0' <= c && c <= '9')

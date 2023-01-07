@@ -77,6 +77,7 @@ namespace NostrLib
             // get clear text data from the input SecureString
             //
             var cipherData = GetData(plainText);
+
             using var aes = Aes.Create();
             aes.Key = key;
             aes.GenerateIV();
