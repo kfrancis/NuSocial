@@ -9,60 +9,50 @@ namespace NostrLib
 {
     public interface IAesEncryptor
     {
-        Task<SecureString> Decrypt(string input, SecureString key);
+        Task<SecureString> Decrypt(byte[] key, string iv, SecureString content);
 
         Task<(string cipherText, string iv)> Encrypt(SecureString plainText, byte[] key);
     }
 
     public class AesEncryptor : IAesEncryptor
     {
-        public async Task<SecureString> Decrypt(string input, SecureString key)
+        public async Task<SecureString> Decrypt(byte[] key, string iv, SecureString content)
         {
-            if (key is null)
+            if (content is null)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(content));
             }
-
-            //
-            // get clear text key from the SecureString key
-            //
-            var keyBlob = GetData(key);
 
             //
             // decrypt the data
             //
+            //
+            // prepare the crypto stuff
+            //
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.Mode = CipherMode.CBC;
+            aes.IV = Convert.FromBase64String(iv);
+            using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+            using var encryptedStream = new MemoryStream(Convert.FromBase64String(content.ToPlainString()));
+            using var targetStream = new MemoryStream();
+
+            //
+            // decrypt the data and return as SecureString
+            //
+            using (var sourceStream = new CryptoStream(encryptedStream, decryptor, CryptoStreamMode.Read))
+            {
+                await sourceStream.CopyToAsync(targetStream);
+            }
+
+            var decryptedData = targetStream.ToArray();
             try
             {
-                //
-                // prepare the crypto stuff
-                //
-                using var aes = Aes.Create();
-                aes.Key = keyBlob;
-                using var decryptor = aes.CreateDecryptor();
-                using var encryptedStream = new MemoryStream(Convert.FromBase64String(input));
-                using var targetStream = new MemoryStream();
-
-                //
-                // decrypt the data and return as SecureString
-                //
-                using (var sourceStream = new CryptoStream(encryptedStream, decryptor, CryptoStreamMode.Read))
-                {
-                    await sourceStream.CopyToAsync(targetStream);
-                }
-
-                var decryptedData = targetStream.ToArray();
-                try
-                {
-                    return New(decryptedData);
-                }
-                finally
-                {
-                    Array.Clear(decryptedData, 0, decryptedData.Length);
-                }
+                return New(decryptedData);
             }
             finally
             {
-                Array.Clear(keyBlob, 0, keyBlob.Length);
+                Array.Clear(decryptedData, 0, decryptedData.Length);
             }
         }
 

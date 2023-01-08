@@ -62,8 +62,8 @@ namespace NostrLib.Nips
             var encryptedText = encrypted[0];
             var iv = encrypted[1];
 
-            using var secureIv = iv.ToSecureString();
-            using var secureContent = await s_encryptor.Decrypt(encryptedText, secureIv);
+            using var secureEncText = encryptedText.ToSecureString();
+            using var secureContent = await s_encryptor.Decrypt(sharedKey!, iv, secureEncText);
 
             nostrEvent.Content = secureContent.ToPlainString();
         }

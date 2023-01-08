@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Bogus;
 using NBitcoin;
@@ -42,7 +43,7 @@ namespace NostrLib.Tests
             receiverKp.ShouldSatisfyAllConditions(
                 kp => kp.PrivateKey.ShouldNotBeNullOrEmpty(),
                 kp => kp.PublicKey.ShouldNotBeNullOrEmpty()
-                );
+            );
 
             ev.ShouldSatisfyAllConditions(
                 x => x.ShouldNotBeNull(),
@@ -56,6 +57,12 @@ namespace NostrLib.Tests
             );
         }
 
+        public static bool IsBase64String(string base64)
+        {
+            Span<byte> buffer = new Span<byte>(new byte[base64.Length]);
+            return Convert.TryFromBase64String(base64, buffer, out int bytesParsed);
+        }
+
         [Fact]
         public async Task Nip04_CanEncrypt()
         {
@@ -64,26 +71,35 @@ namespace NostrLib.Tests
             var (ev, receiverKp) = GivenSampleEvent(randomSender.PublicKey);
 
             // Act
+            var origialContent = ev.Content;
             Output.WriteLine("Content: " + ev.Content);
             Output.WriteLine("SenderPub: " + randomSender.PublicKey);
             Output.WriteLine("SenderPriv: " + randomSender.PrivateKey);
             Output.WriteLine("ReceiverPub: " + receiverKp.PublicKey);
+            Output.WriteLine("ReceiverPriv: " + receiverKp.PrivateKey);
             await ev.EncryptNip04Event(WithKey(randomSender.PrivateKey));
 
             // Assert
+            ev.ShouldSatisfyAllConditions(
+                e => e.Tags.Any(t => t.Data.Contains(receiverKp.PublicKey))
+            );
+
             ev.Content.ShouldSatisfyAllConditions(
                 x => x.ShouldNotBeNullOrEmpty(),
-                x => x?.ShouldContain("?iv")
+                x => x?.ShouldContain("?iv"),
+                x => x?.ShouldNotContain(origialContent!),
+                x => IsBase64String(x?.Split("?iv=")[0] ?? string.Empty).ShouldBeTrue(),    // encrypted content should be base64
+                x => IsBase64String(x?.Split("?iv=")[1] ?? string.Empty).ShouldBeTrue()     // iv should be base64
             );
 
             Output.WriteLine("EncContent: " + ev.Content);
         }
 
-        private (NostrEvent<string> ev, NostrKeyPair receiverKp) GivenSampleEvent(string senderPubKey, string? content = null)
+        private static (NostrEvent<string> ev, NostrKeyPair receiverKp) GivenSampleEvent(string senderPubKey, string? content = null)
         {
             var randomReceiver = NostrClient.GenerateKey();
             var faker = new Faker<NostrEvent<string>>()
-                .RuleFor(e => e.Content, f => f.Random.Words(f.Random.Int(1, 20)));
+                .RuleFor(e => e.Content, f => f.Random.Words(f.Random.Int(1, 3)));
 
             var e = faker.Generate(1)[0];
             e.Kind = NostrKind.EncryptedDM;
@@ -114,18 +130,18 @@ namespace NostrLib.Tests
         public async Task Nip04_CanDecrypt()
         {
             // Arrange
-            var encContent = "h4pXaZs8AWMTSAuOWmBpyg==?iv=rSZ4Z4ObT40+FO8htVOlng==";
-            var sampleEvent = GivenSampleEvent("57d6b1e417d0466e1b4bd8b8bfc08fb9f3b9843155c6c56065d359f5a2e4ffef", encContent);
+            var encContent = "VoBTXkL1nSU/jZ1boXJP2RqAeqwcu9tNqpNyBY3nD3XZyeGjmfpOXXU7ak2usVX9?iv=vmQ0tp50YNVRi8iaoI4B1w==";
+            var sampleEvent = GivenSampleEvent("cb697f0ab15d86bb1c930d01af8a15c19a03a1827a05083417ea0ebb1d9e20c2", encContent);
             sampleEvent.ev.Tags.Clear();
-            sampleEvent.ev.Tags.Add(new NostrEventTag() { TagIdentifier = "p", Data = new List<string>() { "0f6cbdcecd15cd7a8061cdc562bd3ae00594a35c66db59dc6614958ccb07b0a9" } });
+            sampleEvent.ev.Tags.Add(new NostrEventTag() { TagIdentifier = "p", Data = new List<string>() { "bc564b9dbf02757c15f7a5a95ed3a0c2e8eb0e239111b1e88396bee51eff1316" } });
 
             // Act
-            await sampleEvent.ev.DecryptNip04Event(WithKey("bdd904e4e6ec9d45dd98e6da43e287911642daa9d97b4611c3ecbccdbc02093e"));
+            await sampleEvent.ev.DecryptNip04Event(WithKey("df2cc9bebc1801f000355f265b23f1828c922377b924a5391f07f20b0f71bcd2"));
 
             // Assert
             sampleEvent.ev.Content.ShouldSatisfyAllConditions(
                 x => x.ShouldNotBeNullOrEmpty(),
-                x => x.ShouldBe("Highway")
+                x => x.ShouldBe("quantifying productize")
             );
         }
 
