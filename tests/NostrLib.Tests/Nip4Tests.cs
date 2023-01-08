@@ -118,7 +118,7 @@ namespace NostrLib.Tests
             e.Kind = NostrKind.EncryptedDM;
             if (!string.IsNullOrEmpty(content))
             {
-                e.Content = content; // overwrite
+                e.Content = content; // overwrite if there's content passed in
             }
             e.PublicKey = senderPubKey;
             e.Tags ??= new();
@@ -126,6 +126,11 @@ namespace NostrLib.Tests
             return (e, randomReceiver);
         }
 
+        /// <summary>
+        /// Provide a random private key or a formatted private key from string param
+        /// </summary>
+        /// <param name="privateKey">The hex private key</param>
+        /// <returns>The ECPrivKey</returns>
         private static ECPrivKey WithKey(string? privateKey = null)
         {
             if (!string.IsNullOrEmpty(privateKey))

@@ -3,12 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using NBitcoin.Protocol;
 using NostrLib.Converters;
 using NostrLib.Models;
 using Websocket.Client;
@@ -27,6 +30,7 @@ namespace NostrLib
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
         public Uri? Url { get; set; }
+        public List<long> SupportedNips { get; }
     }
 
     public class NostrRelay : INostrRelay, IDisposable
@@ -59,6 +63,8 @@ namespace NostrLib
 
         public event EventHandler<RelayPostEventArgs>? RelayPost;
 
+        public List<long> SupportedNips { get; } = new();
+
         private static readonly object GATE1 = new object();
 
         public bool CanRead { get; set; }
@@ -75,6 +81,31 @@ namespace NostrLib
             }
 
             _webSocketTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+
+            // Perform NIP-11 check of supported features
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Accept", "application/nostr+json");
+
+                var response = await client.GetAsync(Url, _webSocketTokenSource.Token);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    var rid = JsonSerializer.Deserialize<NostrRelayInfo>(responseBody);
+                    if (rid != null)
+                    {
+                        Debug.WriteLine($"{Url} SupportedNips: {(string.Join(", ", rid.SupportedNips))}");
+                        SupportedNips.AddRange(rid.SupportedNips);
+                    }
+                }
+            }
+
+            if (!SupportedNips.Any() || !SupportedNips.Contains(1))
+            {
+                Debug.WriteLine($"{Url} doesn't support enough NIPS to be useful. Stopping.");
+                // If the relay doesn't at least support NIP-01, then we're going to stop here.
+                return false;
+            }
 
             _webSocket = new WebsocketClient(Url, () => new ClientWebSocket()
             {
@@ -133,6 +164,7 @@ namespace NostrLib
                 }
                 else if (eose)
                 {
+                    // TODO: Hmm, this will only come through if NIP-15 is supported, otherwise we need another way to trigger.
                     linked.Cancel();
                 }
             }
