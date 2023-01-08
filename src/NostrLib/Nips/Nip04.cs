@@ -93,8 +93,21 @@ namespace NostrLib.Nips
                 throw new ArgumentNullException(nameof(nostrEvent));
             }
 
-            var sharedPubKey = key.CreateXOnlyPubKey().GetSharedPubkey(key);
+            var senderPubKey = key.CreateXOnlyPubKey();
 
+            var receiverPubKeyStr = nostrEvent.Tags.FirstOrDefault(tag => tag.TagIdentifier == "p")?.Data?.First();
+            if (receiverPubKeyStr is null)
+            {
+                throw new ArgumentException("event did not specify a receiver pub key", nameof(nostrEvent));
+            }
+            var receiverPubKey = Context.Instance.CreateXOnlyPubKey(receiverPubKeyStr.DecodHexData());
+
+            if (string.IsNullOrEmpty(nostrEvent.PublicKey))
+            {
+                nostrEvent.PublicKey = senderPubKey.ToBytes().ToHex();
+            }
+
+            var sharedPubKey = receiverPubKey.GetSharedPubkey(key);
             if (sharedPubKey == null) { throw new Exception("Couldn't get the shared public key"); }
 
             using var secureContent = nostrEvent.Content.ToSecureString();
