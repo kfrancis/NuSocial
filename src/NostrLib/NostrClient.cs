@@ -526,7 +526,7 @@ namespace NostrLib
                 CreatedAt = DateTime.Now,
                 Kind = NostrKind.TextNote,
                 PublicKey = PublicKey,
-                Tags = new List<NostrEventTag>()
+                Tags = new()
             };
 
             if (!string.IsNullOrEmpty(clientId))

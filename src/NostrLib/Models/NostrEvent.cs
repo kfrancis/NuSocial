@@ -6,16 +6,6 @@ using NostrLib.Converters;
 
 namespace NostrLib.Models
 {
-    public class NostrPostReceivedEventArgs : EventArgs
-    {
-        public NostrPostReceivedEventArgs(NostrPost post)
-        {
-            Post = post;
-        }
-
-        public NostrPost Post { get; set; }
-    }
-
     public enum NostrKind
     {
         SetMetadata = 0,
@@ -67,9 +57,7 @@ namespace NostrLib.Models
         string PublicKey { get; set; }
         string Signature { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
-        List<NostrEventTag> Tags { get; set; }
+        Collection<NostrEventTag> Tags { get; set; }
     }
 
     public interface INostrEvent<TBody> : INostrEvent
@@ -103,9 +91,22 @@ namespace NostrLib.Models
         public string Signature { get; set; }
 
         [JsonPropertyName("tags")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
-        public List<NostrEventTag> Tags { get; set; }
+        public Collection<NostrEventTag> Tags { get; set; } = new();
+
+        public NostrEvent<TBody> Clone()
+        {
+            return new NostrEvent<TBody>()
+            {
+                Content = this.Content,
+                Kind = this.Kind,
+                Tags = this.Tags,
+                Signature = this.Signature,
+                CreatedAt = this.CreatedAt,
+                PublicKey = this.PublicKey,
+                Deleted = this.Deleted,
+                Id = this.Id
+            };
+        }
 
         public bool Equals(NostrEvent<TBody>? x, NostrEvent<TBody>? y)
         {
@@ -123,20 +124,15 @@ namespace NostrLib.Models
 
             return obj.Id.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
         }
+    }
 
-        public NostrEvent<TBody> Clone()
+    public class NostrPostReceivedEventArgs : EventArgs
+    {
+        public NostrPostReceivedEventArgs(NostrPost post)
         {
-            return new NostrEvent<TBody>()
-            {
-                Content = this.Content,
-                Kind = this.Kind,
-                Tags = this.Tags,
-                Signature = this.Signature,
-                CreatedAt = this.CreatedAt,
-                PublicKey = this.PublicKey,
-                Deleted = this.Deleted,
-                Id = this.Id
-            };
+            Post = post;
         }
+
+        public NostrPost Post { get; set; }
     }
 }

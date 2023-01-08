@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace NostrLib.Models
 {
     public class NostrKeyPair
@@ -12,7 +8,7 @@ namespace NostrLib.Models
             PrivateKey = privKey;
         }
 
-        public string PublicKey { get; private set; }
         public string PrivateKey { get; private set; }
+        public string PublicKey { get; private set; }
     }
 }

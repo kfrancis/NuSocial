@@ -1,25 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using NostrLib.Converters;
-using System.Reflection;
 
 namespace NostrLib.Models
 {
     public class NostrSubscriptionFilter
     {
         [JsonIgnore]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string> Authors { get; set; }
 
         [JsonPropertyName("authors")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? AuthorsExtensions
         {
             get => Authors?.Count > 0 ? Authors : null;
@@ -27,12 +22,10 @@ namespace NostrLib.Models
         }
 
         [JsonIgnore]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? EventId { get; set; }
 
         [JsonPropertyName("#e")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? EventIdExtensions
         {
             get => EventId?.Count > 0 ? EventId : null;
@@ -43,12 +36,10 @@ namespace NostrLib.Models
         public IDictionary<string, JsonElement> ExtensionData { get; }
 
         [JsonIgnore]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? Ids { get; set; }
 
         [JsonPropertyName("extension")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? IdsExtensions
         {
             get => Ids?.Count > 0 ? Ids : null;
@@ -63,12 +54,10 @@ namespace NostrLib.Models
         public int? Limit { get; set; }
 
         [JsonIgnore]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? PublicKey { get; set; }
 
         [JsonPropertyName("#p")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public Collection<string>? PublicKeyExtensions
         {
             get => PublicKey?.Count > 0 ? PublicKey : null;

@@ -12,4 +12,5 @@ Based on [NNostr](https://github.com/Kukks/NNostr), but I couldn't quite underst
 - [x] get profiles
 - [x] get global posts
 - [x] get individual feed
+- [x] NIP-04 encrypt/decrypt
 - [ ] handle the varying way markdown is packed into profiles

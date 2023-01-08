@@ -48,6 +48,7 @@ Based on NNostr, but I couldn't quite understand how it was meant to be used so 
 - [x] get profiles
 - [x] get global posts
 - [x] get individual feed
+- [x] NIP-04 encrypt/decrypt
 - [ ] handle the varying way markdown is packed into profiles
 
 ## Thoughts

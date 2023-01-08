@@ -1,4 +1,5 @@
 using Bogus;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using NBitcoin.Secp256k1;
 using NostrLib.Models;
 using NostrLib.Nips;
@@ -80,13 +81,9 @@ namespace NostrLib.Tests
             // Arrange
             var randomSender = NostrClient.GenerateKey();
             var (ev, receiverKp) = GivenSampleEvent(randomSender.PublicKey);
+            var origialContent = ev.Content;
 
             // Act
-            var origialContent = ev.Content;
-            Output.WriteLine("Content: " + ev.Content);
-            Output.WriteLine("SenderPub: " + randomSender.PublicKey);
-            Output.WriteLine("ReceiverPub: " + receiverKp.PublicKey);
-            Output.WriteLine("ReceiverPriv: " + receiverKp.PrivateKey);
             await ev.EncryptNip04Event(WithKey(randomSender.PrivateKey));
 
             // Assert
@@ -103,9 +100,12 @@ namespace NostrLib.Tests
                 x => IsBase64String(x?.Split("?iv=")[1] ?? string.Empty).ShouldBeTrue()     // iv should be base64
             );
 
+            Output.WriteLine("Content: " + origialContent);
+            Output.WriteLine("SenderPub: " + randomSender.PublicKey);
+            Output.WriteLine("ReceiverPub: " + receiverKp.PublicKey);
+            Output.WriteLine("ReceiverPriv: " + receiverKp.PrivateKey);
             Output.WriteLine("EncContent: " + ev.Content);
-
-            Output.WriteLine($"[InlineData(\"{origialContent}\",\"{randomSender.PublicKey}\",\"{receiverKp.PublicKey}\",\"{receiverKp.PrivateKey}\",\"{ev.Content}\")]");
+            Output.WriteLine($"\n[InlineData(\"{origialContent}\",\"{randomSender.PublicKey}\",\"{receiverKp.PublicKey}\",\"{receiverKp.PrivateKey}\",\"{ev.Content}\")]");
         }
 
         private static (NostrEvent<string> ev, NostrKeyPair receiverKp) GivenSampleEvent(string senderPubKey, string? content = null)
