@@ -72,7 +72,7 @@ namespace NostrKey
                     powDifficulty *= (settings.VanityPubPrefix.Length * 4);
                 }
 
-                AnsiConsole.WriteLine($"Started mining process for a vanify prefix of: '{settings.VanityPrefix}' and 'npub1{settings.VanityPubPrefix}' (estimated pow: {powDifficulty})");
+                AnsiConsole.WriteLine($"Started mining process for a vanify prefix of: '{settings.VanityPrefix}' and npub vanity prefix '{settings.VanityPubPrefix}' (estimated pow: {powDifficulty})");
             }
             else
             {
@@ -92,6 +92,10 @@ namespace NostrKey
 
             if (powDifficulty > 0)
             {
+                var found = false;
+
+                using var cts = new CancellationTokenSource();
+
                 var iterationCount = 0L;
                 var workerThread = (long bestDiff, string prefix, string pubPrefix) =>
                 {
@@ -145,6 +149,7 @@ namespace NostrKey
                             var l = iterString.Length;
                             var f = iterString[0];
 
+                            found = true;
                             PrintKeys(privateKey, publicKey, iterations, f, l, now);
 
                             if (Interlocked.Read(ref bestDiff) > 0)
@@ -155,18 +160,44 @@ namespace NostrKey
                     }
                 };
 
-                var threadCount = Math.Max(1, Math.Min(numCores, Math.Min(8, 8)));
-                var threads = new Task[threadCount - 1];
-                for (var i = 0; i < threads.Length; i++)
+                try
                 {
-                    threads[i] = Task.Run(() => workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix));
-                }
+                    var parallelOptions = new ParallelOptions
+                    {
+                        CancellationToken = cts.Token,
+                        MaxDegreeOfParallelism = Environment.ProcessorCount
+                    };
 
-                workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix);
-                for (var i = 0; i < threads.Length; i++)
-                {
-                    threads[i].Wait();
+                    AnsiConsole.WriteLine("Press any key to start. Press 'c' to cancel.");
+                    Console.ReadKey();
+                    AnsiConsole.WriteLine("Press any key to stop search...");
+                    Task.Factory.StartNew(() =>
+                    {
+                        if (Console.ReadKey().KeyChar == 'c')
+                            cts.Cancel();
+
+                        AnsiConsole.WriteLine("press any key to exit");
+                    });
+
+                    Parallel.For(0, int.MaxValue, parallelOptions, (i, state) =>
+                    {
+                        if (found)
+                        {
+                            state.Break();
+                        }
+
+                        workerThread(powDifficulty, settings.VanityPrefix, settings.VanityPubPrefix);
+                    });
                 }
+                catch (OperationCanceledException)
+                {
+                    AnsiConsole.WriteLine("Search cancelled.");
+                }
+                finally
+                {
+                    cts.Dispose();
+                }
+                Console.ReadKey();
             }
             else
             {
@@ -226,7 +257,6 @@ namespace NostrKey
 
         private static (ECPrivKey privateKey, ECXOnlyPubKey publicKey) GenerateKeyPair(Scalar rng)
         {
-
             if (Context.Instance.TryCreateECPrivKey(rng, out var privKey))
             {
                 var pubKey = privKey.CreateXOnlyPubKey();
