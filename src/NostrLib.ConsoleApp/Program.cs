@@ -12,12 +12,15 @@ using System.Collections.Concurrent;
 
 var overallCts = new CancellationTokenSource();
 var servers = new ConcurrentDictionary<string, CancellationTokenSource>();
+
+// each relay listener, aka NostrRelay, has it's own cts linked to the overall
 servers.TryAdd("wss://relay.damus.io", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
 servers.TryAdd("wss://node01.nostress.cc", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
 servers.TryAdd("wss://nostr.ethtozero.fr", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
 servers.TryAdd("wss://nostr.bongbong.com", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
+
 using var resultProcessor = new WebSocketReceiveResultProcessor();
-Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, releaseBuffer) =>
+var dispatch = (string url, ReadOnlySequence<byte> data, IDisposable releaseBuffer) =>
 {
     try
     {
@@ -32,14 +35,14 @@ Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, relea
                 var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2]);
                 if (ev != null && ev.Verify())
                 {
-                    AnsiConsole.WriteLine($"From {url}: " + ev.Content + Environment.NewLine);
+                    AnsiConsole.Write(new Markup($"[bold green]From {url}:[/] {ev.Content.EscapeMarkup()}\n"));
                 }
                 break;
             case "NOTICE":
                 var msg = json[1].GetString();
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    AnsiConsole.WriteLine($"Notice From {url}: " + msg + Environment.NewLine);
+                    AnsiConsole.Write(new Markup($"[yellow]Notice From {url}:[/] {msg.EscapeMarkup()}\n"));
                 }
                 break;
             case "EOSE":
@@ -56,9 +59,12 @@ Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, relea
                 break;
         }
     }
+    catch (TaskCanceledException)
+    {
+        // do nothing
+    }
     catch (Exception)
     {
-
         throw;
     }
     finally
@@ -68,17 +74,18 @@ Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, relea
 };
 
 // Start a new task to monitor for cancellation
-Task.Run(() => MonitorKeyboard(overallCts.Token));
+_ = Task.Run(() => MonitorKeyboard(overallCts.Token));
 
 // Connect to each server
-
 foreach (var server in servers)
 {
-    Task.Run(async () => await ConnectToServer(server.Key, resultProcessor, dispatch, server.Value.Token));
+    _ = Task.Run(async () => await ConnectToServer(server.Key, resultProcessor, dispatch, server.Value.Token));
 }
 
-// Keep the console open
-Console.ReadLine();
+while (!overallCts.IsCancellationRequested)
+{
+    await Task.Yield();
+}
 
 static ArraySegment<byte> RentBuffer(int receiveChunkSize = 10000)
 {
@@ -114,15 +121,15 @@ async Task ConnectToServer(string url, WebSocketReceiveResultProcessor resultPro
             await client.ConnectAsync(new Uri(url), token);
             AnsiConsole.WriteLine($"{url} connected!");
 
-            // Start a new task to receive messages from the server
+            // Start a new cancellable task to receive messages from the server
             _ = Task.Run(async () => await ReceiveMessages(url, client, resultProcessor, dispatch, token), token);
 
-            // Send a sub message to the server
+            // Send a sub message to the server to get all of @jack's messages
             var filter = new NostrSubscriptionFilter();
             filter.Kinds.Add((int)NostrKind.TextNote);
-            filter.Authors = new Collection<string>() { "1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f" };
+            filter.Authors = new Collection<string>() { "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" };
             var filters = new List<NostrSubscriptionFilter>() { filter };
-            var message = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object[] { "REQ", "1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f" }.Concat(filters))));
+            var message = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object[] { "REQ", "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" }.Concat(filters))));
             await client.SendAsync(message, WebSocketMessageType.Text, true, token);
 
             // wait until disconnected
@@ -135,7 +142,7 @@ async Task ConnectToServer(string url, WebSocketReceiveResultProcessor resultPro
         }
         catch (TaskCanceledException)
         {
-            continue;
+            break;
         }
         catch (Exception ex)
         {
@@ -165,6 +172,10 @@ async Task ReceiveMessages(string url, ClientWebSocket client, WebSocketReceiveR
                 // Send the frame, and delegate consumer should call to release the buffer once done.
                 dispatch(url, frame, Disposable.Create(() => ReturnRentedBuffer(frame)));
             }
+        }
+        catch (TaskCanceledException)
+        {
+            break;
         }
         catch (Exception ex)
         {
