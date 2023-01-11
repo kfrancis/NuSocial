@@ -8,8 +8,14 @@ using Nito.Disposables;
 using NostrLib.Models;
 using Spectre.Console;
 using NostrLib;
+using System.Collections.Concurrent;
 
-var cts = new CancellationTokenSource();
+var overallCts = new CancellationTokenSource();
+var servers = new ConcurrentDictionary<string, CancellationTokenSource>();
+servers.TryAdd("wss://relay.damus.io", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
+servers.TryAdd("wss://node01.nostress.cc", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
+servers.TryAdd("wss://nostr.ethtozero.fr", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
+servers.TryAdd("wss://nostr.bongbong.com", CancellationTokenSource.CreateLinkedTokenSource(overallCts.Token));
 using var resultProcessor = new WebSocketReceiveResultProcessor();
 Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, releaseBuffer) =>
 {
@@ -21,11 +27,33 @@ Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, relea
         var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
         switch (messageType)
         {
-        }
-        var ev = JsonSerializer.Deserialize<NostrEvent<string>>(strData);
-        if (ev != null && ev.Verify())
-        {
-            AnsiConsole.WriteLine($"From {url}: " + ev.Content + Environment.NewLine);
+            case "EVENT":
+                var subId = json[1].GetString() ?? string.Empty;
+                var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2]);
+                if (ev != null && ev.Verify())
+                {
+                    AnsiConsole.WriteLine($"From {url}: " + ev.Content + Environment.NewLine);
+                }
+                break;
+            case "NOTICE":
+                var msg = json[1].GetString();
+                if (!string.IsNullOrEmpty(msg))
+                {
+                    AnsiConsole.WriteLine($"Notice From {url}: " + msg + Environment.NewLine);
+                }
+                break;
+            case "EOSE":
+                AnsiConsole.WriteLine($"{messageType} from {url}, disconnecting ..\n");
+                if (servers.TryGetValue(url, out var cts))
+                {
+                    cts.Cancel(false);
+                }
+                break;
+            //case "OK":
+            //    break;
+            default:
+                AnsiConsole.WriteLine($"{messageType} from {url}\n");
+                break;
         }
     }
     catch (Exception)
@@ -40,13 +68,13 @@ Action<string, ReadOnlySequence<byte>, IDisposable> dispatch = (url, data, relea
 };
 
 // Start a new task to monitor for cancellation
-Task.Run(() => MonitorKeyboard(cts.Token));
+Task.Run(() => MonitorKeyboard(overallCts.Token));
 
 // Connect to each server
-var servers = new[] { "wss://relay.damus.io", "wss://node01.nostress.cc" };
+
 foreach (var server in servers)
 {
-    Task.Run(async () => await ConnectToServer(server, resultProcessor, dispatch, cts.Token));
+    Task.Run(async () => await ConnectToServer(server.Key, resultProcessor, dispatch, server.Value.Token));
 }
 
 // Keep the console open
@@ -100,15 +128,20 @@ async Task ConnectToServer(string url, WebSocketReceiveResultProcessor resultPro
             // wait until disconnected
             while (client.State == WebSocketState.Open && !token.IsCancellationRequested)
             {
-                await Task.Delay(1000, token);
+                await Task.Delay(500, token);
             }
 
             AnsiConsole.WriteLine($"{url} disconnected!");
+        }
+        catch (TaskCanceledException)
+        {
+            continue;
         }
         catch (Exception ex)
         {
             AnsiConsole.WriteLine("Error connecting to server: " + ex.Message);
         }
+
         await Task.Delay(5000, token);
     }
 }
@@ -149,7 +182,7 @@ void MonitorKeyboard(CancellationToken token)
     {
         if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
         {
-            cts.Cancel();
+            overallCts.Cancel();
             AnsiConsole.WriteLine("Cancellation requested by the user. Stopping all the connections...");
             break;
         }
