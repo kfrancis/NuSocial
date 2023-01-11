@@ -42,13 +42,13 @@ namespace NuSocial.Services
         {
             var relays = new List<RelayItem>()
             {
-                //new RelayItem("relay.damus.io"),
-                new RelayItem("nostr-relay.wlvs.space"),
-                //new RelayItem("nostr-fmt.wiz.biz"),
-                //new RelayItem("relay.nostr.bg"),
+                new RelayItem("relay.damus.io"),
+                //new RelayItem("nostr.easydns.ca"),
+                //new RelayItem("nostr.supremestack.xyz"),
+                //new RelayItem("nostr.ethtozero.fr"),
                 //new RelayItem("nostr-oxtr.dev"),
                 //new RelayItem("nostr-v0l.io"),
-                //new RelayItem("brb.io"),
+                new RelayItem("brb.io"),
             };
             return relays.ToArray();
         }
