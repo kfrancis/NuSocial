@@ -42,13 +42,12 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Nito.Disposables" Version="2.3.0" />
 		<PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="System.Text.Json" Version="7.0.1" />
-		<PackageReference Include="System.Threading.Channels" Version="7.0.0" />
-		<PackageReference Include="Websocket.Client" Version="4.4.43" />
 	</ItemGroup>
 
 	<ItemGroup>

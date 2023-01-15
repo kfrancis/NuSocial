@@ -1,21 +1,19 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
-using System.Reactive.Linq;
-using System.Security.Cryptography;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using NBitcoin.Protocol;
-using NostrLib.Converters;
+using Nito.Disposables;
 using NostrLib.Models;
-using Websocket.Client;
-using Websocket.Client.Models;
+using NostrLib.Socket;
 
 namespace NostrLib
 {
@@ -29,20 +27,20 @@ namespace NostrLib
     {
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
+        public List<int> SupportedNips { get; }
         public Uri? Url { get; set; }
-        public List<long> SupportedNips { get; }
     }
 
     public class NostrRelay : INostrRelay, IDisposable
     {
         private readonly NostrClient _client;
-        private readonly TimeSpan _reconnectTimeout = TimeSpan.FromSeconds(30);
+        private readonly object _lockObj = new();
+        private CancellationTokenSource _cts = new();
         private int _currentMessageId;
         private bool _isDisposed;
         private ConcurrentDictionary<string, IListener> _listeners = new();
-        private IDisposable _pingSubscription;
-        private WebsocketClient? _webSocket;
-        private CancellationTokenSource _webSocketTokenSource = new();
+        private WebSocketReceiveResultProcessor? _resultProcessor;
+        private ClientWebSocket? _webSocket;
 
         public NostrRelay(NostrClient client)
         {
@@ -63,72 +61,74 @@ namespace NostrLib
 
         public event EventHandler<RelayPostEventArgs>? RelayPost;
 
-        public List<long> SupportedNips { get; } = new();
-
-        private static readonly object GATE1 = new object();
-
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
-        public bool IsAlive => _webSocket?.IsRunning ?? false;
+        public bool IsAlive => _webSocket?.State == WebSocketState.Open;
         public string? Name { get; set; }
+        public List<int> SupportedNips { get; } = new();
         public Uri? Url { get; set; }
 
-        public async Task<bool> ConnectAsync(CancellationToken token = default)
+        public async Task<bool> ConnectAsync(WebSocketReceiveResultProcessor resultProcessor, CancellationToken token = default)
         {
-            if (_webSocket != null)
+            try
             {
-                await Close();
-            }
-
-            _webSocketTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-            // Perform NIP-11 check of supported features
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Accept", "application/nostr+json");
-
-                var response = await client.GetAsync(Url, _webSocketTokenSource.Token);
-                if (response.IsSuccessStatusCode)
+                if (_webSocket != null)
                 {
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    var rid = JsonSerializer.Deserialize<NostrRelayInfo>(responseBody);
-                    if (rid != null)
+                    await Close();
+                }
+
+                _resultProcessor = resultProcessor;
+
+                _cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+
+                _cts.Token.ThrowIfCancellationRequested();
+
+                // Perform NIP-11 check of supported features
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("Accept", "application/nostr+json");
+
+                    var response = await client.GetAsync(Url, _cts.Token);
+                    if (response.IsSuccessStatusCode)
                     {
-                        Debug.WriteLine($"{Url} SupportedNips: {(string.Join(", ", rid.SupportedNips))}");
-                        SupportedNips.AddRange(rid.SupportedNips);
+                        var responseBody = await response.Content.ReadAsStringAsync();
+                        var rid = JsonSerializer.Deserialize<NostrRelayInfo>(responseBody);
+                        if (rid != null)
+                        {
+                            Debug.WriteLine($"{Url} SupportedNips: {string.Join(", ", rid.SupportedNips)}");
+                            SupportedNips.AddRange(rid.SupportedNips);
+                        }
                     }
                 }
-            }
 
-            if (!SupportedNips.Any() || !SupportedNips.Contains(1))
-            {
-                Debug.WriteLine($"{Url} doesn't support enough NIPS to be useful. Stopping.");
-                // If the relay doesn't at least support NIP-01, then we're going to stop here.
-                return false;
-            }
-
-            _webSocket = new WebsocketClient(Url, () => new ClientWebSocket()
-            {
-                Options =
+                lock (_lockObj)
                 {
-                    KeepAliveInterval = TimeSpan.FromSeconds(5)
+                    if (!SupportedNips.Any() || !SupportedNips.Contains(1))
+                    {
+                        Debug.WriteLine($"{Url} doesn't support enough NIPS to be useful. Stopping.");
+                        // If the relay doesn't at least support NIP-01, then we're going to stop here.
+                        return false;
+                    }
                 }
-            })
+
+                _webSocket = new()
+                {
+                    Options =
+                    {
+                        KeepAliveInterval = TimeSpan.FromSeconds(15)
+                    }
+                };
+
+                await _webSocket.ConnectAsync(Url, _cts.Token);
+
+                RelayConnectionChanged?.Invoke(this, new(IsAlive));
+
+                return IsAlive;
+            }
+            catch (Exception)
             {
-                MessageEncoding = Encoding.UTF8,
-                IsReconnectionEnabled = true,
-                ReconnectTimeout = _reconnectTimeout,
-            };
-
-            _webSocket.MessageReceived.Where(msg => msg.MessageType == WebSocketMessageType.Text).Select(msg => Observable.FromAsync(async () => await WsReceived(msg))).Synchronize(GATE1).Concat().Subscribe();
-            _webSocket.ReconnectionHappened.Subscribe(WsConnected);
-            _webSocket.DisconnectionHappened.Subscribe(WsDisconnected);
-
-            await _webSocket.Start();
-
-            StartSendingPing(_webSocket);
-
-            return IsAlive;
+                throw;
+            }
         }
 
         public void Dispose()
@@ -146,45 +146,56 @@ namespace NostrLib
 
         public async Task<List<INostrEvent>> SubscribeAsync(string subscribeId, NostrSubscriptionFilter[] filters, CancellationToken cancellationToken = default)
         {
-            var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-            if (!IsAlive)
+            try
             {
-                await ConnectAsync(linked.Token);
-            }
+                _resultProcessor ??= _client.ResultProcessor;
 
-            var events = new ConcurrentBag<INostrEvent>();
-
-            void HandleMethod(INostrEvent? nEvent, bool eose)
-            {
-                if (nEvent != null)
+                if (!IsAlive)
                 {
-                    events.Add(nEvent);
-                    HandleEvent(subscribeId, nEvent);
-                }
-                else if (eose)
-                {
-                    // TODO: Hmm, this will only come through if NIP-15 is supported, otherwise we need another way to trigger.
-                    linked.Cancel();
-                }
-            }
-
-            if (!_listeners.ContainsKey(subscribeId) && _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
-            {
-                var payload = JsonSerializer.Serialize(new object[] { NostrConsts.REQ, subscribeId }.Concat(filters));
-                await SendMessageAsync(payload);
-
-                while (!linked.IsCancellationRequested)
-                {
-                    await Task.Yield();
+                    await ConnectAsync(_resultProcessor, cancellationToken);
                 }
 
-                linked.Dispose();
-                return events.ToList();
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+
+                // Start a new cancellable task to receive messages from the server
+                _ = Task.Run(async () => await ReceiveMessages(cts.Token), cts.Token);
+
+                var events = new ConcurrentBag<INostrEvent>();
+
+                void HandleMethod(INostrEvent? nEvent, bool eose)
+                {
+                    if (nEvent != null)
+                    {
+                        events.Add(nEvent);
+                        HandleEvent(subscribeId, nEvent);
+                    }
+                    else if (eose)
+                    {
+                        // TODO: Hmm, this will only come through if NIP-15 is supported, otherwise we need another way to trigger.
+                        cts.Cancel();
+                    }
+                }
+
+                if (!_listeners.ContainsKey(subscribeId) && _listeners.TryAdd(subscribeId, new RelayListener() { SubscribeId = subscribeId, HandleEvent = HandleMethod }))
+                {
+                    var payload = JsonSerializer.Serialize(new object[] { NostrConsts.REQ, subscribeId }.Concat(filters));
+                    await SendMessageAsync(payload);
+
+                    while (!cts.IsCancellationRequested)
+                    {
+                        await Task.Yield();
+                    }
+
+                    return events.ToList();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Couldn't add listener for some reason");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new InvalidOperationException("Couldn't add listener for some reason");
+                throw;
             }
         }
 
@@ -194,14 +205,27 @@ namespace NostrLib
             {
                 if (disposing)
                 {
-                    _pingSubscription?.Dispose();
                     _webSocket?.Dispose();
-                    _webSocketTokenSource?.Dispose();
+                    _cts?.Dispose();
                 }
 
                 _webSocket = null;
 
                 _isDisposed = true;
+            }
+        }
+
+        private static ArraySegment<byte> RentBuffer(int receiveChunkSize = 10000)
+        {
+            return ArrayPool<byte>.Shared.Rent(receiveChunkSize); // Rent a buffer.
+        }
+
+        private static void ReturnRentedBuffer(ReadOnlySequence<byte> data)
+        {
+            foreach (var chunk in data)
+            {
+                if (MemoryMarshal.TryGetArray(chunk, out var segment) && segment.Array != null)
+                    ArrayPool<byte>.Shared.Return(segment.Array);
             }
         }
 
@@ -304,77 +328,119 @@ namespace NostrLib
             }
         }
 
+        private async Task ReceiveMessages(CancellationToken token)
+        {
+            while (_webSocket?.State == WebSocketState.Open && !token.IsCancellationRequested)
+            {
+                try
+                {
+                    var buffer = RentBuffer();
+
+                    // Wait for a message from the server
+                    var result = await _webSocket.ReceiveAsync(buffer, token);
+
+                    _resultProcessor ??= _client.ResultProcessor;
+                    if (_resultProcessor.Receive(result, buffer, out var frame))
+                    {
+                        if (frame.IsEmpty)
+                            break; // End of message with no data means socket closed - break so we can reconnect.
+
+                        // Send the frame, and delegate consumer should call to release the buffer once done.
+                        WsReceived(frame, Disposable.Create(() => ReturnRentedBuffer(frame)));
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToStringDemystified());
+
+                    // if an exception occurs, we close the websocket
+                    await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Error receiving message", CancellationToken.None);
+                }
+            }
+        }
+
         private async Task SendMessageAsync(string? message)
         {
-            if (IsAlive && !string.IsNullOrEmpty(message))
+            try
             {
-                System.Threading.Interlocked.Increment(ref _currentMessageId);
-                Debug.WriteLine($"Sending {_currentMessageId}: {message}");
-                await Task.Run(() => _webSocket!.Send(message));
+                _cts.Token.ThrowIfCancellationRequested();
+                if (IsAlive && !string.IsNullOrEmpty(message))
+                {
+                    System.Threading.Interlocked.Increment(ref _currentMessageId);
+                    Debug.WriteLine($"Sending {_currentMessageId}: {message}");
+                    var messageBytes = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(message));
+                    await _webSocket!.SendAsync(messageBytes, WebSocketMessageType.Text, true, _cts.Token);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
-        private void StartSendingPing(IWebsocketClient client)
+        private void WsReceived(ReadOnlySequence<byte> data, IDisposable releaseBuffer)
         {
-            _pingSubscription = Observable
-                .Interval(TimeSpan.FromSeconds(31000))
-                .Subscribe(_ => client.Send("ping"));
-        }
-
-        private void WsConnected(ReconnectionInfo obj)
-        {
-            RelayConnectionChanged?.Invoke(this, new(true));
-        }
-
-        private void WsDisconnected(DisconnectionInfo obj)
-        {
-            RelayConnectionChanged?.Invoke(this, new(false));
-        }
-
-        private Task WsReceived(ResponseMessage obj)
-        {
-            using var doc = JsonDocument.Parse(obj.Text);
-            var json = doc.RootElement;
-            NostrClient.Log(this, json);
-            var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
-            switch (messageType)
+            try
             {
-                case NostrConsts.EVENT:
-                    var subId = json[1].GetString() ?? string.Empty;
-                    var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2].ToString());
-                    if (ev?.Verify() is true)
-                    {
-                        HandleEvent(subId, ev!);
-                    }
-                    break;
+                _cts.Token.ThrowIfCancellationRequested();
+                var strData = Encoding.UTF8.GetString(data.ToArray());
+                using var doc = JsonDocument.Parse(strData);
+                var json = doc.RootElement;
+                NostrClient.Log(this, json);
+                var messageType = json[0].GetString()?.ToUpperInvariant() ?? string.Empty;
+                switch (messageType)
+                {
+                    case NostrConsts.EVENT:
+                        var subId = json[1].GetString() ?? string.Empty;
+                        var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2].ToString());
+                        if (ev?.Verify() is true)
+                        {
+                            HandleEvent(subId, ev!);
+                        }
+                        break;
 
-                case NostrConsts.NOTICE:
-                    var msg = json[1].GetString();
-                    if (!string.IsNullOrEmpty(msg))
-                    {
-                        RelayNotice?.Invoke(this, new RelayNoticeEventArgs(msg));
-                    }
-                    break;
+                    case NostrConsts.NOTICE:
+                        var msg = json[1].GetString();
+                        if (!string.IsNullOrEmpty(msg))
+                        {
+                            RelayNotice?.Invoke(this, new RelayNoticeEventArgs(msg));
+                        }
+                        break;
 
-                case NostrConsts.EOSE:
-                    // NIP-15 :: End of Stored Events Notice
-                    // https://github.com/nostr-protocol/nips/blob/master/15.md
-                    // used to notify clients all stored events have been sent
-                    DeleteListener(json[1].GetString() ?? string.Empty);
-                    break;
+                    case NostrConsts.EOSE:
+                        // NIP-15 :: End of Stored Events Notice
+                        // https://github.com/nostr-protocol/nips/blob/master/15.md
+                        // used to notify clients all stored events have been sent
+                        DeleteListener(json[1].GetString() ?? string.Empty);
+                        break;
 
-                case NostrConsts.OK:
-                    // NIP-20 :: Command Results
-                    // https://github.com/nostr-protocol/nips/blob/master/20.md
-                    RelayPost?.Invoke(this, new(json[1].GetString(), json[2].GetBoolean(), json[3].GetString()));
-                    break;
+                    case NostrConsts.OK:
+                        // NIP-20 :: Command Results
+                        // https://github.com/nostr-protocol/nips/blob/master/20.md
+                        RelayPost?.Invoke(this, new(json[1].GetString(), json[2].GetBoolean(), json[3].GetString()));
+                        break;
 
-                default:
-                    // future
-                    break;
+                    default:
+                        // future
+                        break;
+                }
             }
-
-            return Task.CompletedTask;
+            catch (TaskCanceledException)
+            {
+                // do nothing
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                releaseBuffer.Dispose();
+            }
         }
     }
 

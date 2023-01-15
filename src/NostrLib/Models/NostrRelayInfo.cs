@@ -74,7 +74,7 @@ namespace NostrLib.Models
         /// </summary>
         [JsonPropertyName("supported_nips")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<long> SupportedNips { get; set; }
+        public List<int> SupportedNips { get; set; }
 
         /// <summary>
         /// The relay MAY choose to publish its software version as a string attribute. The string

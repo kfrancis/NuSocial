@@ -48,7 +48,7 @@ namespace NuSocial.Services
                 //new RelayItem("nostr.ethtozero.fr"),
                 //new RelayItem("nostr-oxtr.dev"),
                 //new RelayItem("nostr-v0l.io"),
-                new RelayItem("brb.io"),
+                //new RelayItem("brb.io"),
             };
             return relays.ToArray();
         }

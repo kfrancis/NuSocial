@@ -15,7 +15,7 @@ namespace NostrLib
 
         event EventHandler<NostrPostReceivedEventArgs> PostReceived;
 
-        Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default);
+        void Connect(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default);
 
         Task DisconnectAsync(CancellationToken cancellationToken = default);
 

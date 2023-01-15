@@ -48,7 +48,8 @@ namespace NostrLib.Tests
                 x => x.PublicKey.ShouldNotBeNullOrEmpty(),
                 x => x.Content.ShouldNotBeNullOrEmpty(),
                 x => x.Kind.ShouldBe(NostrKind.EncryptedDM),
-                x => x.PublicKey.ShouldBe(randomSender.PublicKey)
+                x => x.PublicKey.ShouldBe(randomSender.PublicKey),
+                x => x.PublicKey.ShouldNotBe(randomSender.PrivateKey)
             );
         }
 

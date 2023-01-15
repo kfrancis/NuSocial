@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-using NBitcoin;
 using NBitcoin.Secp256k1;
 using NostrLib.Models;
 using Shouldly;
@@ -23,7 +21,17 @@ namespace NostrLib.Tests
         }
 
         [Fact]
-        public async Task Client_CanConnect()
+        public void CanHandlePrivatePublicKeyFormats()
+        {
+            var privKeyHex = "7f4c11a9742721d66e40e321ca50b682c27f7422190c14a187525e69e604836a";
+            Assert.True(Context.Instance.TryCreateECPrivKey(privKeyHex.DecodHexData(), out var privKey));
+
+            var pubKey = privKey.CreateXOnlyPubKey();
+            Assert.Equal("7cef86754ddf07395c289c30fe31219de938c6d707d6b478a8682fc75795e8b9", pubKey.ToBytes().ToHex());
+        }
+
+        [Fact]
+        public void Client_CanConnect()
         {
             // Arrange
             using var client = new NostrClient(TestPubKey, relays: _relays);
@@ -32,7 +40,7 @@ namespace NostrLib.Tests
             var cts = new CancellationTokenSource();
 
             // Act
-            await client.ConnectAsync(cb, cancellationToken: cts.Token);
+            client.Connect(cb, cancellationToken: cts.Token);
 
             // Assert
             didCallbackRun.ShouldBeTrue();
@@ -45,7 +53,7 @@ namespace NostrLib.Tests
             // Arrange
             using var client = new NostrClient(TestPubKey, false, _relays);
             var cts = new CancellationTokenSource();
-            await client.ConnectAsync(cancellationToken: cts.Token);
+            client.Connect(cancellationToken: cts.Token);
 
             // Act
             await client.DisconnectAsync(cancellationToken: cts.Token);
@@ -55,42 +63,10 @@ namespace NostrLib.Tests
         }
 
         [Fact]
-        public async Task Client_GetPostsNeedsKey()
-        {
-            // Arrange
-            using var client = new NostrClient("", false, _relays);
-            var cts = new CancellationTokenSource();
-            await client.ConnectAsync(cancellationToken: cts.Token);
-
-            // Act
-            try
-            {
-                var posts = await client.GetPostsAsync();
-                Assert.Fail("Should have required a key.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                ex.ShouldSatisfyAllConditions(
-                    x => x.ShouldNotBeNull(),
-                    x => x.Message.ShouldNotBeNullOrWhiteSpace());
-            }
-        }
-
-        [Fact]
-        public void CanHandlePrivatePublicKeyFormats()
-        {
-            var privKeyHex = "7f4c11a9742721d66e40e321ca50b682c27f7422190c14a187525e69e604836a";
-            Assert.True(Context.Instance.TryCreateECPrivKey(privKeyHex.DecodHexData(), out var privKey));
-
-            var pubKey = privKey.CreateXOnlyPubKey();
-            Assert.Equal("7cef86754ddf07395c289c30fe31219de938c6d707d6b478a8682fc75795e8b9", pubKey.ToBytes().ToHex());
-        }
-
-        [Fact]
         public async Task Client_CanPost()
         {
             // Arrange
-            using var client = await Connect();
+            using var client = Connect();
             var message = Guid.NewGuid().ToString();
 
             // Act
@@ -109,32 +85,10 @@ namespace NostrLib.Tests
         }
 
         [Fact]
-        public async Task Client_GetProfile()
-        {
-            // Arrange
-            using var client = await Connect(TestPubKey);
-
-            // Act
-            var profile = await client.GetProfileAsync("1ad34e8aa265df5bd6106b4535a6a82528141efd800beb35b6413d7a8298741f");
-
-            // Assert
-            profile.ShouldSatisfyAllConditions(
-                p => p.Name.ShouldNotBeNullOrEmpty(),
-                p => p.Name.ShouldBe("testNuSocialName"),
-                p => p.Following.ShouldNotBeNull(),
-                p => p.Following.Any().ShouldBeTrue(),
-                p => p.Following.Count.ShouldBe(1),
-                p => p.Followers.ShouldNotBeNull(),
-                p => p.Followers.Any().ShouldBeFalse(),
-                p => p.Followers.Count.ShouldBe(0)
-            );
-        }
-
-        [Fact]
         public async Task Client_GetGlobalPosts()
         {
             // Arrange
-            using var client = await Connect(TestPubKey);
+            using var client = Connect(TestPubKey);
             var postFetchCount = 10;
 
             List<NostrPost> posts = new();
@@ -160,10 +114,32 @@ namespace NostrLib.Tests
         }
 
         [Fact]
+        public async Task Client_GetPostsNeedsKey()
+        {
+            // Arrange
+            using var client = new NostrClient("", false, _relays);
+            var cts = new CancellationTokenSource();
+            client.Connect(cancellationToken: cts.Token);
+
+            // Act
+            try
+            {
+                var posts = await client.GetPostsAsync();
+                Assert.Fail("Should have required a key.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ex.ShouldSatisfyAllConditions(
+                    x => x.ShouldNotBeNull(),
+                    x => x.Message.ShouldNotBeNullOrWhiteSpace());
+            }
+        }
+
+        [Fact]
         public async Task Client_GetPostsWithKey()
         {
             // Arrange
-            using var client = await Connect(TestPubKey);
+            using var client = Connect(TestPubKey);
 
             // Act
             var posts = await client.GetPostsAsync();
@@ -174,11 +150,36 @@ namespace NostrLib.Tests
                 p => p.Any().ShouldBeTrue(),
                 p => p.Count().ShouldBeGreaterThanOrEqualTo(1)
             );
+
+            Output.WriteLine($"Retreived {posts.Count()} posts");
+            posts.ToList().ForEach(p => Output.WriteLine($"{p.Content}\n"));
         }
 
-        private async Task<NostrClient> Connect(string key = "")
+        [Fact]
+        public async Task Client_GetProfile()
         {
-            bool isPrivateKey = false;
+            // Arrange
+            using var client = Connect(TestPubKey);
+
+            // Act
+            var profile = await client.GetProfileAsync(TestPubKey);
+
+            // Assert
+            profile.ShouldSatisfyAllConditions(
+                p => p.Name.ShouldNotBeNullOrEmpty(),
+                p => p.Name.ShouldBe("testNuSocialName"),
+                p => p.Following.ShouldNotBeNull(),
+                p => p.Following.Any().ShouldBeTrue(),
+                p => p.Following.Count.ShouldBe(1),
+                p => p.Followers.ShouldNotBeNull(),
+                p => p.Followers.Any().ShouldBeFalse(),
+                p => p.Followers.Count.ShouldBe(0)
+            );
+        }
+
+        private NostrClient Connect(string key = "")
+        {
+            var isPrivateKey = false;
             if (string.IsNullOrEmpty(key))
             {
                 var keys = NostrClient.GenerateKey();
@@ -190,7 +191,7 @@ namespace NostrLib.Tests
             }
             var client = new NostrClient(key, isPrivateKey, _relays);
             var cts = new CancellationTokenSource();
-            await client.ConnectAsync(cancellationToken: cts.Token);
+            client.Connect(cancellationToken: cts.Token);
             return client;
         }
     }

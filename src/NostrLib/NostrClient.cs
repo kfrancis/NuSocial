@@ -1,10 +1,11 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -12,8 +13,8 @@ using System.Threading.Tasks;
 using NBitcoin;
 using NBitcoin.DataEncoders;
 using NBitcoin.Secp256k1;
-using NostrLib.Converters;
 using NostrLib.Models;
+using NostrLib.Socket;
 
 namespace NostrLib
 {
@@ -21,6 +22,7 @@ namespace NostrLib
     {
         private readonly ConcurrentDictionary<Uri, NostrRelay> _relayInstances = new();
         private readonly ObservableCollection<RelayItem> _relayList = new();
+        private readonly CancellationTokenSource _cts = new();
         private bool _isDisposed;
 
         /// <summary>
@@ -42,11 +44,6 @@ namespace NostrLib
         /// <exception cref="ArgumentNullException"></exception>
         public NostrClient(string key, bool isPrivateKey = false, RelayItem[]? relays = null)
         {
-            if (relays is null)
-            {
-                throw new ArgumentNullException(nameof(relays));
-            }
-
             if (isPrivateKey)
             {
                 var hex = new HexEncoder();
@@ -60,9 +57,12 @@ namespace NostrLib
 
             ReconnectDelay = TimeSpan.FromSeconds(2);
 
-            foreach (var relay in relays)
+            if (relays != null)
             {
-                _relayList.Add(relay);
+                foreach (var relay in relays)
+                {
+                    _relayList.Add(relay);
+                }
             }
         }
 
@@ -74,20 +74,7 @@ namespace NostrLib
 
         public event EventHandler<NostrPostReceivedEventArgs> PostReceived;
 
-        // Wrap event invocations inside a protected virtual method
-        // to allow derived classes to override the event invocation behavior
-        protected virtual void OnRaisePostReceived(NostrPostReceivedEventArgs e)
-        {
-            // Make a temporary copy of the event to avoid possibility of
-            // a race condition if the last subscriber unsubscribes
-            // immediately after the null check and before the event is raised.
-            var raiseEvent = PostReceived;
-
-            // Event will be null if there are no subscribers
-            raiseEvent?.Invoke(this, e);
-        }
-
-        private ECPrivKey? PrivateKey { get; set; }
+        public bool IsConnected { get; set; }
 
         public string? PublicKey { get; set; }
 
@@ -95,66 +82,95 @@ namespace NostrLib
         /// The time to wait after a connection drops to try reconnecting.
         /// </summary>
         public TimeSpan ReconnectDelay { get; set; }
-        public bool IsConnected { get; set; }
 
-        public async Task ConnectAsync(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default)
+        private ECPrivKey? PrivateKey { get; set; }
+
+        internal WebSocketReceiveResultProcessor ResultProcessor { get; } = new();
+
+        public static NostrKeyPair GenerateKey()
+        {
+            ECPrivKey? privKey = null;
+
+            try
+            {
+                using var randomNumberGenerator = RandomNumberGenerator.Create();
+                var randomBytes = new byte[32];
+                randomNumberGenerator.GetBytes(randomBytes);
+                if (Context.Instance.TryCreateECPrivKey(randomBytes.AsSpan(), out privKey))
+                {
+                    var pubKey = privKey.CreateXOnlyPubKey();
+                    Span<byte> privKeyc = stackalloc byte[65];
+                    privKey.WriteToSpan(privKeyc);
+                    return new NostrKeyPair(pubKey.ToBytes().ToHex(), privKeyc.ToHex()[..64]);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            finally
+            {
+                privKey?.Dispose();
+            }
+        }
+
+        public void Connect(Action<NostrClient>? cb = null, CancellationToken cancellationToken = default)
         {
             if (_relayList.Count < 1)
             {
                 throw new InvalidOperationException("Please add any relay and try again.");
             }
-            for (var i = 0; i < _relayList.Count; i++)
+
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+            try
             {
-                var item = _relayList[i];
-                using var relay = new NostrRelay(this)
+                cts.Token.ThrowIfCancellationRequested();
+                foreach (var item in _relayList)
                 {
-                    Url = item.Uri,
-                    Name = item.Name
-                };
-                if (!_relayInstances.ContainsKey(item.Uri))
-                {
-                    relay.RelayPost += Relay_RelayPost;
-                    relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
-                    relay.RelayNotice += Relay_RelayNotice;
-                    relay.PostReceived += Relay_PostReceived;
-                    if (await relay.ConnectAsync(cancellationToken))
+                    using var relay = new NostrRelay(this)
                     {
+                        Url = item.Uri,
+                        Name = item.Name
+                    };
+                    if (!_relayInstances.ContainsKey(item.Uri))
+                    {
+                        relay.RelayPost += Relay_RelayPost;
+                        relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
+                        relay.RelayNotice += Relay_RelayNotice;
+                        relay.PostReceived += Relay_PostReceived;
+                        _ = Task.Run(async () => await relay.ConnectAsync(ResultProcessor, cts.Token));
                         _relayInstances.TryAdd(relay.Url, relay);
                         IsConnected = true;
                         cb?.Invoke(this);
                     }
                     else
                     {
-                        // something went wrong
-                    }
-                }
-                else
-                {
-                    // Already exists
-                    if (_relayInstances.TryGetValue(item.Uri, out var existingRelay))
-                    {
-                        // re-init
-                        relay.RelayPost -= Relay_RelayPost;
-                        relay.RelayPost += Relay_RelayPost;
-                        relay.RelayConnectionChanged -= Relay_RelayConnectionChanged;
-                        relay.RelayConnectionChanged += Relay_RelayConnectionChanged;
-                        relay.RelayNotice -= Relay_RelayNotice;
-                        relay.RelayNotice += Relay_RelayNotice;
-                        relay.PostReceived -= Relay_PostReceived;
-                        relay.PostReceived += Relay_PostReceived;
-                        if (await existingRelay.ConnectAsync(cancellationToken))
+                        // Already exists
+                        if (_relayInstances.TryGetValue(item.Uri, out var existingRelay))
                         {
+                            // re-init
+                            existingRelay.RelayPost -= Relay_RelayPost;
+                            existingRelay.RelayPost += Relay_RelayPost;
+                            existingRelay.RelayConnectionChanged -= Relay_RelayConnectionChanged;
+                            existingRelay.RelayConnectionChanged += Relay_RelayConnectionChanged;
+                            existingRelay.RelayNotice -= Relay_RelayNotice;
+                            existingRelay.RelayNotice += Relay_RelayNotice;
+                            existingRelay.PostReceived -= Relay_PostReceived;
+                            existingRelay.PostReceived += Relay_PostReceived;
+                            if (!existingRelay.IsAlive)
+                            {
+                                _ = Task.Run(async () => await existingRelay.ConnectAsync(ResultProcessor, cts.Token));
+                            }
                             IsConnected = true;
                             cb?.Invoke(this);
                         }
                     }
                 }
             }
-        }
-
-        private void Relay_PostReceived(object sender, NostrPostReceivedEventArgs e)
-        {
-            OnRaisePostReceived(e);
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public Task DisconnectAsync(CancellationToken cancellationToken = default)
@@ -334,185 +350,6 @@ namespace NostrLib
             return profileInfo;
         }
 
-        public async Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default)
-        {
-            if (relayItems?.Length > 0)
-            {
-                await DisconnectAsync(cancellationToken);
-
-                _relayList.Clear();
-                for (var i = 0; i < relayItems.Length; i++)
-                {
-                    _relayList.Add(relayItems[i]);
-                }
-
-                if (shouldConnect)
-                    await ConnectAsync(cancellationToken: cancellationToken);
-            }
-        }
-
-        public void UpdateKey(string key, bool isPrivateKey = false)
-        {
-            if (isPrivateKey)
-            {
-                var hex = new HexEncoder();
-                PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(key));
-                PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
-            }
-            else
-            {
-                PublicKey = key;
-            }
-        }
-
-        [Conditional("DEBUG")]
-        internal static void Log(NostrRelay sender, JsonElement json)
-        {
-            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), $"From {sender.Url}: {json}");
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_isDisposed)
-            {
-                if (disposing)
-                {
-                    if (_relayInstances?.Count > 0)
-                    {
-                        foreach (var relay in _relayInstances.Values)
-                        {
-                            if (relay != null)
-                            {
-                                relay.RelayPost -= Relay_RelayPost;
-                                relay.RelayConnectionChanged -= Relay_RelayConnectionChanged;
-                                relay.RelayNotice -= Relay_RelayNotice;
-                            }
-                            relay?.Dispose();
-                        }
-                    }
-                    PrivateKey?.Dispose();
-                    PublicKey = null;
-                }
-
-                _isDisposed = true;
-            }
-        }
-
-        private static NostrPost EventToPost(INostrEvent evt) => new(evt);
-
-        private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
-        {
-            if (!IsConnected && _relayList.Count > 0)
-            {
-                await DisconnectAsync(cancellationToken);
-                await ConnectAsync(cancellationToken: cancellationToken);
-            }
-        }
-
-        private void StartStreamEvents(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
-        {
-            if (!string.IsNullOrEmpty(PublicKey))
-            {
-                _ = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-            }
-        }
-
-        private async Task<ConcurrentDictionary<string, INostrEvent>> GetEventsAsync(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
-        {
-            var events = new ConcurrentDictionary<string, INostrEvent>();
-
-            if (!string.IsNullOrEmpty(PublicKey))
-            {
-                var subEvents = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
-                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
-                //var results = await Task.WhenAll(subEvents);
-
-                foreach (var relayEvent in results.SelectMany(relayEvents => relayEvents))
-                {
-                    events.TryAdd(relayEvent.Id, relayEvent);
-                }
-            }
-
-            return events;
-        }
-
-        private static Scalar GenerateScalar()
-        {
-            var scalar = Scalar.Zero;
-            Span<byte> output = stackalloc byte[32];
-            while (true)
-            {
-                RandomUtils.GetBytes(output);
-                scalar = new Scalar(output, out var overflow);
-                if (overflow != 0 || scalar.IsZero)
-                {
-                    continue;
-                }
-                break;
-            }
-            return scalar;
-        }
-
-        public static NostrKeyPair GenerateKey()
-        {
-            var key = GenerateScalar();
-
-            ECPrivKey? privKey = null;
-
-            try
-            {
-                if (Context.Instance.TryCreateECPrivKey(key, out privKey))
-                {
-                    var pubKey = privKey.CreateXOnlyPubKey();
-                    Span<byte> privKeyc = stackalloc byte[65];
-                    privKey.WriteToSpan(privKeyc);
-                    return new NostrKeyPair(pubKey.ToBytes().ToHex(), privKeyc.ToHex()[..64]);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
-            finally
-            {
-                privKey?.Dispose();
-            }
-        }
-
-        private void Relay_RelayConnectionChanged(object sender, RelayConnectionChangedEventArgs args)
-        {
-            if (sender is NostrRelay relay)
-            {
-                Debug.WriteLine($"Connection for '{relay.Url}' changed: {(args.IsConnected ? "connected" : "disconnected")}");
-            }
-        }
-
-        private void Relay_RelayNotice(object sender, RelayNoticeEventArgs args)
-        {
-            if (sender is NostrRelay relay)
-            {
-                Debug.WriteLineIf(!string.IsNullOrEmpty(args.Message), $"RelayNotice from '{relay.Url}': {args.Message}");
-            }
-        }
-
-        private void Relay_RelayPost(object sender, RelayPostEventArgs args)
-        {
-            if (sender is NostrRelay relay)
-            {
-                Debug.WriteLine($"Relay message for '{relay.Url}': {(args.WasSuccessful ? "Success" : "Fail")} :: {args.Message}");
-            }
-        }
-
-        public Task<INostrEvent> SendTextPostAsync(string message, string? clientId = null)
-        {
-            return SendPostAsync(message, clientId: clientId);
-        }
-
-        public Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e, string? clientId = null)
-        {
-            return SendPostAsync(message, "rootReference", "reference", clientId: clientId);
-        }
-
         public async Task<INostrEvent> SendPostAsync(string content, string? rootReference = null, string? reference = null, string? mention = null, string? clientId = null)
         {
             if (string.IsNullOrEmpty(PublicKey))
@@ -567,13 +404,106 @@ namespace NostrLib
             return postEvent;
         }
 
-        private INostrEvent GenerateRelayEvent(NostrEvent<string> postEvent)
+        public Task<INostrEvent> SendReplyPostAsync(string message, INostrEvent e, string? clientId = null)
         {
-            var relayEvent = postEvent.Clone();
-            relayEvent.Id = CalculateId(relayEvent);
-            relayEvent.Signature = CalculateSignature(relayEvent);
-            return relayEvent;
+            return SendPostAsync(message, "rootReference", "reference", clientId: clientId);
         }
+
+        public Task<INostrEvent> SendTextPostAsync(string message, string? clientId = null)
+        {
+            return SendPostAsync(message, clientId: clientId);
+        }
+
+        public async Task SetRelaysAsync(RelayItem[] relayItems, bool shouldConnect = false, CancellationToken cancellationToken = default)
+        {
+            if (relayItems?.Length > 0)
+            {
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+                await DisconnectAsync(cts.Token);
+
+                _relayList.Clear();
+                for (var i = 0; i < relayItems.Length; i++)
+                {
+                    _relayList.Add(relayItems[i]);
+                }
+
+                if (shouldConnect)
+                    Connect(cancellationToken: cts.Token);
+            }
+        }
+
+        public void UpdateKey(string key, bool isPrivateKey = false)
+        {
+            if (isPrivateKey)
+            {
+                var hex = new HexEncoder();
+                PrivateKey = Context.Instance.CreateECPrivKey(hex.DecodeData(key));
+                PublicKey = PrivateKey.CreateXOnlyPubKey().ToBytes().ToHex();
+            }
+            else
+            {
+                PublicKey = key;
+            }
+        }
+
+        [Conditional("DEBUG")]
+        internal static void Log(NostrRelay sender, JsonElement json)
+        {
+            Debug.WriteLineIf(!string.IsNullOrEmpty(json.ToString()), $"From {sender.Url}: {json}");
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_relayInstances?.Count > 0)
+                    {
+                        foreach (var relay in _relayInstances.Values)
+                        {
+                            if (relay != null)
+                            {
+                                relay.RelayPost -= Relay_RelayPost;
+                                relay.RelayConnectionChanged -= Relay_RelayConnectionChanged;
+                                relay.RelayNotice -= Relay_RelayNotice;
+                            }
+                            relay?.Dispose();
+                        }
+                    }
+                    PrivateKey?.Dispose();
+                    PublicKey = null;
+                    _cts?.Dispose();
+                    ResultProcessor?.Dispose();
+                }
+
+                _isDisposed = true;
+            }
+        }
+
+        // Wrap event invocations inside a protected virtual method
+        // to allow derived classes to override the event invocation behavior
+        protected virtual void OnRaisePostReceived(NostrPostReceivedEventArgs e)
+        {
+            // Make a temporary copy of the event to avoid possibility of
+            // a race condition if the last subscriber unsubscribes
+            // immediately after the null check and before the event is raised.
+            var raiseEvent = PostReceived;
+
+            // Event will be null if there are no subscribers
+            raiseEvent?.Invoke(this, e);
+        }
+
+        private static string CalculateId(NostrEvent<string> relayEvent)
+        {
+            var commit = relayEvent.ToJson(true);
+            var hash = commit.ComputeSha256Hash();
+            return Encoding.UTF8.GetString(hash);
+        }
+
+        private static NostrPost EventToPost(INostrEvent evt) => new(evt);
+
+
 
         private string CalculateSignature(NostrEvent<string> relayEvent)
         {
@@ -595,7 +525,6 @@ namespace NostrLib
                 {
                     throw new NotImplementedException();
                 }
-
             }
             else
             {
@@ -603,11 +532,86 @@ namespace NostrLib
             }
         }
 
-        private static string CalculateId(NostrEvent<string> relayEvent)
+        private async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
         {
-            var commit = relayEvent.ToJson(true);
-            var hash = commit.ComputeSha256Hash();
-            return Encoding.UTF8.GetString(hash);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+            try
+            {
+                cts.Token.ThrowIfCancellationRequested();
+                if (!IsConnected && _relayList.Count > 0)
+                {
+                    await DisconnectAsync(cts.Token);
+                    Connect(cancellationToken: cts.Token);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private INostrEvent GenerateRelayEvent(NostrEvent<string> postEvent)
+        {
+            var relayEvent = postEvent.Clone();
+            relayEvent.Id = CalculateId(relayEvent);
+            relayEvent.Signature = CalculateSignature(relayEvent);
+            return relayEvent;
+        }
+
+        private async Task<ConcurrentDictionary<string, INostrEvent>> GetEventsAsync(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
+        {
+            var events = new ConcurrentDictionary<string, INostrEvent>();
+
+            if (!string.IsNullOrEmpty(PublicKey))
+            {
+                var subEvents = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
+                var results = await subEvents.WhenAll(TimeSpan.FromSeconds(10));
+                //var results = await Task.WhenAll(subEvents);
+
+                foreach (var relayEvent in results.SelectMany(relayEvents => relayEvents))
+                {
+                    events.TryAdd(relayEvent.Id, relayEvent);
+                }
+            }
+
+            return events;
+        }
+
+        private void Relay_PostReceived(object sender, NostrPostReceivedEventArgs e)
+        {
+            OnRaisePostReceived(e);
+        }
+
+        private void Relay_RelayConnectionChanged(object sender, RelayConnectionChangedEventArgs args)
+        {
+            if (sender is NostrRelay relay)
+            {
+                Debug.WriteLine($"Connection for '{relay.Url}' changed: {(args.IsConnected ? "connected" : "disconnected")}");
+            }
+        }
+
+        private void Relay_RelayNotice(object sender, RelayNoticeEventArgs args)
+        {
+            if (sender is NostrRelay relay)
+            {
+                Debug.WriteLineIf(!string.IsNullOrEmpty(args.Message), $"RelayNotice from '{relay.Url}': {args.Message}");
+            }
+        }
+
+        private void Relay_RelayPost(object sender, RelayPostEventArgs args)
+        {
+            if (sender is NostrRelay relay)
+            {
+                Debug.WriteLine($"Relay message for '{relay.Url}': {(args.WasSuccessful ? "Success" : "Fail")} :: {args.Message}");
+            }
+        }
+
+        private void StartStreamEvents(List<NostrSubscriptionFilter> filters, CancellationToken cancellationToken = default)
+        {
+            if (!string.IsNullOrEmpty(PublicKey))
+            {
+                _ = _relayInstances.Values.Select(relay => relay.SubscribeAsync(PublicKey, filters.ToArray(), cancellationToken));
+            }
         }
     }
 
