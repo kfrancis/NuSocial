@@ -303,7 +303,7 @@ namespace NostrLib
             var filters = new List<NostrSubscriptionFilter>() { filter };
             var events = await GetEventsAsync(filters, cancellationToken);
             var profileInfo = new NostrProfile();
-            var latest = events.OrderByDescending(x => x.Value.CreatedAt).FirstOrDefault();
+            var latest = events.GroupBy(e => e.Key).Select(x => x.First()).OrderByDescending(x => x.Value.CreatedAt).FirstOrDefault();
             if (latest.Value is INostrEvent<string> latestProfile &&
                 !string.IsNullOrEmpty(latestProfile.Content))
             {

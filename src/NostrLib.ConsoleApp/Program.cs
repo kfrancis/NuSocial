@@ -32,8 +32,8 @@ var dispatch = (string url, ReadOnlySequence<byte> data, IDisposable releaseBuff
         {
             case "EVENT":
                 var subId = json[1].GetString() ?? string.Empty;
-                var ev = JsonSerializer.Deserialize<NostrEvent<string>>(json[2]);
-                if (ev != null && ev.Verify())
+                var ev = json[2].Deserialize<NostrEvent<string>>();
+                if (ev?.Verify() == true)
                 {
                     AnsiConsole.Write(new Markup($"[bold green]From {url}:[/] {ev.Content.EscapeMarkup()}\n"));
                 }
@@ -166,7 +166,7 @@ async Task ReceiveMessages(string url, ClientWebSocket client, WebSocketReceiveR
 
             if (resultProcessor.Receive(result, buffer, out var frame))
             {
-                if (frame.IsEmpty == true)
+                if (frame.IsEmpty)
                     break; // End of message with no data means socket closed - break so we can reconnect.
 
                 // Send the frame, and delegate consumer should call to release the buffer once done.
@@ -252,7 +252,9 @@ internal sealed class WebSocketReceiveResultProcessor : IDisposable
         var slice = buffer.Slice(0, result.Count);
 
         if (_startChunk == null)
+        {
             _startChunk = _currentChunk = new Chunk<byte>(slice);
+        }
         else
         {
             _currentChunk ??= new Chunk<byte>(slice);
