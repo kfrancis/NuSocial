@@ -87,7 +87,7 @@ namespace NostrLib
 
         internal WebSocketReceiveResultProcessor ResultProcessor { get; } = new();
 
-        public static NostrKeyPair GenerateKey()
+        public static NostrKeyPair GenerateKey(bool asBech32 = false)
         {
             ECPrivKey? privKey = null;
 
@@ -101,7 +101,20 @@ namespace NostrLib
                     var pubKey = privKey.CreateXOnlyPubKey();
                     Span<byte> privKeyc = stackalloc byte[65];
                     privKey.WriteToSpan(privKeyc);
-                    return new NostrKeyPair(pubKey.ToBytes().ToHex(), privKeyc.ToHex()[..64]);
+                    if (asBech32)
+                    {
+                        throw new NotImplementedException();
+                        //Span<byte> pubKeyc = stackalloc byte[65];
+                        //pubKey.WriteToSpan(pubKeyc);
+                        //var encoder = Encoders.Bech32("tnos"); // ??
+                        //var pubKey1 = encoder.EncodeData(pubKeyc.Slice(1), Bech32EncodingType.BECH32);
+                        //var privKey1 = encoder.EncodeData(privKeyc.Slice(1), Bech32EncodingType.BECH32);
+                        //return new NostrKeyPair(pubKey1, privKey1);
+                    }
+                    else
+                    {
+                        return new NostrKeyPair(pubKey.ToBytes().ToHex(), privKeyc.ToHex()[..64]);
+                    }
                 }
                 else
                 {

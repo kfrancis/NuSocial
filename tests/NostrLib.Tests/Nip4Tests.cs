@@ -1,5 +1,6 @@
 using Bogus;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
+using NBitcoin.DataEncoders;
 using NBitcoin.Secp256k1;
 using NostrLib.Models;
 using NostrLib.Nips;
@@ -29,15 +30,79 @@ namespace NostrLib.Tests
         }
 
         [Fact]
+        public void Generate1000()
+        {
+            for (var i = 0; i < 1000; i++)
+            {
+                _ = NostrClient.GenerateKey();
+            }
+
+            string t = "";
+        }
+
+        [Fact]
+        public void CanGenerateEncryptableEventUsingBech()
+        {
+            var randomSender = NostrClient.GenerateKey(true);
+
+            randomSender.ShouldSatisfyAllConditions(
+                x => x.PrivateKey.ShouldNotBeNullOrEmpty(),
+                x => x.PrivateKey.ShouldStartWith("nsec"),
+                x => x.PrivateKey.Length.ShouldBe(64),
+                x => x.PublicKey.ShouldNotBeNullOrEmpty(),
+                x => x.PublicKey.ShouldStartWith("npub"),
+                x => x.PublicKey.Length.ShouldBe(64)
+            );
+
+            //var (ev, receiverKp) = GivenSampleEvent(randomSender.PublicKey);
+
+            //receiverKp.ShouldSatisfyAllConditions(
+            //    kp => kp.PrivateKey.ShouldNotBeNullOrEmpty(),
+            //    kp => kp.PrivateKey.Length.ShouldBe(64),
+            //    kp => kp.PublicKey.ShouldNotBeNullOrEmpty(),
+            //    kp => kp.PublicKey.Length.ShouldBe(64),
+            //    kp => kp.PublicKey.ShouldNotBe(randomSender.PublicKey),
+            //    kp => kp.PublicKey.ShouldNotBe(randomSender.PrivateKey),
+            //    kp => kp.PrivateKey.ShouldNotBe(randomSender.PublicKey),
+            //    kp => kp.PrivateKey.ShouldNotBe(randomSender.PrivateKey)
+            //);
+
+            //ev.ShouldSatisfyAllConditions(
+            //    x => x.ShouldNotBeNull(),
+            //    x => x.Tags.ShouldNotBeNull(),
+            //    x => x.Tags.Count.ShouldBe(1),
+            //    x => x.Tags.Any(t => t.Data.Contains(receiverKp.PublicKey)).ShouldBeTrue(),
+            //    x => x.PublicKey.ShouldNotBeNullOrEmpty(),
+            //    x => x.Content.ShouldNotBeNullOrEmpty(),
+            //    x => x.Kind.ShouldBe(NostrKind.EncryptedDM),
+            //    x => x.PublicKey.ShouldBe(randomSender.PublicKey),
+            //    x => x.PublicKey.ShouldNotBe(randomSender.PrivateKey)
+            //);
+        }
+
+        [Fact]
         public void CanGenerateEncryptableEvent()
         {
             var randomSender = NostrClient.GenerateKey();
+
+            randomSender.ShouldSatisfyAllConditions(
+                x => x.PrivateKey.ShouldNotBeNullOrEmpty(),
+                x => x.PrivateKey.Length.ShouldBe(64),
+                x => x.PublicKey.ShouldNotBeNullOrEmpty(),
+                x => x.PublicKey.Length.ShouldBe(64)
+            );
 
             var (ev, receiverKp) = GivenSampleEvent(randomSender.PublicKey);
 
             receiverKp.ShouldSatisfyAllConditions(
                 kp => kp.PrivateKey.ShouldNotBeNullOrEmpty(),
-                kp => kp.PublicKey.ShouldNotBeNullOrEmpty()
+                kp => kp.PrivateKey.Length.ShouldBe(64),
+                kp => kp.PublicKey.ShouldNotBeNullOrEmpty(),
+                kp => kp.PublicKey.Length.ShouldBe(64),
+                kp => kp.PublicKey.ShouldNotBe(randomSender.PublicKey),
+                kp => kp.PublicKey.ShouldNotBe(randomSender.PrivateKey),
+                kp => kp.PrivateKey.ShouldNotBe(randomSender.PublicKey),
+                kp => kp.PrivateKey.ShouldNotBe(randomSender.PrivateKey)
             );
 
             ev.ShouldSatisfyAllConditions(
@@ -54,6 +119,8 @@ namespace NostrLib.Tests
         }
 
         [Theory]
+        [InlineData("Credit Card Account withdrawal Data", "8c059a97feb6868757e65bd2558ef9554d4d24412421a13b7cf5c01228dece83", "bf52d0d131b9e64733f825e96e22865d6fe29eed5279ac898a7d863009c74f77", "71b906b6176e2b7f689da0379c21cc3083f77d64158fa4b1aab5c1662c17ad8c", "iljJ08iw62tv+JGWStSZuSnqihCG+h4OdNWFdtwOacZzhNNAYS9MBermyN4E/+3+yRsrB4lVPxD2jjM31SPgiP160jaZdXpOUyX740f1jwU=?iv=hFpulqz3Ljy4oBIlVgPkhA==")]
+        [InlineData("archive", "9ff8b006a613b3e47bd9ec998b75c27b32381184c6d9c6f69044c0be59594633", "4f3ed8d57fb25b5f18c4f7c100f4044196d79bb128df96448f30a3593d70cd8a", "a4a87faf152fd0ee162a5f4753f35339ef32287fb6f18f9e44d68df0aaf51983", "1P2ddpZ0LZKUZmfANoox2g==?iv=Lx338ArZ7C1QfiM/yDcUZQ==")]
         [InlineData("Fresh primary", "337e9aae24a0e921f78173794c6d037d993b4aa4e0c0df1c8ffb0c6f6caae18d", "1ae4c693d7570dd2cb90e0670e3f79ccafb4cdda52eca21cc9cf5224429b3f5b", "d582c73494e7fe819cc835c19000523f51be9d94fc1a494e6f7be628c6f40e11", "s1b4rM6Bwanxigo0pqe3xeQ5/bM8cUIsD9DpQETRCyk=?iv=1+K6d7IN8S92gi+Rys5g3g==")]
         [InlineData("needs-based interactive", "732ec6322130fb05d8434c7616c99a8e4e40aeb1dce2a7fada6cbd8a9849a41c", "9a359ff4d3814ed83d19990c57f2cd8ca0692a594809cc3f768b23a9cfeb6c7e", "3cdde4bd235d8c84dc24a55710647a505745137e34b9560d6ff7cc287d046853", "8+scz66ksDGbdebpTyLoJlyi1SRAU037S2iMrRFMShIxmANxv6atxHKzQ8kdTObp?iv=o532juHfU8eZaKCWoIsE9A==")]
         [InlineData("1080p", "c921e32db57da6b87396506650432e9720730086566a0f617872dbbb1314f11a", "d6d40605ddb41913878cd87bd8158fa91e9d46348239b862651355dba176cdfd", "13b6b90fe00f2fabd9ff25d48d6a5609f885d25a434cd24e5bcb4e8309211257", "DlzRWhzT4J9NV+NrdXPdbw==?iv=E5mkm0Var1Q1Fit5LBY4Vw==")]
