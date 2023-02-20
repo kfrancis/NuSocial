@@ -84,10 +84,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\NostrLib\NostrLib.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Update="Resources\Strings\AppResources.es.Designer.cs">
 			<DependentUpon>AppResources.es.resx</DependentUpon>
 			<DesignTime>True</DesignTime>

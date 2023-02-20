@@ -5,10 +5,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Nito.Disposables;
-using NostrLib.Models;
 using Spectre.Console;
-using NostrLib;
 using System.Collections.Concurrent;
+using NNostr.Client;
 
 var overallCts = new CancellationTokenSource();
 var servers = new ConcurrentDictionary<string, CancellationTokenSource>();
@@ -32,7 +31,7 @@ var dispatch = (string url, ReadOnlySequence<byte> data, IDisposable releaseBuff
         {
             case "EVENT":
                 var subId = json[1].GetString() ?? string.Empty;
-                var ev = json[2].Deserialize<NostrEvent<string>>();
+                var ev = json[2].Deserialize<NostrEvent>();
                 if (ev?.Verify() == true)
                 {
                     AnsiConsole.Write(new Markup($"[bold green]From {url}:[/] {ev.Content.EscapeMarkup()}\n"));
@@ -126,8 +125,8 @@ async Task ConnectToServer(string url, WebSocketReceiveResultProcessor resultPro
 
             // Send a sub message to the server to get all of @jack's messages
             var filter = new NostrSubscriptionFilter();
-            filter.Kinds.Add((int)NostrKind.TextNote);
-            filter.Authors = new Collection<string>() { "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" };
+            filter.Kinds = new List<int>() { 1 }.ToArray();
+            filter.Authors = new Collection<string>() { "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" }.ToArray();
             var filters = new List<NostrSubscriptionFilter>() { filter };
             var message = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object[] { "REQ", "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" }.Concat(filters))));
             await client.SendAsync(message, WebSocketMessageType.Text, true, token);
