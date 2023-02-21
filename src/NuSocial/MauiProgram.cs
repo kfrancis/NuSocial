@@ -2,11 +2,11 @@ using CommunityToolkit.Maui.Markup;
 using NuSocial.Core.Threading;
 using UraniumUI;
 using Microsoft.Extensions.Logging;
-using NostrLib;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Hosting;
 using InputKit.Handlers;
 using Microsoft.Maui.LifecycleEvents;
+using NNostr.Client;
 
 namespace NuSocial;
 
@@ -78,7 +78,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IDatabase, LocalStorage>();
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
-        builder.Services.AddSingleton<INostrClient, NostrClient>(x =>
+        builder.Services.AddSingleton<NostrClient>(x =>
         {
             var settings = x.GetRequiredService<ISettingsService>();
             return new NostrClient(settings.GetId(), false, settings.GetRelays());

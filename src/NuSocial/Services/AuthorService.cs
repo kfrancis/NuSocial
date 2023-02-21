@@ -4,19 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NostrLib;
-using NostrLib.Models;
+using NNostr.Client;
 
 namespace NuSocial.Services
 {
     public class AuthorService : IAuthorService
     {
-        private readonly INostrClient _nostrClient;
+        private readonly NostrClient _nostrClient;
         private static readonly ConcurrentDictionary<string, NostrProfile> s_cache = new();
         private static ConcurrentDictionary<string, string> s_blocked = new();
         private const string BlockedKey = "blocked-authors";
 
-        public AuthorService(INostrClient nostrClient)
+        public AuthorService(NostrClient nostrClient)
         {
             _nostrClient = nostrClient;
 
