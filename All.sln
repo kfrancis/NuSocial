@@ -18,8 +18,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrKey", "src\NostrKey\No
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrLib.ConsoleApp", "src\NostrLib.ConsoleApp\NostrLib.ConsoleApp.csproj", "{D0C5346A-E24E-43BA-9892-D8C9645F54B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNostr.Extensions", "src\NNostr.Extensions\NNostr.Extensions.csproj", "{5804A847-4D78-457C-A549-5A20C4C0EE89}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{D0C5346A-E24E-43BA-9892-D8C9645F54B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0C5346A-E24E-43BA-9892-D8C9645F54B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0C5346A-E24E-43BA-9892-D8C9645F54B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5804A847-4D78-457C-A549-5A20C4C0EE89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5804A847-4D78-457C-A549-5A20C4C0EE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5804A847-4D78-457C-A549-5A20C4C0EE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5804A847-4D78-457C-A549-5A20C4C0EE89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
