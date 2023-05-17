@@ -23,9 +23,10 @@
         <Button
             Grid.Row="2"
             Margin="0,10"
+            Command="{Binding LoginCommand}"
             HeightRequest="50"
             MaximumWidthRequest="200"
-            Text="Login"
+            Text="{loc:Translate Login}"
             VerticalOptions="Start" />
     </Grid>
 </base:ContentPageFormBase>

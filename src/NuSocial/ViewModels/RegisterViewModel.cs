@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Nostr.Client.Keys;
 using NuSocial.Core.ViewModel;
 using NuSocial.Messages;
 using System.ComponentModel.DataAnnotations;
@@ -24,12 +25,25 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
     private string? _about;
 
     [ObservableProperty]
-    private string _accountId = "123";
+    private string _publicKey = string.Empty;
+
+    [ObservableProperty]
+    private string _privateKey = string.Empty;
 
     public override Task OnFirstAppear()
     {
+        GenerateKeyPair();
+
         WeakReferenceMessenger.Default.Send<ResetNavMessage>(new("//start"));
         return Task.CompletedTask;
+    }
+
+    private void GenerateKeyPair()
+    {
+        var keyPair = NostrKeyPair.GenerateNew();
+
+        PublicKey = keyPair.PublicKey.Bech32;
+        PrivateKey = keyPair.PrivateKey.Bech32;
     }
 
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
@@ -42,6 +56,16 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
             {
                 return Task.CompletedTask;
             }, async () => await ShowErrorsCommand.ExecuteAsync(null));
+        });
+    }
+
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task RegenerateAsync()
+    {
+        return SetBusyAsync(() =>
+        {
+            GenerateKeyPair();
+            return Task.CompletedTask;
         });
     }
 }

@@ -15,6 +15,7 @@
     "AboutPlaceholder": "Add something interesting about you ..",
     "AccountId": "Account ID",
     "AccountKeyPlaceholder": "nsec1...",
-    "NuSocial": "NuSocial"
+    "NuSocial": "NuSocial",
+    "TapToRegenerate": "Tap to regenerate"
   }
 }

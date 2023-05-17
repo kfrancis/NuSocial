@@ -85,6 +85,11 @@
 		<framework>Flyout</framework>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
+	  <CodesignKey>Apple Development: Created via API (45692F9U2L)</CodesignKey>
+	  <CodesignProvision>VS: WildCard Development</CodesignProvision>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x64\native\secp256k1.dll" />
 	</ItemGroup>

@@ -33,7 +33,7 @@
                     <toolkit:GravatarImageSource
                         CacheValidity="1"
                         CachingEnabled="True"
-                        Email="{Binding AccountId}"
+                        Email="{Binding PublicKey}"
                         Image="Robohash" />
                 </Image.Source>
             </Image>
@@ -123,11 +123,23 @@
             Padding="10,0,0,0"
             RowDefinitions="Auto,Auto"
             RowSpacing="5">
-            <Label FontAttributes="Bold" Text="{loc:Translate AccountId}" />
+            <HorizontalStackLayout>
+                <Label FontAttributes="Bold" Text="{loc:Translate AccountId}" />
+                <Label
+                    Margin="5,0"
+                    FontSize="10"
+                    Text="{loc:Translate TapToRegenerate,
+                                         StringFormat='({0})'}"
+                    VerticalTextAlignment="Center" />
+            </HorizontalStackLayout>
             <Label
                 Grid.Row="1"
-                Text="{Binding AccountId}"
-                VerticalOptions="Center" />
+                Text="{Binding PublicKey}"
+                VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding RegenerateCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
         </Grid>
 
         <Button

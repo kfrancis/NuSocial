@@ -15,9 +15,9 @@ namespace NuSocial.Services
     {
         Task DeleteAllDataAsync();
 
-        //Task<ObservableCollection<DataElement>> GetDataElementsAsync();
+        Task<ObservableCollection<User>> GetUsersAsync();
         
-        //Task UpdateDataElementsAsync(ObservableCollection<DataElement> dataElements);
+        Task UpdateUsersAsync(ObservableCollection<User> users);
     }
 
     /// <summary>
@@ -135,10 +135,10 @@ namespace NuSocial.Services
             GC.SuppressFinalize(this);
         }
 
-        ///// <summary>
-        ///// Gets data elements from the database.
-        ///// </summary>
-        //public Task<ObservableCollection<DataElement>> GetDataElementsAsync() => GetItemsAsync<DataElement>();
+        /// <summary>
+        /// Gets data elements from the database.
+        /// </summary>
+        public Task<ObservableCollection<User>> GetUsersAsync() => GetItemsAsync<User>();
 
         public async Task<ObservableCollection<T>> GetItemsAsync<T>(Action? reset = null) where T : class, new()
         {
@@ -155,10 +155,10 @@ namespace NuSocial.Services
             }
         }
 
-        ///// <summary>
-        ///// Updates data elements in the database.
-        ///// </summary>
-        //public Task UpdateDataElementsAsync(ObservableCollection<DataElement> dataElements) => UpdateIfPossible(dataElements);
+        /// <summary>
+        /// Updates data elements in the database.
+        /// </summary>
+        public Task UpdateUsersAsync(ObservableCollection<User> users) => UpdateIfPossible(users);
 
         protected virtual async Task DisposeAsync(bool disposing)
         {
