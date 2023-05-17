@@ -1,23 +1,15 @@
 ﻿using Mopups.Pages;
 using NuSocial.Core.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 
 namespace NuSocial.Core.View
 {
     public abstract class PopupPageBase : PopupPage
     {
-
     }
 
     public abstract class PopupPageBase<T> : PopupPageBase, IPopupFor<T> where T : BasePopupModel, ITransientDependency
     {
-        internal SemaphoreSlim InternalLock { get; private set; } = new SemaphoreSlim(1, 1);
         private bool _initialView = true;
         private T? _viewModel;
 
@@ -38,10 +30,46 @@ namespace NuSocial.Core.View
                 BindingContext = _viewModel = value;
             }
         }
+
         object IViewForBase.ViewModel
         {
             get => _viewModel;
             set => ViewModel = (T)value;
+        }
+
+        internal SemaphoreSlim InternalLock { get; private set; } = new SemaphoreSlim(1, 1);
+        protected virtual Guid PageInstanceId { get; set; }
+
+        protected virtual string StyleSheet { get; set; } = string.Empty;
+
+        protected override async void OnAppearing()
+        {
+            try
+            {
+                base.OnAppearing();
+
+                if (BindingContext is BasePopupModel bindingViewContext)
+                {
+                    await InternalLock.WaitAsync();
+
+                    if (!bindingViewContext.IsInitialized)
+                    {
+                        await bindingViewContext.InitializeAsync();
+                        bindingViewContext.IsInitialized = true;
+                    }
+
+                    await bindingViewContext.OnAppearing();
+
+                    InternalLock.Release();
+                }
+
+                LoadStyles();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Demystify());
+                throw;
+            }
         }
 
         protected override async void OnBindingContextChanged()
@@ -76,36 +104,6 @@ namespace NuSocial.Core.View
                         await InternalInitialize();
                     }
                 }
-            }
-        }
-
-        protected override async void OnAppearing()
-        {
-            try
-            {
-                base.OnAppearing();
-
-                if (BindingContext is BasePopupModel bindingViewContext)
-                {
-                    await InternalLock.WaitAsync();
-
-                    if (!bindingViewContext.IsInitialized)
-                    {
-                        await bindingViewContext.InitializeAsync();
-                        bindingViewContext.IsInitialized = true;
-                    }
-
-                    await bindingViewContext.OnAppearing();
-
-                    InternalLock.Release();
-                }
-
-                LoadStyles();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Demystify());
-                throw;
             }
         }
 
@@ -157,8 +155,5 @@ namespace NuSocial.Core.View
                 }
             }
         }
-
-        protected virtual string StyleSheet { get; set; } = string.Empty;
-        protected virtual Guid PageInstanceId { get; set; }
     }
 }

@@ -65,5 +65,6 @@ public partial class AppShell : Shell, ISingletonDependency
     private void RegisterRoutes()
     {
         Routing.RegisterRoute(nameof(LoginViewModel), typeof(LoginView));
+        Routing.RegisterRoute(nameof(RegisterViewModel), typeof(RegisterView));
     }
 }

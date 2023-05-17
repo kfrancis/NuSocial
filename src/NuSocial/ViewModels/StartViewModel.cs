@@ -19,7 +19,7 @@ namespace NuSocial.ViewModels
         {
             return SetBusyAsync(() =>
             {
-                return Task.CompletedTask;
+                return Navigation.NavigateTo(nameof(RegisterViewModel));
             });
         }
 

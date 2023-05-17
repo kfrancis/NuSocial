@@ -128,8 +128,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Views\LoadingIndicatorPopup.xaml">
+	  <Compile Update="Views\RegisterView.xaml.cs">
+	    <DependentUpon>RegisterView.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Update="Core\View\LoadingIndicatorPopup.xaml">
 			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\RegisterView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\LoginView.xaml">
 			<Generator>MSBuild:Compile</Generator>
