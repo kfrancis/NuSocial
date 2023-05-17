@@ -20,10 +20,17 @@ public partial class AppShell : Shell, ISingletonDependency
             Uri.Clear();
         });
 
-        WeakReferenceMessenger.Default.Register<DataLoadedMessage>(this, (r, m) =>
+        WeakReferenceMessenger.Default.Register<ResetNavMessage>(this, (r, m) =>
         {
-            // When we finish loading the data, we clear the nav history because we can't go back
-            Uri.Clear();
+            if (!string.IsNullOrEmpty(m.Value))
+            {
+                Uri.Clear();
+                Uri.Push(m.Value);
+            }
+            else
+            {
+                Uri.Clear();
+            }
         });
 
         RegisterRoutes();

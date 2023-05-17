@@ -14,9 +14,9 @@ namespace NuSocial.Messages
         }
     }
 
-    public class DataLoadedMessage : ValueChangedMessage<bool?>
+    public class ResetNavMessage : ValueChangedMessage<string?>
     {
-        public DataLoadedMessage(bool? value = null) : base(value)
+        public ResetNavMessage(string? route = null) : base(route)
         {
         }
     }

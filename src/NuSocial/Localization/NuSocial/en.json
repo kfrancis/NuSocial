@@ -3,6 +3,17 @@
   "Texts": {
     "Login": "Login",
     "CreateAccount": "Create Account",
-    "StartMessage": "Welcome"
+    "StartMessage": "Welcome",
+    "AgreementText": "END USER LICENSE AGREEMENT\\n\\nThis is an agreement between you and [Your Company Name] (\\\"Company\\\") for your use of [Your App Name] (\\\"Application\\\"). The Application is licensed to you, not sold.\\n\\n1. LICENSE\\n\\nCompany grants you a limited, non-exclusive, nontransferable license to:\\n\\n- Download, install, and use the Application for personal, non-commercial use on a single mobile device.\\n- Access and use the content and services made available through the Application.\\n\\n2. TERM AND TERMINATION\\n\\nThis Agreement remains in effect until terminated by you or Company. Company may suspend or terminate this Agreement at any time for any reason.\\n\\n3. USER DATA\\n\\nYour use of the Application is subject to the Company's Privacy Policy, available at [insert URL to your privacy policy].\\n\\n4. AMENDMENTS\\n\\nCompany may modify, suspend or discontinue the Application or any service connected to it at any time without notice or liability to you.\\n\\n5. CONTENT AND SERVICES\\n\\nThe Application may provide access to the Company's website",
+    "EULA": "EULA",
+    "Username": "Username",
+    "UsernamePlaceholder": "satoshi",
+    "DisplayName": "Display Name",
+    "DisplayNamePlaceholder": "What is your name?",
+    "Optional": "optional",
+    "About": "About",
+    "AboutPlaceholder": "Add something interesting about you ..",
+    "AccountId": "Account ID",
+    "AccountKeyPlaceholder": "nsec1..."
   }
 }

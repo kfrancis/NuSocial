@@ -55,15 +55,20 @@
 
 	<ItemGroup>
 		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+		<PackageReference Include="BindableProps" Version="1.3.7" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="3.1.0" />
 		<PackageReference Include="CommunityToolkit.MVVM" Version="8.2.0" />
+		<PackageReference Include="Markdig" Version="0.31.0" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Maui.Graphics.Text.Markdig" Version="7.0.86" />
 		<PackageReference Include="Mopups" Version="1.1.1" />
+		<PackageReference Include="NBitcoin.Secp256k1" Version="3.1.1" />
 		<PackageReference Include="Nostr.Client" Version="1.4.0" />
 		<PackageReference Include="Polly" Version="7.2.3" />
+		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="2.0.0-preview.61" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.4" />
 		<PackageReference Include="Volo.Abp.Autofac" Version="7.2.2" />
@@ -114,6 +119,7 @@
 
 	<ItemGroup>
 		<None Remove="Localization\NuSocial\en.json" />
+		<None Remove="Resources\Raw\144135-planet.json" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -8,7 +8,8 @@
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
     x:DataType="viewModels:RelaysViewModel"
-    x:TypeArguments="viewModels:RelaysViewModel">
+    x:TypeArguments="viewModels:RelaysViewModel"
+    BackgroundColor="{StaticResource Background}">
     <VerticalStackLayout>
         <Label
             HorizontalOptions="Center"

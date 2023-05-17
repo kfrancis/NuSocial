@@ -1,12 +1,5 @@
-﻿using CommunityToolkit.Maui.Layouts;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
 using NuSocial.Localization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Volo.Abp.Autofac;
 using Volo.Abp.Http.Client;
 using Volo.Abp.Localization;
@@ -24,7 +17,7 @@ namespace NuSocial
     {
         public NuSocialModule()
         {
-            SkipAutoServiceRegistration = true;
+            
         }
 
         public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -48,17 +41,21 @@ namespace NuSocial
         private static HttpMessageHandler GetInsecureHandler()
         {
 #if ANDROID
-        var handler = new HttpClientHandler();
-        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-        {
-            if (cert.Issuer.Equals("CN=localhost"))
+            var handler = new HttpClientHandler
             {
-                return true;
-            }
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                {
+                    ArgumentNullException.ThrowIfNull(cert);
 
-            return errors == System.Net.Security.SslPolicyErrors.None;
-        };
-        return handler;
+                    if (cert.Issuer.Equals("CN=localhost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    return errors == System.Net.Security.SslPolicyErrors.None;
+                }
+            };
+            return handler;
 #elif IOS
         var handler = new NSUrlSessionHandler
         {
@@ -81,7 +78,7 @@ namespace NuSocial
 
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
-                options.FileSets.AddEmbedded<NuSocialModule>();
+                options.FileSets.AddEmbedded<NuSocialModule>("NuSocial");
             });
 
             Configure<AbpLocalizationOptions>(options =>

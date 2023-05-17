@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using NuSocial.Core.Threading;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Reflection;
 using Volo.Abp;
 using Volo.Abp.Autofac;
@@ -24,6 +25,7 @@ public static class MauiProgram
                 options.SetShouldSuppressExceptionsInBehaviors(false);
                 options.SetShouldSuppressExceptionsInAnimations(false);
             })
+            .UseSkiaSharp()
             .UseMauiCommunityToolkitMarkup()
             .ConfigureFonts(fonts =>
 			{

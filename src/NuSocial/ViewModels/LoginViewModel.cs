@@ -11,6 +11,7 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
 
     public LoginViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
     {
+        Title = L["Login"];
     }
 
     public bool IsAccountKeyValid => !string.IsNullOrEmpty(AccountKey);

@@ -12,4 +12,9 @@ public partial class AgreeView
 	public AgreeView() : this(Ioc.Default.GetRequiredService<AgreeViewModel>())
 	{
     }
+
+    private async void ScrollView_Scrolled(object sender, ScrolledEventArgs e)
+    {
+        await ViewModel.EulaScrolledAsync(sender, e);
+    }
 }

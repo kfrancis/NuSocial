@@ -33,7 +33,7 @@ public partial class ShellViewModel : BaseViewModel, ISingletonDependency
 
         AppVersion = $"v{appInfo.Version.Major}.{appInfo.Version.Minor}";
 
-        WeakReferenceMessenger.Default.Register<DataLoadedMessage>(this, (r, m) =>
+        WeakReferenceMessenger.Default.Register<ResetNavMessage>(this, (r, m) =>
         {
             RefreshMenuItems(true);
         });

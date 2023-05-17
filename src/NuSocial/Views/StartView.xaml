@@ -5,29 +5,37 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
     Padding="20"
     x:DataType="viewModels:StartViewModel"
     x:TypeArguments="viewModels:StartViewModel"
     BackgroundColor="{StaticResource Background}"
+    Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
-    <Grid RowDefinitions="*, Auto, Auto" RowSpacing="10">
-        <Label
-            Margin="0,20"
+    <Grid RowDefinitions="Auto,Auto, Auto,*" RowSpacing="10">
+        <skia:SKLottieView
+            HeightRequest="200"
             HorizontalOptions="Center"
-            Text="{loc:Translate StartMessage}"
-            VerticalOptions="Center" />
-        <Button
+            RepeatCount="-1"
+            Source="144135-planet.json"
+            WidthRequest="200" />
+        <Label
             Grid.Row="1"
+            HorizontalTextAlignment="Center"
+            Text="{loc:Translate Welcome}" />
+        <Button
+            Grid.Row="2"
             Command="{Binding CreateAccountCommand}"
             MaximumWidthRequest="200"
             Text="{loc:Translate CreateAccount}"
             VerticalOptions="End" />
         <Button
-            Grid.Row="2"
+            Grid.Row="3"
             Command="{Binding GoToLoginCommand}"
             MaximumWidthRequest="200"
-            Text="{loc:Translate Login}" />
+            Text="{loc:Translate Login}"
+            VerticalOptions="Start" />
     </Grid>
 </base:ContentPageViewBase>

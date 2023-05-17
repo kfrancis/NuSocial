@@ -4,16 +4,28 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
+    Padding="0,20"
     x:DataType="viewModels:LoginViewModel"
-    x:TypeArguments="viewModels:LoginViewModel">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Enter your account key to login:"
-            VerticalOptions="Center" />
-        <Entry Text="{Binding AccountKey}" />
-        <Button Text="Login" />
-    </VerticalStackLayout>
+    x:TypeArguments="viewModels:LoginViewModel"
+    Shell.FlyoutBehavior="Disabled">
+    <Grid
+        Margin="20,0"
+        RowDefinitions="Auto,Auto,*"
+        RowSpacing="10">
+        <Label Text="Enter your account key to login:" VerticalOptions="Center" />
+        <Entry
+            Grid.Row="1"
+            Placeholder="{loc:Translate AccountKeyPlaceholder}"
+            Text="{Binding AccountKey}" />
+        <Button
+            Grid.Row="2"
+            Margin="0,10"
+            HeightRequest="50"
+            MaximumWidthRequest="200"
+            Text="Login"
+            VerticalOptions="Start" />
+    </Grid>
 </base:ContentPageFormBase>
