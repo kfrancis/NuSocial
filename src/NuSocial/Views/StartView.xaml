@@ -12,8 +12,7 @@
     x:DataType="viewModels:StartViewModel"
     x:TypeArguments="viewModels:StartViewModel"
     BackgroundColor="{StaticResource Background}"
-    Shell.FlyoutBehavior="Disabled"
-    Shell.NavBarIsVisible="False">
+    Shell.FlyoutBehavior="Disabled">
     <Grid RowDefinitions="Auto,Auto, Auto,*" RowSpacing="10">
         <skia:SKLottieView
             HeightRequest="200"

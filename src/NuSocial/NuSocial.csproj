@@ -119,10 +119,12 @@
 
 	<ItemGroup>
 		<None Remove="Localization\NuSocial\en.json" />
+		<None Remove="Localization\NuSocial\fr.json" />
 		<None Remove="Resources\Raw\144135-planet.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="Localization\NuSocial\fr.json" />
 		<EmbeddedResource Include="Localization\NuSocial\en.json" />
 	</ItemGroup>
 

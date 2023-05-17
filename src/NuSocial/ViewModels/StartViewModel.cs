@@ -7,6 +7,7 @@ public partial class StartViewModel : BaseViewModel, ITransientDependency
 {
     public StartViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
     {
+        Title = L["NuSocial"];
     }
 
     [RelayCommand(CanExecute = nameof(IsNotBusy))]

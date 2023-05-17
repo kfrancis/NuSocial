@@ -109,7 +109,7 @@ namespace NuSocial
             Configure<AbpLocalizationOptions>(options =>
             {
                 options.Languages.Add(new LanguageInfo("en", "en", "English"));
-                //options.Languages.Add(new LanguageInfo("fr", "fr", "Français", "fr"));
+                options.Languages.Add(new LanguageInfo("fr", "fr", "Français", "fr"));
             });
         }
 
