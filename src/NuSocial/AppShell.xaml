@@ -3,6 +3,8 @@
     x:Class="NuSocial.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:fa="clr-namespace:FontAwesome"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:local="clr-namespace:NuSocial"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
@@ -21,4 +23,100 @@
         FlyoutItemIsVisible="False"
         Route="start" />
 
+    <FlyoutItem Title="{loc:Translate Home}" Icon="{x:Static fa:FontAwesomeIcons.House}">
+        <ShellContent ContentTemplate="{DataTemplate views:MainView}" Route="main" />
+    </FlyoutItem>
+
+    <Shell.MenuItemTemplate>
+        <DataTemplate x:DataType="{x:Type MenuItem}">
+            <Grid
+                Padding="20,0"
+                ColumnDefinitions="30,*"
+                HeightRequest="50">
+                <!--  ICON  -->
+                <Label
+                    Grid.Column="0"
+                    FontFamily="{DynamicResource FaSolid}"
+                    HorizontalOptions="Center"
+                    Style="{DynamicResource MainMenuIconStyle}"
+                    Text="{x:Static fa:FontAwesomeIcons.ScreenUsers}"
+                    TextColor="{DynamicResource Primary}"
+                    VerticalOptions="Center"
+                    VerticalTextAlignment="Center" />
+
+                <!--  LABEL  -->
+                <Label
+                    Grid.Column="1"
+                    Margin="{DynamicResource MainMenuFullLabelMargin}"
+                    Padding="10,0,0,0"
+                    LineBreakMode="WordWrap"
+                    Style="{DynamicResource MainMenuLabelStyle}"
+                    Text="{Binding Text}"
+                    TextColor="{DynamicResource Gray200}"
+                    VerticalOptions="Center"
+                    VerticalTextAlignment="Center" />
+
+            </Grid>
+        </DataTemplate>
+    </Shell.MenuItemTemplate>
+
+    <Shell.ItemTemplate>
+        <DataTemplate x:DataType="{x:Type FlyoutItem}">
+            <Grid
+                Padding="20,0"
+                ColumnDefinitions="30,*"
+                HeightRequest="50">
+                <!--  ICON  -->
+                <Label
+                    x:Name="IconLabel"
+                    Grid.Column="0"
+                    FontFamily="{DynamicResource FaSolid}"
+                    HorizontalOptions="Center"
+                    Style="{DynamicResource MainMenuIconStyle}"
+                    Text="{Binding Icon}"
+                    TextColor="{DynamicResource Primary}"
+                    VerticalOptions="Center"
+                    VerticalTextAlignment="Center" />
+
+                <!--  LABEL  -->
+                <Label
+                    x:Name="NameLabel"
+                    Grid.Column="1"
+                    Margin="{DynamicResource MainMenuFullLabelMargin}"
+                    Padding="10,0,0,0"
+                    LineBreakMode="WordWrap"
+                    Style="{DynamicResource MainMenuLabelStyle}"
+                    Text="{Binding Title}"
+                    TextColor="{DynamicResource Gray200}"
+                    VerticalOptions="Center"
+                    VerticalTextAlignment="Center" />
+
+                <!--<BoxView
+                    x:Name="MenuSep"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    BackgroundColor="{StaticResource Gray600}"
+                    HeightRequest="1"
+                    IsVisible="{Binding ., Converter={StaticResource separatorVisibilityConverter}, ConverterParameter={x:Reference Name=listView}}" />-->
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="Transparent" />
+                                <Setter TargetName="IconLabel" Property="Label.TextColor" Value="{StaticResource Primary}" />
+                                <Setter TargetName="NameLabel" Property="Label.TextColor" Value="White" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                <Setter TargetName="IconLabel" Property="Label.TextColor" Value="White" />
+                                <Setter TargetName="NameLabel" Property="Label.TextColor" Value="{StaticResource Gray300}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
 </Shell>

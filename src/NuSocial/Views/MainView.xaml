@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:ContentPageViewBase
+    x:Class="NuSocial.Views.MainView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
+    Title="{Binding Title}"
+    x:DataType="viewModels:MainViewModel"
+    x:TypeArguments="viewModels:MainViewModel"
+    Shell.NavBarIsVisible="False">
+    <VerticalStackLayout>
+        <Label
+            HorizontalOptions="Center"
+            Text="{loc:Translate MainView}"
+            VerticalOptions="Center" />
+    </VerticalStackLayout>
+</base:ContentPageViewBase>
