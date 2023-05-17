@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using NuSocial.Core.ViewModel;
 using NuSocial.Messages;
 using System;
 using System.Collections.Generic;
