@@ -56,4 +56,4 @@ Based on NNostr, but I couldn't quite understand how it was meant to be used so 
 ### Images
 - [BlurHash](https://blurha.sh/) is how we'll store compact representations of profile images so they load immediately and we can then load them dynamically as they are seen.
 
-![Current progress](/pic.png "Current progress")
+![Current progress](/nusocial.gif "Current progress")

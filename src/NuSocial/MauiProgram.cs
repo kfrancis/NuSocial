@@ -34,7 +34,8 @@ public static class MauiProgram
 				fonts.AddFont("FontAwesome6FreeSolid.otf", "FontAwesomeSolid");
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			})
+                fonts.AddFont("Urbanist-Medium.ttf", "Urbanist");
+            })
             .ConfigureMopups()
             .ConfigureContainer<ContainerBuilder>(new AbpAutofacServiceProviderFactory(GetAutofacContainerBuilder(builder.Services)));
 

@@ -16,6 +16,7 @@
     "AccountId": "Account ID",
     "AccountKeyPlaceholder": "nsec1...",
     "NuSocial": "NuSocial",
-    "TapToRegenerate": "Tap to regenerate"
+    "TapToRegenerate": "Tap to regenerate",
+    "WelcomeText": "#nostr NuSocial: Your Universe, Nu Connections"
   }
 }

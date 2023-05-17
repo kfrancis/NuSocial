@@ -125,6 +125,7 @@
 	<ItemGroup>
 		<None Remove="Localization\NuSocial\en.json" />
 		<None Remove="Localization\NuSocial\fr.json" />
+		<None Remove="Resources\Fonts\Urbanist-Medium.ttf" />
 		<None Remove="Resources\Raw\144135-planet.json" />
 	</ItemGroup>
 
