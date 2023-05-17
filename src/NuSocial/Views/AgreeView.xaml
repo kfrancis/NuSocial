@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:ContentPageViewBase
-    x:Class="NuSocial.Views.StartView"
+    x:Class="NuSocial.Views.AgreeView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
@@ -8,26 +8,25 @@
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
     Padding="20"
-    x:DataType="viewModels:StartViewModel"
-    x:TypeArguments="viewModels:StartViewModel"
-    BackgroundColor="{StaticResource Background}"
+    x:DataType="viewModels:AgreeViewModel"
+    x:TypeArguments="viewModels:AgreeViewModel"
     Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="*, Auto, Auto" RowSpacing="10">
-        <Label
-            Margin="0,20"
-            HorizontalOptions="Center"
-            Text="{loc:Translate StartMessage}"
-            VerticalOptions="Center" />
+        <Border Stroke="{StaticResource Gray100}" StrokeThickness="1">
+            <Label
+                HorizontalOptions="Center"
+                Text="Agree Text"
+                VerticalOptions="Center" />
+        </Border>
         <Button
             Grid.Row="1"
-            Command="{Binding CreateAccountCommand}"
+            Command="{Binding AgreeCommand}"
             MaximumWidthRequest="200"
-            Text="{loc:Translate CreateAccount}"
-            VerticalOptions="End" />
+            Text="Agree" />
         <Button
             Grid.Row="2"
-            Command="{Binding GoToLoginCommand}"
+            Command="{Binding DisagreeCommand}"
             MaximumWidthRequest="200"
-            Text="{loc:Translate Login}" />
+            Text="Disagree" />
     </Grid>
 </base:ContentPageViewBase>

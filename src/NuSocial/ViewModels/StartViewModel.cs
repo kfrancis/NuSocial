@@ -1,35 +1,29 @@
 ﻿using NuSocial.Core.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
 
-namespace NuSocial.ViewModels
+namespace NuSocial.ViewModels;
+
+public partial class StartViewModel : BaseViewModel, ITransientDependency
 {
-    public partial class StartViewModel : BaseViewModel, ITransientDependency
+    public StartViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
     {
-        public StartViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
-        {
-        }
+    }
 
-        [RelayCommand(CanExecute = nameof(IsNotBusy))]
-        private Task CreateAccountAsync()
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task CreateAccountAsync()
+    {
+        return SetBusyAsync(() =>
         {
-            return SetBusyAsync(() =>
-            {
-                return Navigation.NavigateTo(nameof(RegisterViewModel));
-            });
-        }
+            return Navigation.NavigateTo(nameof(AgreeViewModel));
+        });
+    }
 
-        [RelayCommand(CanExecute = nameof(IsNotBusy))]
-        private Task GoToLoginAsync()
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task GoToLoginAsync()
+    {
+        return SetBusyAsync(() =>
         {
-            return SetBusyAsync(() =>
-            {
-                return Navigation.NavigateTo(nameof(LoginViewModel));
-            });
-        }
+            return Navigation.NavigateTo(nameof(LoginViewModel));
+        });
     }
 }

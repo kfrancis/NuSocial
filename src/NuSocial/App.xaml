@@ -3,10 +3,8 @@
     x:Class="NuSocial.App"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
     xmlns:core="clr-namespace:NuSocial.Core"
-    xmlns:local="clr-namespace:NuSocial"
-    android:Application.WindowSoftInputModeAdjust="Resize">
+    xmlns:local="clr-namespace:NuSocial">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -54,13 +54,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="appsettings.Development.json">
-			<CopyToOutputDirectory></CopyToOutputDirectory>
-			<TransformOnBuild>true</TransformOnBuild>
-		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="3.1.0" />
@@ -128,28 +121,46 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\RegisterView.xaml.cs">
-	    <DependentUpon>RegisterView.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\MainView.xaml.cs">
-	    <DependentUpon>MainView.xaml</DependentUpon>
-	  </Compile>
+		<Compile Update="Views\RegisterView.xaml.cs">
+			<DependentUpon>RegisterView.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\MainView.xaml.cs">
+			<DependentUpon>MainView.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\StartView.xaml.cs">
+			<DependentUpon>StartView.xaml</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 		<MauiXaml Update="Core\View\LoadingIndicatorPopup.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\StartView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\AgreeView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\ProfileView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\RegisterView.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\LoginView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\MainView.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\StartView.xaml">
+		<MauiXaml Update="Views\RelaysView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\SettingsView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\WalletView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>

@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:ContentPageFormBase
-    x:Class="NuSocial.Views.LoginView"
+<base:ContentPageViewBase
+    x:Class="NuSocial.Views.WalletView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
-    x:DataType="viewModels:LoginViewModel"
-    x:TypeArguments="viewModels:LoginViewModel">
+    x:DataType="viewModels:WalletViewModel"
+    x:TypeArguments="viewModels:WalletViewModel">
     <VerticalStackLayout>
         <Label
             HorizontalOptions="Center"
-            Text="Enter your account key to login:"
+            Text="Wallet"
             VerticalOptions="Center" />
-        <Entry Text="{Binding AccountKey}" />
-        <Button Text="Login" />
     </VerticalStackLayout>
-</base:ContentPageFormBase>
+</base:ContentPageViewBase>

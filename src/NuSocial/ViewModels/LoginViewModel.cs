@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NuSocial.Core.ViewModel;
+﻿using NuSocial.Core.ViewModel;
 using Volo.Abp.DependencyInjection;
 
-namespace NuSocial.ViewModels
+namespace NuSocial.ViewModels;
+
+public partial class LoginViewModel : BaseFormModel, ITransientDependency
 {
-    public class LoginViewModel : BaseFormModel, ITransientDependency
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAccountKeyValid))]
+    private string _accountKey = string.Empty;
+
+    public LoginViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
     {
+    }
+
+    public bool IsAccountKeyValid => !string.IsNullOrEmpty(AccountKey);
+
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task LoginAsync()
+    {
+        return SetBusyAsync(() => { return Task.CompletedTask; });
     }
 }

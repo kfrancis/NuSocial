@@ -6,7 +6,7 @@ namespace NuSocial;
 
 public partial class AppShell : Shell, ISingletonDependency
 {
-    private ShellNavigationState? temp;
+    private ShellNavigationState? _navState;
 
     public AppShell(ShellViewModel vm)
     {
@@ -54,10 +54,10 @@ public partial class AppShell : Shell, ISingletonDependency
         base.OnNavigated(args);
         if (Uri != null && args.Previous != null)
         {
-            if (temp == null || temp != args.Previous)
+            if (_navState == null || _navState != args.Previous)
             {
                 Uri.Push(args.Previous);
-                temp = args.Current;
+                _navState = args.Current;
             }
         }
     }
@@ -66,5 +66,11 @@ public partial class AppShell : Shell, ISingletonDependency
     {
         Routing.RegisterRoute(nameof(LoginViewModel), typeof(LoginView));
         Routing.RegisterRoute(nameof(RegisterViewModel), typeof(RegisterView));
+        Routing.RegisterRoute(nameof(AgreeViewModel), typeof(AgreeView));
+        Routing.RegisterRoute(nameof(RegisterViewModel), typeof(RegisterView));
+        Routing.RegisterRoute(nameof(ProfileViewModel), typeof(ProfileView));
+        Routing.RegisterRoute(nameof(RelaysViewModel), typeof(RelaysView));
+        Routing.RegisterRoute(nameof(SettingsViewModel), typeof(SettingsView));
+        Routing.RegisterRoute(nameof(WalletViewModel), typeof(WalletView));
     }
 }

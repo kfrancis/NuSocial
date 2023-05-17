@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using NuSocial.Core.View;
 
 namespace NuSocial.Views;
 
