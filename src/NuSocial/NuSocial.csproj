@@ -1,126 +1,142 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>NuSocial</RootNamespace>
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>NuSocial</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 
-    <!-- Display name -->
-    <ApplicationTitle>NuSocial</ApplicationTitle>
+		<!-- Display name -->
+		<ApplicationTitle>NuSocial</ApplicationTitle>
 
-    <!-- App Identifier -->
-    <ApplicationId>com.companyname.NuSocial</ApplicationId>
-    <ApplicationIdGuid>C5685783-9E08-4ABD-8F7B-054528D767F9</ApplicationIdGuid>
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.NuSocial</ApplicationId>
+		<ApplicationIdGuid>C5685783-9E08-4ABD-8F7B-054528D767F9</ApplicationIdGuid>
 
-    <!-- Versions -->
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-  </PropertyGroup>
+		<!-- Required for C# Hot Reload -->
+		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">True</UseInterpreter>
 
-  <ItemGroup>
-    <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
 
-    <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
-    <!-- Images -->
-    <MauiImage Include="Resources\Images\*" />
-    <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
-    <!-- Custom Fonts -->
-    <MauiFont Include="Resources\Fonts\*" />
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
-    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-  </ItemGroup>
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
 
-  <ItemGroup>
-    <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
-    <PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
-    <PackageReference Include="CommunityToolkit.Maui.Markup" Version="3.1.0" />
-    <PackageReference Include="CommunityToolkit.MVVM" Version="8.2.0" />
-    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
-    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
-    <PackageReference Include="Mopups" Version="1.1.1" />
-    <PackageReference Include="Nostr.Client" Version="1.4.0" />
-    <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
-    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.4" />
-    <PackageReference Include="Volo.Abp.Autofac" Version="7.2.2" />
-    <PackageReference Include="Volo.Abp.Core" Version="7.2.2" />
-    <PackageReference Include="Volo.Abp.Http.Client" Version="7.2.2" />
-    <PackageReference Include="Volo.Abp.Localization" Version="7.2.2" />
-    <PackageReference Include="Volo.Abp.Localization.Abstractions" Version="7.2.2" />
-    <PackageReference Include="Volo.Abp.Validation" Version="7.2.2" />
-  </ItemGroup>
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
 
-  <PropertyGroup Label="MauiAppAccelerator">
-    <wizardVersion>v1.2.4</wizardVersion>
-    <projectType>MVVMToolkit</projectType>
-    <framework>Flyout</framework>
-  </PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="appsettings.Development.json">
+			<CopyToOutputDirectory></CopyToOutputDirectory>
+			<TransformOnBuild>true</TransformOnBuild>
+		</EmbeddedResource>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x64\native\secp256k1.dll" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="3.1.0" />
+		<PackageReference Include="CommunityToolkit.MVVM" Version="8.2.0" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="Mopups" Version="1.1.1" />
+		<PackageReference Include="Nostr.Client" Version="1.4.0" />
+		<PackageReference Include="Polly" Version="7.2.3" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.4" />
+		<PackageReference Include="Volo.Abp.Autofac" Version="7.2.2" />
+		<PackageReference Include="Volo.Abp.Core" Version="7.2.2" />
+		<PackageReference Include="Volo.Abp.Http.Client" Version="7.2.2" />
+		<PackageReference Include="Volo.Abp.Localization" Version="7.2.2" />
+		<PackageReference Include="Volo.Abp.Localization.Abstractions" Version="7.2.2" />
+		<PackageReference Include="Volo.Abp.Validation" Version="7.2.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x86\native\secp256k1.dll" />
-  </ItemGroup>
+	<PropertyGroup Label="MauiAppAccelerator">
+		<wizardVersion>v1.2.4</wizardVersion>
+		<projectType>MVVMToolkit</projectType>
+		<framework>Flyout</framework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-arm64\native\secp256k1.dll" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x64\native\secp256k1.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x64\native\libsecp256k1.so" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x86\native\secp256k1.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x86\native\libsecp256k1.so" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-arm64\native\secp256k1.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-arm64\native\libsecp256k1.so" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x64\native\libsecp256k1.so" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-x64\native\libsecp256k1.dylib" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x86\native\libsecp256k1.so" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-arm64\native\libsecp256k1.dylib" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-arm64\native\libsecp256k1.so" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Localization\NuSocial\en.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-x64\native\libsecp256k1.dylib" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Localization\NuSocial\en.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-arm64\native\libsecp256k1.dylib" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <MauiXaml Update="Views\LoadingIndicatorPopup.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\LoginView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Localization\NuSocial\en.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Localization\NuSocial\en.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Update="Views\LoadingIndicatorPopup.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\LoginView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\StartView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+	</ItemGroup>
 
 </Project>

@@ -1,6 +1,8 @@
 {
   "Culture": "en",
   "Texts": {
-    
+    "Login": "Login",
+    "CreateAccount": "Create Account",
+    "StartMessage": "Welcome"
   }
 }

@@ -8,7 +8,7 @@ namespace NuSocial
 {
     internal class Config
     {
-        public static bool IsFirstLogin { get; internal set; }
+        public static bool IsFirstLogin => true;
 
         internal static void ResetVersions()
         {

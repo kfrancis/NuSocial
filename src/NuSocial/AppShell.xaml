@@ -15,22 +15,10 @@
     <Shell.Behaviors>
         <toolkit:StatusBarBehavior StatusBarColor="{OnPlatform iOS='#00FFFFFF', Default='#FF0D2647'}" StatusBarStyle="LightContent" />
     </Shell.Behaviors>
+
     <ShellContent
-        Title="Main"
-        ContentTemplate="{DataTemplate views:MainPage}"
-        Icon="iconblank.png"
-        Route="MainPage"
-        Shell.NavBarIsVisible="true" />
-    <ShellContent
-        Title="ListDetail"
-        ContentTemplate="{DataTemplate views:ListDetailPage}"
-        Icon="iconlistdetail.png"
-        Route="ListDetailPage"
-        Shell.NavBarIsVisible="true" />
-    <ShellContent
-        Title="WebView"
-        ContentTemplate="{DataTemplate views:WebViewPage}"
-        Icon="iconwebview.png"
-        Route="WebViewPage"
-        Shell.NavBarIsVisible="true" />
+        ContentTemplate="{DataTemplate views:StartView}"
+        FlyoutItemIsVisible="False"
+        Route="start" />
+
 </Shell>

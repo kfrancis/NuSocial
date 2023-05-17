@@ -99,8 +99,7 @@ namespace NuSocial
                 options.MapCodeNamespace("NuSocial", typeof(NuSocialResource));
             });
 
-            context.Services.AddAssemblyOf<MainPage>();
-            context.Services.AddAssemblyOf<MainViewModel>();
+            context.Services.AddAssemblyOf<ShellViewModel>();
 
             var configuration = context.Services.GetConfiguration();
 
