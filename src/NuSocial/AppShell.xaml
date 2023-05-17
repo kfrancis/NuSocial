@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="NuSocial.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:NuSocial"
+    xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
+    xmlns:views="clr-namespace:NuSocial.Views"
+    x:DataType="viewModels:ShellViewModel"
+    FlyoutIsPresented="{Binding IsPresented, Mode=TwoWay}">
+
+    <ShellContent
+        Title="Main"
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Icon="iconblank.png"
+        Route="MainPage"
+        Shell.NavBarIsVisible="true" />
+    <ShellContent
+        Title="ListDetail"
+        ContentTemplate="{DataTemplate views:ListDetailPage}"
+        Icon="iconlistdetail.png"
+        Route="ListDetailPage"
+        Shell.NavBarIsVisible="true" />
+    <ShellContent
+        Title="WebView"
+        ContentTemplate="{DataTemplate views:WebViewPage}"
+        Icon="iconwebview.png"
+        Route="WebViewPage"
+        Shell.NavBarIsVisible="true" />
+</Shell>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+			 xmlns:conv="clr-namespace:NuSocial.Converters"
+			 xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+			 xmlns:vm="clr-namespace:NuSocial.ViewModels"
+			 x:Class="NuSocial.Views.WebViewPage"
+			 x:DataType="vm:WebViewViewModel">
+	<Grid RowDefinitions="*,Auto">
+		<WebView x:Name="webview" Source="{Binding Source}">
+			<WebView.Behaviors>
+				<toolkit:EventToCommandBehavior
+					EventName="Navigated"
+					Command="{Binding WebViewNavigatedCommand}">
+					<toolkit:EventToCommandBehavior.EventArgsConverter>
+						<conv:WebNavigatedEventArgsConverter/>
+					</toolkit:EventToCommandBehavior.EventArgsConverter>
+				</toolkit:EventToCommandBehavior>
+			</WebView.Behaviors>
+		</WebView>
+		<ActivityIndicator IsVisible="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="{Binding IsLoading}" />
+		<HorizontalStackLayout Grid.Row="1" HorizontalOptions="Center" Spacing="12">
+			<Button
+				Text="Back"
+				IsEnabled="{Binding Source={x:Reference webview}, Path=CanGoBack}"
+				Command="{Binding NavigateBackCommand}"
+				CommandParameter="{Binding Source={x:Reference webview}}" />
+			<Button
+				Text="Forward"
+				IsEnabled="{Binding Source={x:Reference webview}, Path=CanGoForward}"
+				Command="{Binding NavigateForwardCommand}"
+				CommandParameter="{Binding Source={x:Reference webview}}" />
+			<Button
+				Text="Refresh"
+				Command="{Binding RefreshPageCommand}"
+				CommandParameter="{Binding Source={x:Reference webview}}" />
+			<Button
+				Text="Open in browser"
+				Command="{Binding OpenInBrowserCommand}" />
+		</HorizontalStackLayout>
+	</Grid>
+</ContentPage>
