@@ -1,7 +1,6 @@
 ﻿using Nostr.Client.Keys;
 using SQLite;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 
 namespace NuSocial.Models;
 
@@ -29,6 +28,30 @@ public class User
     }
 
     public bool IsReadOnly => PublicKey != null && PrivateKey == null;
+}
+
+public class Profile
+{
+    private string? _picture;
+
+    public string Name { get; internal set; } = string.Empty;
+    public string? DisplayName { get; internal set; }
+    public string? Picture
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_picture))
+            {
+                _picture = $"https://placehold.co/60x60?text={Name}";
+            }
+            return _picture;
+        }
+        internal set => _picture = value;
+    }
+    public string? Nip05 { get; internal set; }
+    public string? About { get; internal set; }
+    public string? Website { get; internal set; }
+    public List<Relay> Relays { get; internal set; } = new();
 }
 
 public class AuthenticateResult

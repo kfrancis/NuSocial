@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 using Nostr.Client.Keys;
+using Nostr.Client.Messages;
+using Nostr.Client.Messages.Metadata;
 
 namespace NuSocial.Messages
 {
@@ -10,9 +12,16 @@ namespace NuSocial.Messages
         }
     }
 
-    public class NostrPostMessage : ValueChangedMessage<string?>
+    public class NostrPostMessage : ValueChangedMessage<NostrEvent?>
     {
-        public NostrPostMessage(string? value = null) : base(value)
+        public NostrPostMessage(NostrEvent? value = null) : base(value)
+        {
+        }
+    }
+
+    public class NostrMetadataMessage : ValueChangedMessage<NostrMetadataEvent?>
+    {
+        public NostrMetadataMessage(NostrMetadataEvent? value = null) : base(value)
         {
         }
     }

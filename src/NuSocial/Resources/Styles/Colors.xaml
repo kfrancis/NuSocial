@@ -7,7 +7,6 @@
     <Color x:Key="Tertiary">#FFD0BCD5</Color>
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Background">#FFF8F8F8</Color>
     <Color x:Key="Gray100">#FFE1E1E1</Color>
     <Color x:Key="Gray200">#FFC8C8C8</Color>
     <Color x:Key="Gray300">#FFACACAC</Color>
@@ -17,6 +16,16 @@
     <Color x:Key="Gray600">#FF404040</Color>
     <Color x:Key="Gray900">#FF212121</Color>
     <Color x:Key="Gray950">#FF141414</Color>
+
+    <Color x:Key="BasePageColor">#FFF8F8F8</Color>
+    <Color x:Key="TranslucidButtonColor">#33FFFFFF</Color>
+    <Color x:Key="BaseTextColor">#FFFFFFFF</Color>
+    <Color x:Key="InverseTextColor">#000</Color>
+    <Color x:Key="BaseButtonBorderColor">Transparent</Color>
+
+    <Color x:Key="SecondaryActionButtonColor">#FF3C3827</Color>
+    <Color x:Key="SecondaryActionButtonTextColor">#FFF</Color>
+
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
@@ -41,6 +50,21 @@
     <Color x:Key="Blue100Accent">#FF3E8EED</Color>
     <Color x:Key="Blue200Accent">#FF72ACF1</Color>
     <Color x:Key="Blue300Accent">#FFA7CBF6</Color>
+
+    <Color x:Key="ErrorLight">#FFFFD4DC</Color>
+    <Color x:Key="ErrorRegular">#FFFF4D6D</Color>
+    <Color x:Key="ErrorDark">#FFE64462</Color>
+
+    <OnPlatform
+        x:Key="SecondaryActionOutlineButtonColor"
+        x:TypeArguments="Color"
+        Default="{StaticResource Yellow100Accent}" />
+
+    <!--  CIRCLE ACTION BUTTON FLAT  -->
+    <Color x:Key="CircleActionButtonFlatBackgroundColor">#4F29BC</Color>
+    <Color x:Key="CircleActionButtonFlatBorderColor">#646ABD</Color>
+    <Color x:Key="CircleActionButtonFlatIconColor">#FFFFFF</Color>
+    <Color x:Key="CircleActionButtonFlatTextColor">#666666</Color>
 
     <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Offset="0.0" Color="#FF373063" />

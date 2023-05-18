@@ -1,13 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Nostr.Client.Messages;
 using NuSocial.Core.ViewModel;
 using NuSocial.Messages;
 using System.Collections.Immutable;
 using Volo.Abp.DependencyInjection;
+using Contact = NuSocial.Models.Contact;
 
 namespace NuSocial.ViewModels;
 
-public partial class MainViewModel : BaseViewModel, ITransientDependency
+public partial class MainViewModel : BaseViewModel, ITransientDependency, IDisposable
 {
+    private readonly IAuthorService _authorService;
+    private CancellationTokenSource? _cts = new();
+
     [ObservableProperty]
     private ObservableCollection<Post> _posts = new();
 
@@ -15,9 +20,14 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
 
     [ObservableProperty]
     private User? _user;
+    private bool _isDisposed;
 
-    public MainViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
+    public MainViewModel(IDialogService dialogService,
+                         INavigationService navigationService,
+                         IAuthorService authorService)
+        : base(dialogService, navigationService)
     {
+        _authorService = authorService;
     }
 
     public string UnreadLabel => $"{L["Unread"]} ({_postsWaiting.Count})";
@@ -76,9 +86,36 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
         });
     }
 
-    private void ReceivePost(string? value)
+    public override Task OnDisappearing()
     {
-        _postsWaiting.Add(new Post() { Content = value ?? string.Empty, CreatedAt = DateTime.Now });
+        _cts?.Cancel();
+        return base.OnDisappearing();
+    }
+
+    private async void ReceivePost(NostrEvent? ev)
+    {
+        if (ev == null) return;
+        if (string.IsNullOrEmpty(ev.Pubkey)) return;
+        _cts ??= new();
+
+        var author = await _authorService.GetInfoAsync(ev.Pubkey, _cts.Token);
+        var contact = new Contact() { PublicKey = ev.Pubkey, PetName = author.DisplayName ?? author.Name ?? string.Empty };
+        if (!string.IsNullOrEmpty(author.Picture))
+        {
+            contact.Picture = new Picture(new Uri(author.Picture));
+        }
+        contact.Nip05 = author.Nip05;
+        if (!string.IsNullOrEmpty(contact.Nip05) && !string.IsNullOrEmpty(author.DisplayName) && contact.Nip05.StartsWith(author.DisplayName, StringComparison.OrdinalIgnoreCase))
+        {
+            contact.Nip05 = contact.Nip05.Replace(author.DisplayName, string.Empty, StringComparison.OrdinalIgnoreCase);
+        }
+        var post = new Post()
+        {
+            Content = ev.Content ?? string.Empty,
+            CreatedAt = ev.CreatedAt ?? DateTime.Now,
+            Contact = contact
+        };
+        _postsWaiting.Add(post);
         OnPropertyChanged(nameof(UnreadLabel));
     }
 
@@ -119,5 +156,31 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
     private void UpdateUser()
     {
         throw new NotImplementedException();
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_isDisposed)
+        {
+            if (disposing)
+            {
+                _cts?.Dispose();
+            }
+
+            _isDisposed = true;
+        }
+    }
+
+    ~MainViewModel()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

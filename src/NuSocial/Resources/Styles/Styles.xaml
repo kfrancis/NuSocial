@@ -3,6 +3,18 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <x:String x:Key="AppFontFamily">Regular</x:String>
+    <x:Double x:Key="SmallFontSize">10</x:Double>
+    <x:Double x:Key="BaseFontSize">12</x:Double>
+    <x:Double x:Key="LargeFontSize">14</x:Double>
+    <x:Double x:Key="XLargeFontSize">16</x:Double>
+    <x:Double x:Key="XXLargeFontSize">18</x:Double>
+    <x:Double x:Key="SmallTitleFontSize">18</x:Double>
+    <x:Double x:Key="TitleFontSize">24</x:Double>
+    <x:Double x:Key="LargeTitleFontSize">28</x:Double>
+
+    <x:Double x:Key="BaseButtonHeight">45</x:Double>
+    <x:Int32 x:Key="BaseButtonCornerRadius">12</x:Int32>
+    <x:Double x:Key="BaseButtonBorderWith">0</x:Double>
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
@@ -19,17 +31,30 @@
         <Setter Property="StrokeThickness" Value="1" />
     </Style>
 
+    <Style TargetType="RefreshView">
+        <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Gray200}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
-    <Style TargetType="Button">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Primary}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
+    <Style ApplyToDerivedTypes="True" TargetType="Button">
+        <Setter Property="FontAttributes" Value="None" />
+
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="FontSize" Value="{StaticResource BaseFontSize}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource BaseButtonCornerRadius}" />
+        <Setter Property="BorderWidth" Value="{DynamicResource BaseButtonBorderWith}" />
+        <Setter Property="BorderColor" Value="{DynamicResource BaseButtonBorderColor}" />
+        <Setter Property="HeightRequest" Value="{DynamicResource BaseButtonHeight}" />
+        <Setter Property="Padding" Value="0" />
+        <!--
+            Mimic Android Buttons background color.
+            If no background color is set the button won't render its height properly.
+        -->
+        <Setter Property="BackgroundColor" Value="{OnPlatform Android='#d6d6d6', Default={x:Null}}" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -43,6 +68,134 @@
                 </VisualStateGroup>
             </VisualStateGroupList>
         </Setter>
+    </Style>
+
+    <Style x:Key="RoundedButtonStyle" TargetType="Button">
+        <Setter Property="FontSize" Value="{StaticResource BaseFontSize}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource BaseButtonCornerRadius}" />
+        <Setter Property="HeightRequest" Value="{DynamicResource BaseButtonHeight}" />
+    </Style>
+
+    <!--  PRIMARY ACTION BUTTON  -->
+    <Style
+        x:Key="PrimaryActionButtonStyle"
+        BasedOn="{StaticResource RoundedButtonStyle}"
+        TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+        <Setter Property="BorderColor" Value="{DynamicResource Primary}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BaseTextColor}, Dark={StaticResource White}}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!--  TRANSPARENT BUTTON  -->
+    <Style
+        x:Key="TransparentButtonStyle"
+        BasedOn="{StaticResource RoundedButtonStyle}"
+        TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{DynamicResource BaseTextColor}" />
+    </Style>
+
+    <!--  OUTLINE BUTTONS  -->
+    <Style x:Key="OutlineInverseButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="BorderColor" Value="{DynamicResource InverseTextColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}" />
+    </Style>
+
+    <Style x:Key="OutlineButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="BorderColor" Value="{DynamicResource BaseTextColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource BaseTextColor}" />
+    </Style>
+
+    <Style
+        x:Key="PrimaryActionOutlineButtonStyle"
+        BasedOn="{StaticResource OutlineButtonStyle}"
+        TargetType="Button">
+        <Setter Property="TextColor" Value="{DynamicResource White}" />
+        <Setter Property="BorderColor" Value="{DynamicResource Primary}" />
+    </Style>
+
+    <Style
+        x:Key="SecondaryActionOutlineButtonStyle"
+        BasedOn="{StaticResource OutlineButtonStyle}"
+        TargetType="Button">
+        <Setter Property="TextColor" Value="{DynamicResource SecondaryActionOutlineButtonColor}" />
+        <Setter Property="BorderColor" Value="{DynamicResource SecondaryActionOutlineButtonColor}" />
+    </Style>
+
+    <Style
+        x:Key="SaveOutlineButtonStyle"
+        BasedOn="{StaticResource OutlineButtonStyle}"
+        TargetType="Button">
+        <Setter Property="TextColor" Value="#FF46C771" />
+        <Setter Property="BorderColor" Value="#FF46C771" />
+    </Style>
+
+    <Style
+        x:Key="DeleteOutlineButtonStyle"
+        BasedOn="{StaticResource OutlineButtonStyle}"
+        TargetType="Button">
+        <Setter Property="TextColor" Value="{DynamicResource ErrorLight}" />
+        <Setter Property="BorderColor" Value="{DynamicResource ErrorDark}" />
+    </Style>
+
+    <!--  FILLED BUTTONS  -->
+    <Style
+        x:Key="SecondaryActionButtonStyle"
+        BasedOn="{StaticResource RoundedButtonStyle}"
+        TargetType="Button">
+        <!--  OVERVIEW  -->
+        <Setter Property="BackgroundColor" Value="{DynamicResource Yellow100Accent}" />
+        <Setter Property="FontFamily" Value="SemiBold" />
+        <Setter Property="BorderColor" Value="{DynamicResource Yellow300Accent}" />
+        <Setter Property="TextColor" Value="{DynamicResource Black}" />
+    </Style>
+
+    <Style
+        x:Key="GoogleButtonStyle"
+        BasedOn="{StaticResource RoundedButtonStyle}"
+        TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{DynamicResource BasePageColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource BaseTextColor}" />
+        <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
+    <Style
+        x:Key="TranslucidButtonStyle"
+        BasedOn="{StaticResource RoundedButtonStyle}"
+        TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{DynamicResource TranslucidButtonColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}" />
+        <Setter Property="HeightRequest" Value="{DynamicResource BaseButtonHeight}" />
+        <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
+    <!--  CIRCLE BUTTONS FLAT  -->
+    <Style x:Key="CircleActionButtonFlatStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{DynamicResource CircleActionButtonFlatBackgroundColor}" />
+        <Setter Property="BorderColor" Value="{DynamicResource CircleActionButtonFlatBorderColor}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="TextColor" Value="{DynamicResource CircleActionButtonFlatIconColor}" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="WidthRequest" Value="44" />
+    </Style>
+
+    <Style x:Key="PrimaryCircleActionButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryActionButtonStartColor}" />
+        <Setter Property="BorderColor" Value="{DynamicResource PrimaryActionButtonStartColor}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="TextColor" Value="{DynamicResource CircleActionButtonFlatIconColor}" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="WidthRequest" Value="44" />
     </Style>
 
     <Style TargetType="CheckBox">
@@ -104,7 +257,7 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource BaseFontSize}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
@@ -146,9 +299,11 @@
     </Style>
 
     <Style TargetType="Label">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource BaseTextColor}}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource BaseFontSize}" />
+        <Setter Property="FontAttributes" Value="None" />
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -224,9 +379,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="RefreshView">
-        <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
-    </Style>
+
 
     <Style TargetType="SearchBar">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
@@ -397,10 +550,6 @@
 
     <x:Double x:Key="MainMenuLabelFontsize">19</x:Double>
     <x:Double x:Key="MainMenuIconFontsize">22</x:Double>
-
-    <x:Double x:Key="BaseButtonHeight">54</x:Double>
-    <x:Int32 x:Key="BaseButtonCornerRadius">16</x:Int32>
-    <x:Double x:Key="BaseButtonBorderWith">0</x:Double>
 
     <Style x:Key="MainMenuIconStyle" TargetType="Label">
         <Setter Property="TextColor" Value="{DynamicResource MainMenuIconColor}" />

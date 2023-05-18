@@ -38,12 +38,14 @@
             Grid.Row="3"
             Command="{Binding CreateAccountCommand}"
             MaximumWidthRequest="200"
+            Style="{StaticResource PrimaryActionButtonStyle}"
             Text="{loc:Translate CreateAccount}"
             VerticalOptions="End" />
         <Button
             Grid.Row="4"
             Command="{Binding GoToLoginCommand}"
             MaximumWidthRequest="200"
+            Style="{StaticResource PrimaryActionButtonStyle}"
             Text="{loc:Translate Login}"
             VerticalOptions="Start" />
     </Grid>

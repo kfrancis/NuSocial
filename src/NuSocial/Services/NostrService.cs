@@ -3,21 +3,14 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Nostr.Client.Client;
 using Nostr.Client.Communicator;
 using Nostr.Client.Keys;
+using Nostr.Client.Messages;
+using Nostr.Client.Messages.Metadata;
 using Nostr.Client.Requests;
-using Serilog;
 using Nostr.Client.Responses;
 using NuSocial.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Serilog;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
-using Volo.Abp.DependencyInjection;
-using Nostr.Client.Messages.Metadata;
-using Nostr.Client.Messages;
 using Websocket.Client.Models;
-using System.Security.Cryptography.X509Certificates;
 
 namespace NuSocial.Services
 {
@@ -26,17 +19,23 @@ namespace NuSocial.Services
         NostrClientStreams? Streams { get; }
 
         void Dispose();
+
+        Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken);
+
         void RegisterFilter(string subscription, NostrFilter filter);
+
         void StartNostr();
+
         void StopNostr();
     }
+
     public class NostrService : INostrService, IDisposable
     {
         private readonly IDatabase _db;
         private NostrMultiWebsocketClient? _client;
         private INostrCommunicator[]? _communicators;
         private bool _isDisposed;
-
+        private double _profileThreshold = 5;
         private readonly Dictionary<string, NostrFilter> _subscriptionToFilter = new();
 
         public NostrService(IDatabase db)
@@ -64,7 +63,6 @@ namespace NuSocial.Services
                 }
                 else if (!string.IsNullOrEmpty(pubKey))
                 {
-
                 }
                 else
                 {
@@ -201,6 +199,7 @@ namespace NuSocial.Services
 
             if (ev is NostrMetadataEvent evm)
             {
+                WeakReferenceMessenger.Default.Send<NostrMetadataMessage>(new(evm));
                 Log.Information("Name: {name}, about: {about}", evm.Metadata?.Name, evm.Metadata?.About);
             }
 
@@ -210,53 +209,77 @@ namespace NuSocial.Services
                 {
                     case NostrKind.Metadata:
                         break;
+
                     case NostrKind.ShortTextNote:
-                        WeakReferenceMessenger.Default.Send<NostrPostMessage>(new(ev?.Content));
+                        WeakReferenceMessenger.Default.Send<NostrPostMessage>(new(ev));
                         break;
+
                     case NostrKind.RecommendRelay:
                         break;
+
                     case NostrKind.Contacts:
                         break;
+
                     case NostrKind.EncryptedDm:
                         break;
+
                     case NostrKind.EventDeletion:
                         break;
+
                     case NostrKind.Reserved:
                         break;
+
                     case NostrKind.Reaction:
                         break;
+
                     case NostrKind.BadgeAward:
                         break;
+
                     case NostrKind.ChannelCreation:
                         break;
+
                     case NostrKind.ChannelMetadata:
                         break;
+
                     case NostrKind.ChannelMessage:
                         break;
+
                     case NostrKind.ChannelHideMessage:
                         break;
+
                     case NostrKind.ChanelMuteUser:
                         break;
+
                     case NostrKind.Reporting:
                         break;
+
                     case NostrKind.ZapRequest:
                         break;
+
                     case NostrKind.Zap:
                         break;
+
                     case NostrKind.RelayListMetadata:
                         break;
+
                     case NostrKind.ClientAuthentication:
                         break;
+
                     case NostrKind.NostrConnect:
                         break;
+
                     case NostrKind.ProfileBadges:
                         break;
+
                     case NostrKind.BadgeDefinition:
                         break;
+
                     case NostrKind.LongFormContent:
                         break;
+
                     case NostrKind.ApplicationSpecificData:
                         break;
+
                     default:
                         break;
                 }
@@ -294,6 +317,90 @@ namespace NuSocial.Services
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public async Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken)
+        {
+            RegisterFilter(publicKey, new NostrFilter()
+            {
+                Kinds = new[]
+                {
+                    NostrKind.Metadata
+                },
+                Authors = new[]
+                {
+                    publicKey
+                },
+                Limit = 0
+            });
+
+            var relays = await _db.GetRelaysAsync();
+            var relay = relays.FirstOrDefault(r => r.Uri != null);
+            var profileEvents = new List<NostrMetadataEvent>();
+            if (relay != null)
+            {
+                WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
+                WeakReferenceMessenger.Default.Register<NostrMetadataMessage>(this, (r, m) =>
+                {
+                    if (m.Value != null)
+                        profileEvents.Add(m.Value);
+                });
+                var ev = new NostrRequest(publicKey, new NostrFilter() { Authors = new[] { publicKey }, Kinds = new[] { NostrKind.Metadata } });
+                _client.Send<NostrRequest>(ev);
+                await Task.Delay(TimeSpan.FromSeconds(_profileThreshold), cancellationToken);
+                WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
+            }
+
+            var profileInfo = new Profile();
+            var latestProfileEvent = profileEvents.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            if (latestProfileEvent != null && !string.IsNullOrEmpty(latestProfileEvent.Content))
+            {
+                using var doc = JsonDocument.Parse(latestProfileEvent.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
+                var json = doc.RootElement;
+                if (json.TryGetProperty("name", out var nameJson))
+                {
+                    profileInfo.Name = nameJson.GetString() ?? string.Empty;
+                }
+                if (json.TryGetProperty("about", out var aboutJson))
+                {
+                    profileInfo.About = aboutJson.GetString();
+                }
+                if (json.TryGetProperty("picture", out var pictureJson))
+                {
+                    profileInfo.Picture = pictureJson.GetString();
+                }
+                if (json.TryGetProperty("website", out var websiteJson))
+                {
+                    profileInfo.Website = websiteJson.GetString();
+                }
+                if (json.TryGetProperty("display_name", out var displayNameJson))
+                {
+                    profileInfo.DisplayName = displayNameJson.GetString();
+                }
+                if (json.TryGetProperty("nip05", out var nip05Json))
+                {
+                    profileInfo.Nip05 = nip05Json.GetString();
+                }
+            }
+
+            //var followingInfo = await GetFollowingInfoAsync(publicKey, cancellationToken);
+            //if (followingInfo != null &&
+            //    !string.IsNullOrEmpty(followingInfo.Content))
+            //{
+            //    using var doc = JsonDocument.Parse(followingInfo.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
+            //    var json = doc.RootElement;
+            //    foreach (var key in json.EnumerateObject())
+            //    {
+            //        profileInfo.Relays.Add(new(key.Name, key.Value.GetProperty("read").GetBoolean(), key.Value.GetProperty("write").GetBoolean()));
+            //    }
+            //}
+
+            return profileInfo;
+        }
+
+        private Task<NostrMetadataEvent> GetFollowingInfoAsync(string publicKey, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

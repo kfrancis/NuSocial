@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:controls="clr-namespace:Drastic.Markdown;assembly=Drastic.Markdown.Maui"
     xmlns:converters="clr-namespace:NuSocial.Converters"
     xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
@@ -19,7 +20,8 @@
     Shell.TabBarForegroundColor="{StaticResource White}"
     Shell.TabBarIsVisible="True">
     <ContentPage.Resources>
-        <converters:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
+        <controls:DarkMarkdownTheme x:Key="DarkTheme" />
+        <controls:LightMarkdownTheme x:Key="LightTheme" />
         <DataTemplate x:Key="postTemplate" x:DataType="models:Post">
             <Grid Padding="10">
                 <Grid.RowDefinitions>
@@ -70,10 +72,15 @@
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="0,5,0,0"
-                    Padding="10"
-                    CornerRadius="10"
-                    HorizontalOptions="StartAndExpand">
-                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type models:Post}}, Path=Content, Converter={StaticResource markdownConverter}}" TextType="Html" />
+                    Padding="0"
+                    HorizontalOptions="FillAndExpand"
+                    IsClippedToBounds="True">
+                    <controls:MarkdownView
+                        Background="Transparent"
+                        IsClippedToBounds="True"
+                        Markdown="{Binding Source={RelativeSource AncestorType={x:Type models:Post}}, Path=Content}"
+                        Theme="{AppThemeBinding Dark={StaticResource DarkTheme},
+                                                Light={StaticResource LightTheme}}" />
                 </Frame>
                 <Grid
                     Grid.Row="2"
@@ -152,12 +159,10 @@
                 Command="{Binding UpdatePostsCommand}"
                 CornerRadius="5"
                 IsEnabled="{Binding IsNotBusy}"
+                Style="{StaticResource PrimaryActionButtonStyle}"
                 Text="{Binding UnreadLabel}" />
         </Grid>
-        <RefreshView
-            Grid.Row="1"
-            Command="{Binding RefreshCommand}"
-            RefreshColor="Teal">
+        <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}">
             <CollectionView
                 x:Name="collectionView"
                 HorizontalOptions="StartAndExpand"
@@ -166,7 +171,8 @@
                 ItemsUpdatingScrollMode="KeepScrollOffset">
                 <CollectionView.EmptyView>
                     <Label
-                        FontAttributes="Italic"
+                        Padding="0,20"
+                        FontFamily="Italic"
                         Opacity="0.5"
                         Text="{loc:Translate NoRecentPosts}" />
                 </CollectionView.EmptyView>
