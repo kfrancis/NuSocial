@@ -17,6 +17,7 @@
     "AccountKeyPlaceholder": "nsec1...",
     "NuSocial": "NuSocial",
     "TapToRegenerate": "Tap to regenerate",
-    "WelcomeText": "#nostr NuSocial: Your Universe, Nu Connections"
+    "WelcomeText": "#nostr NuSocial: Your Universe, Nu Connections",
+    "NoRecentPosts": "No recent posts"
   }
 }

@@ -160,7 +160,7 @@
                 CornerRadius="5"
                 IsEnabled="{Binding IsNotBusy}"
                 Style="{StaticResource PrimaryActionButtonStyle}"
-                Text="{Binding UnreadLabel}" />
+                Text="{Binding UnreadLabel}" x:Name="UnreadBtn" Clicked="UnreadBtn_Clicked" />
         </Grid>
         <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}">
             <CollectionView

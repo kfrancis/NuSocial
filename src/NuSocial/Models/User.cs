@@ -32,7 +32,7 @@ public class User
 
 public class Profile
 {
-    private string? _picture;
+    private string? _picture = "https://placehold.co/60x60";
 
     public string Name { get; internal set; } = string.Empty;
     public string? DisplayName { get; internal set; }
@@ -40,7 +40,7 @@ public class Profile
     {
         get
         {
-            if (string.IsNullOrEmpty(_picture))
+            if (string.IsNullOrEmpty(_picture) || (_picture.Equals("https://placehold.co/60x60", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(Name)))
             {
                 _picture = $"https://placehold.co/60x60?text={Name}";
             }
@@ -70,11 +70,8 @@ public class UserConfiguration
 }
 
 /// <summary>
-/// A simple model for a contact.
+/// A contact on the #nostr network
 /// </summary>
-/// <param name="Name">Gets the name of the contact.</param>
-/// <param name="Email">Gets the email of the contact.</param>
-/// <param name="Picture">Gets the picture of the contact.</param>
 public sealed record Contact
 {
     [JsonPropertyName("name")]

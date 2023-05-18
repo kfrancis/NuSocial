@@ -19,6 +19,7 @@
         <Label Text="Enter your account key to login:" VerticalOptions="Center" />
         <Entry
             Grid.Row="1"
+            IsPassword="True"
             Placeholder="{loc:Translate AccountKeyPlaceholder}"
             Text="{Binding AccountKey}" />
         <Button

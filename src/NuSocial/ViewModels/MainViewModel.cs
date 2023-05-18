@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Nostr.Client.Messages;
+using NuSocial.Core;
 using NuSocial.Core.ViewModel;
 using NuSocial.Messages;
 using System.Collections.Immutable;
@@ -12,6 +13,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
 {
     private readonly IAuthorService _authorService;
     private CancellationTokenSource? _cts = new();
+    private const int _postThreshold = 100;
 
     [ObservableProperty]
     private ObservableCollection<Post> _posts = new();
@@ -143,8 +145,14 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
         return SetBusyAsync(() =>
         {
             var posts = _postsWaiting.ToImmutableList();
+
             _postsWaiting.Clear();
             OnPropertyChanged(nameof(UnreadLabel));
+
+            if (Posts.Count > _postThreshold)
+            {
+                Posts.RemoveLastN(posts.Count);
+            }
             foreach (var post in posts)
             {
                 Posts.AddFirst(post);
