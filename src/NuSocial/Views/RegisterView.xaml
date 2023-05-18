@@ -146,8 +146,8 @@
             Grid.Row="5"
             Margin="20,0"
             Command="{Binding CreateCommand}"
-            HeightRequest="50"
             MaximumWidthRequest="200"
+            Style="{StaticResource PrimaryActionButtonStyle}"
             Text="{loc:Translate Create}"
             VerticalOptions="Start" />
     </Grid>

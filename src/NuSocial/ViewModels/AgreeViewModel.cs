@@ -1,4 +1,4 @@
-﻿using NuSocial.Core.ViewModel;
+using NuSocial.Core.ViewModel;
 using Volo.Abp.DependencyInjection;
 
 namespace NuSocial.ViewModels;

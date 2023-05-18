@@ -153,14 +153,16 @@
         <Grid Grid.Row="0" ColumnDefinitions="*,150">
             <SearchBar Grid.Column="0" />
             <Button
+                x:Name="UnreadBtn"
                 Grid.Column="1"
                 Margin="5,0"
                 Padding="2"
+                Clicked="UnreadBtn_Clicked"
                 Command="{Binding UpdatePostsCommand}"
                 CornerRadius="5"
                 IsEnabled="{Binding IsNotBusy}"
                 Style="{StaticResource PrimaryActionButtonStyle}"
-                Text="{Binding UnreadLabel}" x:Name="UnreadBtn" Clicked="UnreadBtn_Clicked" />
+                Text="{Binding UnreadLabel}" />
         </Grid>
         <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}">
             <CollectionView

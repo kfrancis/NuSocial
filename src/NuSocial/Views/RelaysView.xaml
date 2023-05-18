@@ -6,12 +6,63 @@
     xmlns:base="clr-namespace:NuSocial.Core.View"
     xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:models="clr-namespace:NuSocial.Models"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
     Padding="20"
     x:DataType="viewModels:RelaysViewModel"
     x:TypeArguments="viewModels:RelaysViewModel"
     BackgroundColor="{StaticResource Background}">
+    <ContentPage.Resources>
+        <DataTemplate x:Key="relayTemplate" x:DataType="models:Relay">
+            <Grid
+                Margin="5,0,0,0"
+                Padding="5,0,0,0"
+                ColumnDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="5"
+                VerticalOptions="Center">
+                <Label
+                    Grid.Column="0"
+                    FontFamily="{StaticResource FaSolid}"
+                    Text="{x:Static fa:FontAwesomeIcons.Circle}">
+                    <Label.Triggers>
+                        <DataTrigger
+                            Binding="{Binding CanRead}"
+                            TargetType="Label"
+                            Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Green}" />
+                        </DataTrigger>
+                        <DataTrigger
+                            Binding="{Binding CanRead}"
+                            TargetType="Label"
+                            Value="False">
+                            <Setter Property="TextColor" Value="{StaticResource ErrorRegular}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Label
+                    Grid.Column="1"
+                    FontFamily="{StaticResource FaSolid}"
+                    Text="{x:Static fa:FontAwesomeIcons.Circle}">
+                    <Label.Triggers>
+                        <DataTrigger
+                            Binding="{Binding CanWrite}"
+                            TargetType="Label"
+                            Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Green}" />
+                        </DataTrigger>
+                        <DataTrigger
+                            Binding="{Binding CanWrite}"
+                            TargetType="Label"
+                            Value="False">
+                            <Setter Property="TextColor" Value="{StaticResource ErrorRegular}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Label Grid.Column="2" Text="{Binding Address}" />
+            </Grid>
+        </DataTemplate>
+    </ContentPage.Resources>
     <Grid RowDefinitions="Auto,*">
         <VerticalStackLayout Spacing="10">
             <Label Text="{loc:Translate ConnectToRelay}" />
@@ -33,8 +84,27 @@
                 </Grid>
             </Frame>
         </VerticalStackLayout>
-        <Grid>
-            <CollectionView />
+        <Grid Grid.Row="1">
+            <Grid
+                Margin="0,20"
+                RowDefinitions="*,Auto"
+                VerticalOptions="StartAndExpand">
+                <Label FontFamily="SemiBold" Text="{loc:Translate Text=Relays}" />
+                <RefreshView Grid.Row="1">
+                    <CollectionView
+                        ItemTemplate="{StaticResource Key=relayTemplate}"
+                        ItemsSource="{Binding Relays}"
+                        SelectionMode="Single">
+                        <CollectionView.EmptyView>
+                            <Label
+                                Padding="0,20"
+                                FontFamily="Italic"
+                                Opacity="0.5"
+                                Text="{loc:Translate Text=NoRelays}" />
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+                </RefreshView>
+            </Grid>
         </Grid>
     </Grid>
 </base:ContentPageViewBase>

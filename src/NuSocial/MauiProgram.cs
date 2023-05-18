@@ -14,7 +14,6 @@ using System.Reflection;
 using Volo.Abp;
 using Volo.Abp.Autofac;
 
-
 #if WINDOWS10_0_17763_0_OR_GREATER
 using NuSocial.Platforms.Windows;
 #endif

@@ -9,9 +9,13 @@ namespace NuSocial.ViewModels;
 
 public partial class RegisterViewModel : BaseFormModel, ITransientDependency
 {
-    public RegisterViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
+    public RegisterViewModel(IDialogService dialogService,
+                             INavigationService navigationService,
+                             IDatabase db)
+        : base(dialogService, navigationService)
     {
         Title = L["CreateAccount"];
+        _db = db;
     }
 
     [Required]
@@ -29,6 +33,7 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
 
     [ObservableProperty]
     private string _privateKey = string.Empty;
+    private readonly IDatabase _db;
 
     public override Task OnFirstAppear()
     {
@@ -52,9 +57,17 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
         return SetBusyAsync(() =>
         {
             // create account
-            return ValidateAsync((isValid) =>
+            return ValidateAsync(async (isValid) =>
             {
-                return Task.CompletedTask;
+                var privKey = NostrPrivateKey.FromBech32(PrivateKey);
+                var pubKeyEc = privKey.Ec.CreateXOnlyPubKey();
+                var pubKey = NostrPublicKey.FromEc(pubKeyEc);
+
+                var user = new User() { PublicKey = pubKey, PrivateKey = privKey };
+                await _db.UpdateUsersAsync(new ObservableCollection<User> { user });
+                GlobalSetting.Instance.CurrentUser = user;
+                await Navigation.NavigateTo("//main", user);
+
             }, async () => await ShowErrorsCommand.ExecuteAsync(null));
         });
     }

@@ -54,6 +54,7 @@
     <Color x:Key="ErrorLight">#FFFFD4DC</Color>
     <Color x:Key="ErrorRegular">#FFFF4D6D</Color>
     <Color x:Key="ErrorDark">#FFE64462</Color>
+    <Color x:Key="Green">#FF8FA998</Color>
 
     <OnPlatform
         x:Key="SecondaryActionOutlineButtonColor"

@@ -27,12 +27,14 @@
             Command="{Binding AgreeCommand}"
             IsEnabled="{Binding AgreeEnabled}"
             MaximumWidthRequest="200"
+            Style="{StaticResource PrimaryActionButtonStyle}"
             Text="Agree" />
         <Button
             Grid.Row="2"
             Command="{Binding DisagreeCommand}"
             IsEnabled="{Binding IsNotBusy}"
             MaximumWidthRequest="200"
+            Style="{StaticResource SecondaryActionButtonStyle}"
             Text="Disagree" />
     </Grid>
 </base:ContentPageViewBase>

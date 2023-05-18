@@ -1,9 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Configuration;
 using Nostr.Client.Keys;
 using NuSocial.Core.Validation;
 using NuSocial.Core.ViewModel;
-using NuSocial.Messages;
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.DependencyInjection;
 
