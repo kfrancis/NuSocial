@@ -1,13 +1,6 @@
-﻿using Autofac.Core;
-using Polly;
+﻿using Polly;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NuSocial.Services
 {
@@ -15,8 +8,12 @@ namespace NuSocial.Services
     {
         Task DeleteAllDataAsync();
 
+        Task<ObservableCollection<Relay>> GetRelaysAsync();
+
         Task<ObservableCollection<User>> GetUsersAsync();
-        
+
+        Task UpdateRelaysAsync(ObservableCollection<Relay> relays);
+
         Task UpdateUsersAsync(ObservableCollection<User> users);
     }
 
@@ -31,10 +28,10 @@ namespace NuSocial.Services
             SQLiteOpenFlags.Create;
 
         private const string _databaseFilename = "NuSocial.db3";
+        private readonly string _databasePath;
         private readonly SemaphoreSlim _lock = new(1, 1);
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private readonly string _databasePath;
 
         // create the database if it doesn't exist
         private Task? _constructionTask;
@@ -52,22 +49,6 @@ namespace NuSocial.Services
         /// </summary>
         public LocalStorage() : this(Path.Combine(FileSystem.AppDataDirectory, _databaseFilename))
         {
-        }
-
-        protected async Task<SQLiteAsyncConnection> GetDatabaseConnection<T>(Action? reset = null) where T : class, new()
-        {
-            _database ??= new SQLiteAsyncConnection(_databasePath, Flags);
-            if (_database.TableMappings.All(x => x.MappedType.Name != typeof(T).Name))
-            {
-                await _database.EnableWriteAheadLoggingAsync();
-                await _database.CreateTableAsync<T>();
-                if (reset != null)
-                {
-                    await reset.InvokeAsync();
-                }
-            }
-
-            return _database;
         }
 
         public LocalStorage(string databasePath)
@@ -102,7 +83,6 @@ namespace NuSocial.Services
         /// </summary>
         public async Task DeleteAllDataAsync()
         {
-            
             // delete data
             try
             {
@@ -135,11 +115,6 @@ namespace NuSocial.Services
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Gets data elements from the database.
-        /// </summary>
-        public Task<ObservableCollection<User>> GetUsersAsync() => GetItemsAsync<User>();
-
         public async Task<ObservableCollection<T>> GetItemsAsync<T>(Action? reset = null) where T : class, new()
         {
             try
@@ -154,6 +129,15 @@ namespace NuSocial.Services
                 _lock.Release();
             }
         }
+
+        public Task<ObservableCollection<Relay>> GetRelaysAsync() => GetItemsAsync<Relay>();
+
+        /// <summary>
+        /// Gets data elements from the database.
+        /// </summary>
+        public Task<ObservableCollection<User>> GetUsersAsync() => GetItemsAsync<User>();
+
+        public Task UpdateRelaysAsync(ObservableCollection<Relay> relays) => UpdateIfPossible(relays);
 
         /// <summary>
         /// Updates data elements in the database.
@@ -176,6 +160,22 @@ namespace NuSocial.Services
 
                 _isDisposed = true;
             }
+        }
+
+        protected async Task<SQLiteAsyncConnection> GetDatabaseConnection<T>(Action? reset = null) where T : class, new()
+        {
+            _database ??= new SQLiteAsyncConnection(_databasePath, Flags);
+            if (_database.TableMappings.All(x => x.MappedType.Name != typeof(T).Name))
+            {
+                await _database.EnableWriteAheadLoggingAsync();
+                await _database.CreateTableAsync<T>();
+                if (reset != null)
+                {
+                    await reset.InvokeAsync();
+                }
+            }
+
+            return _database;
         }
 
         private static Task<T> AttemptAndRetry<T>(Func<Task<T>> action, int numRetries = 10)

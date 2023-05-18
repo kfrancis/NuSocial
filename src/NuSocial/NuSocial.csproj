@@ -83,6 +83,7 @@
 		<wizardVersion>v1.2.4</wizardVersion>
 		<projectType>MVVMToolkit</projectType>
 		<framework>Flyout</framework>
+		<DefaultLanguage>en</DefaultLanguage>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
@@ -123,6 +124,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Remove="appsettings.Development.json" />
+		<None Remove="appsettings.json" />
 		<None Remove="Localization\NuSocial\en.json" />
 		<None Remove="Localization\NuSocial\fr.json" />
 		<None Remove="Resources\Fonts\Urbanist-Medium.ttf" />
@@ -130,11 +133,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="appsettings.Development.json" />
+		<EmbeddedResource Include="appsettings.json" />
 		<EmbeddedResource Include="Localization\NuSocial\fr.json" />
 		<EmbeddedResource Include="Localization\NuSocial\en.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Views\MessagesView.xaml.cs">
+		  <DependentUpon>MessagesView.xaml</DependentUpon>
+		</Compile>
 		<Compile Update="Views\RegisterView.xaml.cs">
 			<DependentUpon>RegisterView.xaml</DependentUpon>
 		</Compile>
@@ -149,6 +157,9 @@
 	<ItemGroup>
 		<MauiXaml Update="Core\View\LoadingIndicatorPopup.xaml">
 			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\MessagesView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\StartView.xaml">
 			<Generator>MSBuild:Compile</Generator>

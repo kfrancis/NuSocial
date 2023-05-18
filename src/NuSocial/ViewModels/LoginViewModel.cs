@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Configuration;
 using Nostr.Client.Keys;
 using NuSocial.Core.Validation;
 using NuSocial.Core.ViewModel;
@@ -10,6 +11,7 @@ namespace NuSocial.ViewModels;
 
 public partial class LoginViewModel : BaseFormModel, ITransientDependency
 {
+    private readonly IConfiguration _configuration;
     private readonly IDatabase _db;
 
     [Required]
@@ -18,9 +20,13 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
     [NostrKeyValid]
     private string _accountKey = string.Empty;
 
-    public LoginViewModel(IDialogService dialogService, INavigationService navigationService, IDatabase db) : base(dialogService, navigationService)
+    public LoginViewModel(IDialogService dialogService,
+                          INavigationService navigationService,
+                          IConfiguration configuration,
+                          IDatabase db) : base(dialogService, navigationService)
     {
         Title = L["Login"];
+        _configuration = configuration;
         _db = db;
     }
 
@@ -56,5 +62,20 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
                 }
             }, async () => await ShowErrorsCommand.ExecuteAsync(null));
         });
+    }
+
+    public override Task OnFirstAppear()
+    {
+        SetWhenDebug();
+        return Task.CompletedTask;
+    }
+
+    [Conditional("DEBUG")]
+    private void SetWhenDebug()
+    {
+        if (_configuration["Keys:Public"] is string pubKey && !string.IsNullOrEmpty(pubKey))
+        {
+            AccountKey = pubKey;
+        }
     }
 }

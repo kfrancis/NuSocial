@@ -4,16 +4,37 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
+    Padding="20"
     x:DataType="viewModels:RelaysViewModel"
     x:TypeArguments="viewModels:RelaysViewModel"
     BackgroundColor="{StaticResource Background}">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Relays"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Spacing="10">
+            <Label Text="{loc:Translate ConnectToRelay}" />
+            <Frame Padding="5" BackgroundColor="{StaticResource White}">
+                <Grid
+                    ColumnDefinitions="25,1*"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Center">
+                    <Label
+                        FontFamily="{StaticResource FaSolid}"
+                        HorizontalOptions="Center"
+                        Text="{x:Static fa:FontAwesomeIcons.CircleNodes}"
+                        VerticalOptions="Center" />
+                    <Entry
+                        Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="FillAndExpand"
+                        Placeholder="{loc:Translate ExampleRelay}" />
+                </Grid>
+            </Frame>
+        </VerticalStackLayout>
+        <Grid>
+            <CollectionView />
+        </Grid>
+    </Grid>
 </base:ContentPageViewBase>

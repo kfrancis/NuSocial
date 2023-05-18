@@ -11,6 +11,9 @@ public class User
     [Ignore]
     public NostrPrivateKey? PrivateKey { get; set; }
 
+    public string? ProfileImageBlurHash { get; set; }
+
+    [PrimaryKey]
     public string PublicKeyString
     {
         get => PublicKey?.Bech32 ?? string.Empty;

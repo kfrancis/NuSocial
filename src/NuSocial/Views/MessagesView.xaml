@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:ContentPageViewBase
-    x:Class="NuSocial.Views.MainView"
+    x:Class="NuSocial.Views.MessagesView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
-    Title="{Binding Title}"
-    x:DataType="viewModels:MainViewModel"
-    x:TypeArguments="viewModels:MainViewModel"
-    Shell.FlyoutBehavior="Flyout"
-    Shell.NavBarIsVisible="True"
-    Shell.TabBarBackgroundColor="{StaticResource Primary}"
-    Shell.TabBarForegroundColor="{StaticResource White}"
-    Shell.TabBarIsVisible="True">
+    x:DataType="viewModels:MessagesViewModel"
+    x:TypeArguments="viewModels:MessagesViewModel">
     <VerticalStackLayout>
         <Label
             HorizontalOptions="Center"
-            Text="{loc:Translate MainView}"
+            Text="Messages"
             VerticalOptions="Center" />
     </VerticalStackLayout>
 </base:ContentPageViewBase>

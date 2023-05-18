@@ -50,15 +50,6 @@ public partial class ShellViewModel : BaseViewModel, ISingletonDependency
     }
 
     /// <summary>
-    /// Activates the Messages page
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(IsNotBusy))]
-    public static void MessagesPressed()
-    {
-        Console.WriteLine("MessagesPressed");
-    }
-
-    /// <summary>
     /// Logs out the user
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
@@ -69,19 +60,6 @@ public partial class ShellViewModel : BaseViewModel, ISingletonDependency
             IsPresented = false;
             _authService ??= Ioc.Default.GetRequiredService<IAuthService>();
             await _authService.LogoutAsync();
-        });
-    }
-
-    /// <summary>
-    /// Activates the support page
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(IsNotBusy))]
-    public Task SupportPressedAsync()
-    {
-        return SetBusyAsync(() =>
-        {
-            _redirectService ??= Ioc.Default.GetRequiredService<IRedirectService>();
-            return _redirectService.OpenUrl(new Uri("https://nostr.com/"));
         });
     }
 
