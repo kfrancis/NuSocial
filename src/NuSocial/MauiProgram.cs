@@ -3,6 +3,7 @@ using Autofac.Diagnostics;
 using CommunityToolkit.Maui.Markup;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
 using Mopups.Hosting;
 using NuSocial.Core.Threading;
 using Serilog;
@@ -13,13 +14,18 @@ using System.Reflection;
 using Volo.Abp;
 using Volo.Abp.Autofac;
 
+
+#if WINDOWS10_0_17763_0_OR_GREATER
+using NuSocial.Platforms.Windows;
+#endif
+
 namespace NuSocial;
 
 public static class MauiProgram
 {
-	public static MauiApp CreateMauiApp()
-	{
-		var builder = MauiApp.CreateBuilder();
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
         SetupSerilog();
         builder
             .UseMauiApp<App>()
@@ -32,13 +38,28 @@ public static class MauiProgram
             .UseSkiaSharp()
             .UseMauiCommunityToolkitMarkup()
             .ConfigureFonts(fonts =>
-			{
-				fonts.AddFont("FontAwesome6FreeBrands.otf", "FontAwesomeBrands");
-				fonts.AddFont("FontAwesome6FreeRegular.otf", "FontAwesomeRegular");
-				fonts.AddFont("FontAwesome6FreeSolid.otf", "FontAwesomeSolid");
-				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                fonts.AddFont("Urbanist-Medium.ttf", "Urbanist");
+            {
+                fonts.AddFont("FontAwesome6FreeBrands.otf", "FontAwesomeBrands");
+                fonts.AddFont("FontAwesome6FreeRegular.otf", "FontAwesomeRegular");
+                fonts.AddFont("FontAwesome6FreeSolid.otf", "FontAwesomeSolid");
+                fonts.AddFont("Urbanist-Black.ttf", "Black");
+                fonts.AddFont("Urbanist-BlackItalic.ttf", "BlackItalic");
+                fonts.AddFont("Urbanist-Bold.ttf", "Bold");
+                fonts.AddFont("Urbanist-BoldItalic.ttf", "BoldItalic");
+                fonts.AddFont("Urbanist-ExtraBold.ttf", "ExtraBold");
+                fonts.AddFont("Urbanist-ExtraBoldItalic.ttf", "ExtraBoldItalic");
+                fonts.AddFont("Urbanist-ExtraLight.ttf", "ExtraLight");
+                fonts.AddFont("Urbanist-ExtraLightItalic.ttf", "ExtraLightItalic");
+                fonts.AddFont("Urbanist-Italic.ttf", "Italic");
+                fonts.AddFont("Urbanist-Light.ttf", "Light");
+                fonts.AddFont("Urbanist-LightItalic.ttf", "LightItalic");
+                fonts.AddFont("Urbanist-Medium.ttf", "Medium");
+                fonts.AddFont("Urbanist-MediumItalic.ttf", "MediumItalic");
+                fonts.AddFont("Urbanist-Regular.ttf", "Regular");
+                fonts.AddFont("Urbanist-SemiBold.ttf", "SemiBold");
+                fonts.AddFont("Urbanist-SemiBoldItalic.ttf", "SemiBoldItalic");
+                fonts.AddFont("Urbanist-Thin.ttf", "Thin");
+                fonts.AddFont("Urbanist-ThinItalic.ttf", "ThinItalic");
             })
             .ConfigureMopups()
             .ConfigureContainer<ContainerBuilder>(new AbpAutofacServiceProviderFactory(GetAutofacContainerBuilder(builder.Services)));
@@ -51,6 +72,21 @@ public static class MauiProgram
         });
 
         AddDebugLogging(builder.Logging);
+
+        // **** THIS SECTION IS WHAT IS RELEVANT FOR YOU ************ //
+        builder.ConfigureLifecycleEvents(events =>
+        {
+#if WINDOWS10_0_17763_0_OR_GREATER
+            events.AddWindows(wndLifeCycleBuilder =>
+            {
+                wndLifeCycleBuilder.OnWindowCreated(window =>
+                {
+                    window.TryMicaOrAcrylic();
+                });
+            });
+#endif
+        });
+        // ************* END OF RELEVANT SECTION *********** //
 
         var app = builder.Build();
 

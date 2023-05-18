@@ -15,7 +15,7 @@
     FlyoutIsPresented="{Binding IsPresented, Mode=TwoWay}"
     Shell.BackgroundColor="{DynamicResource Primary}">
     <Shell.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="{OnPlatform iOS='#00FFFFFF', Default='#FF0D2647'}" StatusBarStyle="LightContent" />
+        <toolkit:StatusBarBehavior StatusBarColor="{OnPlatform iOS='#00FFFFFF', Default='#FF373063'}" StatusBarStyle="LightContent" />
     </Shell.Behaviors>
 
     <ShellContent
@@ -163,9 +163,10 @@
                 <!--  Logout  -->
                 <Button
                     Grid.Row="1"
-                    BackgroundColor="{DynamicResource Blue100Accent}"
+                    BackgroundColor="{DynamicResource Yellow100Accent}"
                     Command="{Binding LogoutPressedCommand}"
-                    Text="{loc:Translate Logout}" />
+                    Text="{loc:Translate Logout}"
+                    TextColor="{DynamicResource Black}" />
             </Grid>
         </DataTemplate>
     </Shell.FlyoutFooterTemplate>

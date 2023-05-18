@@ -16,7 +16,9 @@
     Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="*, Auto,Auto, Auto,*" RowSpacing="10">
         <Label
+            FontFamily="ExtraBold"
             FontSize="55"
+            HorizontalOptions="Center"
             Text="NuSocial"
             TextColor="{StaticResource White}" />
         <skia:SKLottieView
@@ -24,10 +26,11 @@
             HeightRequest="200"
             HorizontalOptions="Center"
             RepeatCount="-1"
-            Source="144135-planet.json"
+            Source="115365-astronauta.json"
             WidthRequest="200" />
         <Label
             Grid.Row="2"
+            FontFamily="SemiBold"
             HorizontalTextAlignment="Center"
             Text="{loc:Translate WelcomeText}"
             TextColor="{StaticResource White}" />

@@ -3,8 +3,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <Color x:Key="Primary">#FF373063</Color>
-    <Color x:Key="Secondary">#FFDFD8F7</Color>
-    <Color x:Key="Tertiary">#FF2B0B98</Color>
+    <Color x:Key="Secondary">#ffa499b3</Color>
+    <Color x:Key="Tertiary">#FFD0BCD5</Color>
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Background">#FFF8F8F8</Color>
@@ -17,8 +17,6 @@
     <Color x:Key="Gray600">#FF404040</Color>
     <Color x:Key="Gray900">#FF212121</Color>
     <Color x:Key="Gray950">#FF141414</Color>
-
-    <Color x:Key="Accent">#F7B548</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
@@ -34,19 +32,19 @@
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}" />
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}" />
 
-    <Color x:Key="Yellow100Accent">#FFF7B548</Color>
+    <Color x:Key="Yellow100Accent">#FFedae49</Color>
     <Color x:Key="Yellow200Accent">#FFFFD590</Color>
     <Color x:Key="Yellow300Accent">#FFFFE5B9</Color>
-    <Color x:Key="Cyan100Accent">#FF28C2D1</Color>
-    <Color x:Key="Cyan200Accent">#FF7BDDEF</Color>
-    <Color x:Key="Cyan300Accent">#FFC3F2F4</Color>
+    <Color x:Key="Cyan100Accent">#FF00798c</Color>
+    <Color x:Key="Cyan200Accent">#FF00c2e0</Color>
+    <Color x:Key="Cyan300Accent">#FF33e4ff</Color>
     <Color x:Key="Blue100Accent">#FF3E8EED</Color>
     <Color x:Key="Blue200Accent">#FF72ACF1</Color>
     <Color x:Key="Blue300Accent">#FFA7CBF6</Color>
 
     <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Offset="0.0" Color="#373063" />
-        <GradientStop Offset="1.0" Color="#C8CF9C" />
+        <GradientStop Offset="0.0" Color="#FF373063" />
+        <GradientStop Offset="1.0" Color="#FFD0BCD5" />
     </LinearGradientBrush>
 
 </ResourceDictionary>
