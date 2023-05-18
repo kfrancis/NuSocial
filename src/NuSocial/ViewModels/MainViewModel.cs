@@ -9,7 +9,7 @@ namespace NuSocial.ViewModels;
 public partial class MainViewModel : BaseViewModel, ITransientDependency
 {
     [ObservableProperty]
-    private ObservableCollection<Post> _posts;
+    private ObservableCollection<Post> _posts = new();
 
     private List<Post> _postsWaiting = new();
 
@@ -29,7 +29,6 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
         {
             UpdateUser();
         });
-        Posts = new ObservableCollection<Post>();
         WeakReferenceMessenger.Default.Register<NostrPostMessage>(this, (r, m) =>
         {
             ReceivePost(m.Value);
@@ -51,7 +50,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
     }
 
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
-    private Task BoostPostAsync()
+    private Task BoostPostAsync(Post post)
     {
         return SetBusyAsync(() =>
         {
@@ -79,7 +78,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency
 
     private void ReceivePost(string? value)
     {
-        _postsWaiting.Add(new Post() { Content = value ?? string.Empty });
+        _postsWaiting.Add(new Post() { Content = value ?? string.Empty, CreatedAt = DateTime.Now });
         OnPropertyChanged(nameof(UnreadLabel));
     }
 
