@@ -44,7 +44,7 @@
         </Tab>
 
         <Tab
-            Title="{loc:Translate Mssages}"
+            Title="{loc:Translate Messages}"
             Icon="{x:Static fa:FontAwesomeIcons.Message}"
             Route="messages">
             <ShellContent ContentTemplate="{DataTemplate views:MessagesView}" />
