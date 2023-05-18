@@ -56,7 +56,13 @@ namespace NuSocial.Models
 
     public class Post
     {
+        [Ignore]
+        public Contact Contact { get; set; }
+
+        public string ContactId => Contact.PublicKey;
+
         public string Content { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [PrimaryKey]
         public string Hash { get; set; }

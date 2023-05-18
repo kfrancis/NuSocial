@@ -13,6 +13,7 @@
     <Color x:Key="Gray300">#FFACACAC</Color>
     <Color x:Key="Gray400">#FF919191</Color>
     <Color x:Key="Gray500">#FF6E6E6E</Color>
+    <Color x:Key="Gray500Translucent">#996E6E6E</Color>
     <Color x:Key="Gray600">#FF404040</Color>
     <Color x:Key="Gray900">#FF212121</Color>
     <Color x:Key="Gray950">#FF141414</Color>

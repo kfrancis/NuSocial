@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using NuSocial.Core.Threading;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.FastConsole;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Reflection;
 using Volo.Abp;
@@ -17,8 +20,9 @@ public static class MauiProgram
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
-		builder
-			.UseMauiApp<App>()
+        SetupSerilog();
+        builder
+            .UseMauiApp<App>()
             .UseMauiCommunityToolkit(options =>
             {
                 options.SetShouldSuppressExceptionsInConverters(true);
@@ -55,6 +59,20 @@ public static class MauiProgram
         return app;
     }
 
+    private static void SetupSerilog()
+    {
+        var flushInterval = new TimeSpan(0, 0, 1);
+        var file = Path.Combine(FileSystem.AppDataDirectory, "NuSocial.log");
+
+        Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Verbose()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        //.WriteTo.File(file, flushToDiskInterval: flushInterval, encoding: System.Text.Encoding.UTF8, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 22)
+        .WriteTo.FastConsole()
+        .CreateLogger();
+    }
+
     [Conditional("DEBUG")]
     private static void AddDebugLogging(ILoggingBuilder logging)
     {
@@ -88,9 +106,12 @@ public static class MauiProgram
 
     private static ContainerBuilder GetAutofacContainerBuilder(IServiceCollection services)
     {
-        services.AddSingleton<IDatabase, LocalStorage>();
+        var db = new LocalStorage();
+        services.AddSingleton<IDatabase>(db);
         services.AddSingleton<ICustomDispatcher, MauiDispatcher>();
+        services.AddSingleton<INostrService>(new NostrService(db));
         services.AddLocalization();
+        services.AddLogging(logging => logging.AddSerilog());
 
         var builder = new Autofac.ContainerBuilder();
 

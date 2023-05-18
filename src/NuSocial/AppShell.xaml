@@ -10,7 +10,7 @@
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     xmlns:views="clr-namespace:NuSocial.Views"
     x:DataType="viewModels:ShellViewModel"
-    FlyoutBackdrop="{DynamicResource Gray500}"
+    FlyoutBackdrop="{DynamicResource Gray500Translucent}"
     FlyoutBackgroundColor="{DynamicResource Primary}"
     FlyoutIsPresented="{Binding IsPresented, Mode=TwoWay}"
     Shell.BackgroundColor="{DynamicResource Primary}">
@@ -40,28 +40,14 @@
             Title="{loc:Translate Home}"
             Icon="{x:Static fa:FontAwesomeIcons.House}"
             Route="main">
-            <ShellContent
-                Title="{loc:Translate Posts}"
-                ContentTemplate="{DataTemplate views:MainView}"
-                Route="posts" />
-            <ShellContent
-                Title="{loc:Translate PostsAndReplies}"
-                ContentTemplate="{DataTemplate views:MainView}"
-                Route="postsAndReplies" />
+            <ShellContent ContentTemplate="{DataTemplate views:MainView}" />
         </Tab>
 
         <Tab
-            Title="{loc:Translate DMs}"
+            Title="{loc:Translate Mssages}"
             Icon="{x:Static fa:FontAwesomeIcons.Message}"
             Route="messages">
-            <ShellContent
-                Title="{loc:Translate DMs}"
-                ContentTemplate="{DataTemplate views:MessagesView}"
-                Route="messages?set=dms" />
-            <ShellContent
-                Title="{loc:Translate Requests}"
-                ContentTemplate="{DataTemplate views:MessagesView}"
-                Route="messages?set=dmrequests" />
+            <ShellContent ContentTemplate="{DataTemplate views:MessagesView}" />
         </Tab>
     </TabBar>
     <Shell.MenuItemTemplate>

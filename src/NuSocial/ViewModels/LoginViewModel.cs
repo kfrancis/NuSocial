@@ -57,6 +57,7 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
 
                         var user = new User() { PublicKey = pubKey, PrivateKey = privKey };
                         await _db.UpdateUsersAsync(new ObservableCollection<User> { user });
+                        GlobalSetting.Instance.CurrentUser = user;
                         await Navigation.NavigateTo("//main", user);
                     }
                 }

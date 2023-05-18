@@ -4,9 +4,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:converters="clr-namespace:NuSocial.Converters"
+    xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:models="clr-namespace:NuSocial.Models"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
+    Padding="20"
     x:DataType="viewModels:MainViewModel"
     x:TypeArguments="viewModels:MainViewModel"
     Shell.FlyoutBehavior="Flyout"
@@ -14,10 +18,159 @@
     Shell.TabBarBackgroundColor="{StaticResource Primary}"
     Shell.TabBarForegroundColor="{StaticResource White}"
     Shell.TabBarIsVisible="True">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="{loc:Translate MainView}"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    <ContentPage.Resources>
+        <converters:ContentStringToMarkdownHtmlConverter x:Key="markdownConverter" />
+        <DataTemplate x:Key="postTemplate" x:DataType="models:Post">
+            <Grid Padding="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="15" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
+                </Grid.GestureRecognizers>
+                <Image
+                    Grid.RowSpan="2"
+                    Margin="0,0,10,0"
+                    Aspect="AspectFill"
+                    HeightRequest="60"
+                    VerticalOptions="Start"
+                    WidthRequest="60">
+                    <Image.Source>
+                        <UriImageSource CacheValidity="00:00:15:00" Uri="{Binding Contact.Picture.Url}" />
+                    </Image.Source>
+                    <Image.Clip>
+                        <RoundRectangleGeometry CornerRadius="15" Rect="0,0,60,60" />
+                    </Image.Clip>
+                </Image>
+                <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,*">
+                    <Label
+                        Grid.Column="0"
+                        FontAttributes="Bold"
+                        Text="{Binding Contact.PetName}" />
+                    <Label
+                        Grid.Column="1"
+                        Margin="5,0"
+                        Text="{Binding Contact.Nip05}"
+                        TextColor="Gray" />
+                    <Label
+                        Grid.Column="2"
+                        FontSize="10"
+                        HorizontalOptions="End"
+                        Text="{Binding CreatedAt}"
+                        TextColor="Gray" />
+                </Grid>
+
+                <Frame
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,5,0,0"
+                    Padding="10"
+                    CornerRadius="10"
+                    HorizontalOptions="StartAndExpand">
+                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type models:Post}}, Path=Content, Converter={StaticResource markdownConverter}}" TextType="Html" />
+                </Frame>
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,10,0,0"
+                    ColumnDefinitions="Auto,Auto,Auto,Auto"
+                    HorizontalOptions="StartAndExpand">
+                    <Image
+                        Grid.Column="0"
+                        Margin="2"
+                        HeightRequest="16"
+                        ToolTipProperties.Text="{loc:Translate Reply}">
+                        <Image.Source>
+                            <FontImageSource
+                                FontFamily="{StaticResource FaSolid}"
+                                Glyph="{x:Static fa:FontAwesomeIcons.Comment}"
+                                Color="LightGray" />
+                        </Image.Source>
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=ReplyToPostCommand}" CommandParameter="{Binding .}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+                    <Image
+                        Grid.Column="1"
+                        Margin="2"
+                        HeightRequest="16">
+                        <Image.Source>
+                            <FontImageSource
+                                FontFamily="{StaticResource FaSolid}"
+                                Glyph="{x:Static fa:FontAwesomeIcons.HandPointUp}"
+                                Color="LightGray" />
+                        </Image.Source>
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=BoostPostCommand}" CommandParameter="{Binding .}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+                    <Image
+                        Grid.Column="2"
+                        Margin="2"
+                        HeightRequest="16">
+                        <Image.Source>
+                            <FontImageSource
+                                FontFamily="{StaticResource FaSolid}"
+                                Glyph="{x:Static fa:FontAwesomeIcons.Heart}"
+                                Color="LightGray" />
+                        </Image.Source>
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+                    <Image
+                        Grid.Column="3"
+                        Margin="2"
+                        HeightRequest="16">
+                        <Image.Source>
+                            <FontImageSource
+                                FontFamily="{StaticResource FaSolid}"
+                                Glyph="{x:Static fa:FontAwesomeIcons.CircleDot}"
+                                Color="LightGray" />
+                        </Image.Source>
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=ReactToPostCommand}" CommandParameter="{Binding .}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </ContentPage.Resources>
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,150">
+            <SearchBar Grid.Column="0" />
+            <Button
+                Grid.Column="1"
+                Margin="5,0"
+                Padding="2"
+                Command="{Binding UpdatePostsCommand}"
+                CornerRadius="5"
+                IsEnabled="{Binding IsNotBusy}"
+                Text="{Binding UnreadLabel}" />
+        </Grid>
+        <RefreshView
+            Grid.Row="1"
+            Command="{Binding RefreshCommand}"
+            RefreshColor="Teal">
+            <CollectionView
+                x:Name="collectionView"
+                HorizontalOptions="StartAndExpand"
+                ItemTemplate="{StaticResource postTemplate}"
+                ItemsSource="{Binding Posts}"
+                ItemsUpdatingScrollMode="KeepScrollOffset">
+                <CollectionView.EmptyView>
+                    <Label
+                        FontAttributes="Italic"
+                        Opacity="0.5"
+                        Text="{loc:Translate NoRecentPosts}" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
 </base:ContentPageViewBase>
