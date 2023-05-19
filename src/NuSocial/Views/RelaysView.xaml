@@ -63,8 +63,32 @@
             </Grid>
         </DataTemplate>
     </ContentPage.Resources>
-    <Grid RowDefinitions="Auto,*">
-        <VerticalStackLayout Spacing="10">
+    <Grid RowDefinitions="50,Auto,*">
+        <CollectionView Grid.Row="0" ItemsSource="{Binding Options}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="0" Orientation="Horizontal" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:RelayViewTypeOption">
+                    <Border
+                        BackgroundColor="{StaticResource Primary}"
+                        HorizontalOptions="Center"
+                        StrokeShape="RoundRectangle 16"
+                        VerticalOptions="Center">
+                        <Label
+                            Padding="10,5"
+                            HorizontalOptions="Center"
+                            Text="{Binding Name}"
+                            TextColor="{StaticResource White}"
+                            VerticalOptions="Center" />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:RelaysViewModel}}, Path=ChangeViewTypeCommand}" CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <VerticalStackLayout Grid.Row="1" Spacing="10">
             <Label Text="{loc:Translate ConnectToRelay}" />
             <Frame Padding="5" BackgroundColor="{StaticResource White}">
                 <Grid
@@ -84,7 +108,7 @@
                 </Grid>
             </Frame>
         </VerticalStackLayout>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid
                 Margin="0,20"
                 RowDefinitions="*,Auto"

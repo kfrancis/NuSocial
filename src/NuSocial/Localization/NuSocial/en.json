@@ -18,6 +18,8 @@
     "NuSocial": "NuSocial",
     "TapToRegenerate": "Tap to regenerate",
     "WelcomeText": "#nostr NuSocial: Your Universe, Nu Connections",
-    "NoRecentPosts": "No recent posts"
+    "NoRecentPosts": "No recent posts",
+    "Enum_My": "My",
+    "Enum_Mutual": "Mutual"
   }
 }
