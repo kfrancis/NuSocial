@@ -11,6 +11,12 @@ namespace NuSocial.Messages
         {
         }
     }
+    public class NostrStateChangeMessage : ValueChangedMessage<bool?>
+    {
+        public NostrStateChangeMessage(bool? value = null) : base(value)
+        {
+        }
+    }
 
     public class NostrPostMessage : ValueChangedMessage<NostrEvent?>
     {

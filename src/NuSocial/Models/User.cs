@@ -1,4 +1,5 @@
-﻿using Nostr.Client.Keys;
+﻿using NBitcoin;
+using Nostr.Client.Keys;
 using SQLite;
 using System.Text.Json.Serialization;
 
@@ -11,6 +12,50 @@ public class User
 
     [Ignore]
     public NostrPrivateKey? PrivateKey { get; set; }
+
+    //private TaprootKeyPair? _taprootKey;
+
+    //[Ignore]
+    //public TaprootKeyPair TaprootKeyPair
+    //{
+    //    get
+    //    {
+    //        if (_taprootKey == null)
+    //        {
+    //            var key = Key.Parse(TaprootBech32m, Network.Main);
+    //            var merkleRoot = RandomUtils.GetUInt256();
+    //            _taprootKey = TaprootKeyPair.CreateTaprootPair(key, merkleRoot);
+    //        }
+
+    //        return _taprootKey;
+    //    }
+    //    set
+    //    {
+    //        _taprootKey = value;
+    //    }
+    //}
+
+    //private string _taprootBech32m = string.Empty;
+    //public string TaprootBech32m
+    //{
+    //    get
+    //    {
+    //        if (TaprootKeyPair != null)
+    //        {
+    //            return TaprootKeyPair.PubKey.GetAddress(Network.Main).PubKey.ToString();
+    //        }
+    //        else
+    //        {
+    //            return _taprootBech32m;
+    //        }
+    //    }
+    //    set
+    //    {
+    //        _taprootBech32m = value;
+    //    }
+    //}
+
+    public string Taproot { get; set; } = string.Empty;
 
     public string? ProfileImageBlurHash { get; set; }
 

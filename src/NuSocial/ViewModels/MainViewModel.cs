@@ -37,13 +37,21 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
     public override Task OnFirstAppear()
     {
         WeakReferenceMessenger.Default.Send<ResetNavMessage>(new());
+
         WeakReferenceMessenger.Default.Register<NostrUserChangedMessage>(this, (r, m) =>
         {
             UpdateUser();
         });
+
         WeakReferenceMessenger.Default.Register<NostrPostMessage>(this, (r, m) =>
         {
             ReceivePost(m.Value);
+        });
+
+        WeakReferenceMessenger.Default.Register<NostrStateChangeMessage>(this, (r, m) =>
+        {
+            // Should we receive the state change message, cancel the nostr token to let other tasks continue.
+            _cts?.Cancel();
         });
         return Task.CompletedTask;
     }

@@ -1,4 +1,6 @@
-﻿using NuSocial.Core.ViewModel;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using NuSocial.Core.ViewModel;
+using NuSocial.Messages;
 using Volo.Abp.DependencyInjection;
 
 namespace NuSocial.ViewModels;
@@ -35,6 +37,9 @@ public partial class RelaysViewModel : BaseViewModel, ITransientDependency
 
     public override async Task InitializeAsync()
     {
+        // We need to cancel any work currently handling nostr information, so fire that message.
+        WeakReferenceMessenger.Default.Send<NostrStateChangeMessage>(new(false));
+
         Relays = await _db.GetRelaysAsync();
         SetOptions(ViewType);
     }

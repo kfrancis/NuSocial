@@ -217,9 +217,10 @@ namespace NuSocial.Services
             where T : new()
         {
             ArgumentNullException.ThrowIfNull(_database);
-            await _lock.WaitAsync().ConfigureAwait(false);
+            
             try
             {
+                await _lock.WaitAsync().ConfigureAwait(false);
                 var entityType = typeof(T);
                 var entityProperties = entityType.GetProperties();
                 var needsReset = false;

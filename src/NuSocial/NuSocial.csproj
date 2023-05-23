@@ -166,6 +166,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Controls\ProfileImage.xaml.cs">
+		  <DependentUpon>ProfileImage.xaml</DependentUpon>
+		</Compile>
 		<Compile Update="Views\MessagesView.xaml.cs">
 		  <DependentUpon>MessagesView.xaml</DependentUpon>
 		</Compile>
@@ -181,6 +184,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Controls\ProfileImage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Core\View\LoadingIndicatorPopup.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

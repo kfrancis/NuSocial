@@ -24,7 +24,11 @@
         Route="start" />
 
     <FlyoutItem Title="{loc:Translate Profile}" Icon="{x:Static fa:FontAwesomeIcons.User}">
-        <ShellContent ContentTemplate="{DataTemplate views:MainView}" Route="profile" />
+        <ShellContent ContentTemplate="{DataTemplate views:ProfileView}" Route="profile" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{loc:Translate Home}" Icon="{x:Static fa:FontAwesomeIcons.House}">
+        <ShellContent ContentTemplate="{DataTemplate views:MainView}" Route="home" />
     </FlyoutItem>
 
     <FlyoutItem Title="{loc:Translate Relays}" Icon="{x:Static fa:FontAwesomeIcons.Globe}">

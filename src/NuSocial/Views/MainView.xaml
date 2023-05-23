@@ -8,6 +8,7 @@
     xmlns:converters="clr-namespace:NuSocial.Converters"
     xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:local="clr-namespace:NuSocial.Controls"
     xmlns:models="clr-namespace:NuSocial.Models"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
     Title="{Binding Title}"
@@ -37,17 +38,19 @@
                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
                 </Grid.GestureRecognizers>
                 <Image
+                    Grid.Row="1"
                     Grid.RowSpan="2"
-                    Margin="0,0,10,0"
+                    Margin="0,5,10,0"
                     Aspect="AspectFill"
                     HeightRequest="60"
+                    IsAnimationPlaying="True"
                     VerticalOptions="Start"
                     WidthRequest="60">
                     <Image.Source>
                         <UriImageSource CacheValidity="00:00:15:00" Uri="{Binding Contact.Picture.Url}" />
                     </Image.Source>
                     <Image.Clip>
-                        <RoundRectangleGeometry CornerRadius="15" Rect="0,0,60,60" />
+                        <RoundRectangleGeometry CornerRadius="{StaticResource BaseButtonCornerRadius}" Rect="0,0,60,60" />
                     </Image.Clip>
                 </Image>
                 <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,*">
