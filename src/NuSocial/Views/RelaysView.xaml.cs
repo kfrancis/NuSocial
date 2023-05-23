@@ -18,7 +18,9 @@ public partial class RelaysView
 		InitializeComponent();
 	}
 
-	public RelaysView() : this(Ioc.Default.GetRequiredService<RelaysViewModel>(), Ioc.Default.GetRequiredService<IStringLocalizer<NuSocialResource>>())
+	public RelaysView() :
+        this(Ioc.Default.GetRequiredService<RelaysViewModel>(),
+             Ioc.Default.GetRequiredService<IStringLocalizer<NuSocialResource>>())
 	{
     }
 }
