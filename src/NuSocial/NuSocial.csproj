@@ -57,10 +57,6 @@
 		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
 		<PackageReference Include="BindableProps" Version="1.3.7" />
 		<PackageReference Include="Bogus" Version="34.0.2" />
-		<PackageReference Include="Bogus.Tools.Analyzer" Version="34.0.2">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="3.1.0" />
 		<PackageReference Include="CommunityToolkit.MVVM" Version="8.2.0" />
@@ -68,6 +64,7 @@
 		<PackageReference Include="Markdig" Version="0.31.0" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
+		<PackageReference Include="Microsoft.AppCenter.Distribute" Version="5.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Maui.Graphics.Text.Markdig" Version="7.0.86" />
 		<PackageReference Include="Mopups" Version="1.1.1" />

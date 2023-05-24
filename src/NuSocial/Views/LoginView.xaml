@@ -34,6 +34,7 @@
             Grid.Row="3"
             Margin="0,10"
             Command="{Binding DemoCommand}"
+            IsVisible="{Binding ShowDemoButton}"
             MaximumWidthRequest="200"
             Style="{StaticResource PrimaryActionButtonStyle}"
             Text="{loc:Translate Demo}"

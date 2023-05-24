@@ -44,6 +44,9 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
         });
     }
 
+    [ObservableProperty]
+    private bool _showDemoButton;
+
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
     private Task LoginAsync()
     {
@@ -90,5 +93,7 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
         {
             AccountKey = pubKey;
         }
+
+        ShowDemoButton = true;
     }
 }
