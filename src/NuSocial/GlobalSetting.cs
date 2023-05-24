@@ -28,6 +28,8 @@ namespace NuSocial
             }
         }
 
+        public bool DemoMode { get; set; }
+
         private static void UpdateUser(NostrPublicKey publicKey, NostrPrivateKey? privateKey)
         {
             if (privateKey != null)

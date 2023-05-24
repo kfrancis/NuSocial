@@ -12,6 +12,7 @@ namespace NuSocial.ViewModels;
 public partial class MainViewModel : BaseViewModel, ITransientDependency, IDisposable
 {
     private readonly IAuthorService _authorService;
+    private readonly INostrService _nostrService;
     private CancellationTokenSource? _cts = new();
     private const int _postThreshold = 100;
 
@@ -26,16 +27,23 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
 
     public MainViewModel(IDialogService dialogService,
                          INavigationService navigationService,
-                         IAuthorService authorService)
+                         IAuthorService authorService,
+                         INostrService nostrService)
         : base(dialogService, navigationService)
     {
         _authorService = authorService;
+        _nostrService = nostrService;
     }
 
     public string UnreadLabel => $"{L["Unread"]} ({_postsWaiting.Count})";
 
     public override Task OnFirstAppear()
     {
+        if (GlobalSetting.Instance.DemoMode && _nostrService is TestNostrService)
+        {
+            _nostrService.StartNostr();
+        }
+
         WeakReferenceMessenger.Default.Send<ResetNavMessage>(new());
 
         WeakReferenceMessenger.Default.Register<NostrUserChangedMessage>(this, (r, m) =>

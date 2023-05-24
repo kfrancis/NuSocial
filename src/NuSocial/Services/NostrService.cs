@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using Bogus;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nostr.Client.Client;
 using Nostr.Client.Communicator;
@@ -401,6 +402,187 @@ namespace NuSocial.Services
         private Task<NostrMetadataEvent> GetFollowingInfoAsync(string publicKey, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class TestNostrService : INostrService, IDisposable
+    {
+        private bool _isDisposed;
+        private readonly Faker<NostrEvent> _nostrFaker;
+        private readonly Faker<Profile> _profileFaker;
+        private Timer? _timer;
+
+        public TestNostrService()
+        {
+            var faker = new Faker();
+            List<NostrKeyPair> authorPool = new List<NostrKeyPair>();
+            for (int i = 0; i < faker.Random.Int(10, 100); i++)
+            {
+                var keyPair = NostrKeyPair.GenerateNew();
+                authorPool.Add(keyPair);
+            }
+            _nostrFaker = new Faker<NostrEvent>()
+                .RuleFor(n => n.Pubkey, f => authorPool[f.UniqueIndex % authorPool.Count].PublicKey.Bech32)
+                .RuleFor(n => n.CreatedAt, f => f.Date.Recent(f.Random.Int(1, 7)))
+                .RuleFor(n => n.Kind, f => NostrKind.ShortTextNote)
+                .RuleFor(n => n.Tags, f => default)
+                .RuleFor(n => n.Content, f => TestNostrService.GenerateRandomMarkdownContent(f))
+                .RuleFor(n => n.Id, (f, n) => n.ComputeId())
+                .RuleFor(n => n.Sig, (f, n) =>
+                {
+                    var index = f.UniqueIndex % authorPool.Count;
+                    var keyPair = authorPool[index];
+                    var sig = n.ComputeSignature(keyPair.PrivateKey);
+                    return sig;
+                })
+                .FinishWith((f, e) =>
+                {
+                    Console.WriteLine("Content event generated! Id={0}", e.Id);
+                });
+
+            _profileFaker = new Faker<Profile>()
+                .RuleFor(p => p.Name, f => f.Internet.UserName())
+                .RuleFor(p => p.DisplayName, f => f.Random.Bool(0.2f) ? f.Internet.UserName() : null)
+                .RuleFor(p => p.Picture, f => f.Random.Bool(0.8f) ? f.Internet.Avatar() : null)
+                .RuleFor(p => p.Relays, f => default);
+        }
+
+        private static string GenerateRandomMarkdownContent(Faker faker)
+        {
+            var markdownContent = $"{string.Join(" ", faker.Lorem.Words(faker.Random.Int(1,3)))}\n\n";
+            var hasSomethingInteresting = false;
+            if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
+            {
+                for (var i = 0; i < faker.Random.Int(1, 3); i++)
+                {
+                    markdownContent += $"{faker.Lorem.Paragraph()}\n\n";
+                }
+                hasSomethingInteresting = true;
+            }
+
+            // Add a list
+            if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
+            {
+                markdownContent += "## List\n\n";
+                for (var i = 0; i < faker.Random.Int(2, 5); i++)
+                {
+                    markdownContent += $"* {faker.Lorem.Sentence()}\n";
+                }
+                hasSomethingInteresting = true;
+                if (faker.Random.Bool(0.05f))
+                {
+                    hasSomethingInteresting = false;
+                }
+            }
+
+            // Add a quote
+            if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
+            {
+                markdownContent += "\n> " + faker.Lorem.Sentence() + "\n\n";
+                hasSomethingInteresting = true;
+                if (faker.Random.Bool(0.05f))
+                {
+                    hasSomethingInteresting = false;
+                }
+            }
+
+            // Add a code block
+            if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
+            {
+                markdownContent += "```\n" + faker.Lorem.Sentence() + "\n```\n\n";
+                hasSomethingInteresting = true;
+                if (faker.Random.Bool(0.05f))
+                {
+                    hasSomethingInteresting = false;
+                }
+            }
+
+            // Add a table
+            if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
+            {
+                markdownContent += "| Column 1 | Column 2 |\n| -------- | -------- |\n";
+                for (var i = 0; i < faker.Random.Int(2, 5); i++)
+                {
+                    markdownContent += $"| {faker.Lorem.Word()} | {faker.Lorem.Word()} |\n";
+                }
+                hasSomethingInteresting = true;
+                if (faker.Random.Bool(0.05f))
+                {
+                    hasSomethingInteresting = false;
+                }
+            }
+
+            // Add an emoji
+            if (!hasSomethingInteresting && faker.Random.Bool(0.30f))
+            {
+                var emojis = new[] { "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇" };
+                markdownContent += "\n" + faker.PickRandom(emojis) + "\n";
+                hasSomethingInteresting = true;
+                if (faker.Random.Bool(0.05f))
+                {
+                    hasSomethingInteresting = false;
+                }
+            }
+
+            return markdownContent;
+        }
+
+        public NostrClientStreams? Streams => throw new NotImplementedException();
+
+
+        public Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_profileFaker.Generate());
+        }
+
+        public void RegisterFilter(string subscription, NostrFilter filter)
+        {
+            // Do nothing
+        }
+
+        public void StartNostr()
+        {
+            var faker = new Faker();
+            _timer = new Timer(SendNostrPostMessage, null, 0, faker.Random.Int(1000, 5000));
+        }
+
+        private void SendNostrPostMessage(object? state)
+        {
+            var nostrEvent = _nostrFaker.Generate();
+            var message = new NostrPostMessage(nostrEvent);
+            WeakReferenceMessenger.Default.Send(message);
+        }
+
+        public void StopNostr()
+        {
+            _timer?.Dispose();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    _timer?.Dispose();
+                }
+
+                _isDisposed = true;
+            }
+        }
+
+        ~TestNostrService()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -29,6 +29,20 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
     }
 
     public bool IsAccountKeyValid => !string.IsNullOrEmpty(AccountKey);
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task DemoAsync()
+    {
+        return SetBusyAsync(async () =>
+        {
+            var keyPair = NostrKeyPair.GenerateNew();
+
+            var user = new User() { PublicKey = keyPair.PublicKey, PrivateKey = keyPair.PrivateKey };
+            await _db.UpdateUsersAsync(new ObservableCollection<User> { user });
+            GlobalSetting.Instance.DemoMode = true;
+            GlobalSetting.Instance.CurrentUser = user;
+            await Navigation.NavigateTo("//main", user);
+        });
+    }
 
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
     private Task LoginAsync()

@@ -351,3 +351,4 @@ MigrationBackup/
 src/NuSocial/Bogus.Premium.LicenseKey
 tests/NostrLib.Tests/testing_keys.json
 /src/NuSocial/appsettings.Development.json
+/Bogus.Premium.LicenseKey
