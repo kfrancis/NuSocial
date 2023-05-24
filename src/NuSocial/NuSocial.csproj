@@ -138,8 +138,6 @@
 	<ItemGroup>
 		<None Remove="appsettings.Development.json" />
 		<None Remove="appsettings.json" />
-		<None Remove="Localization\NuSocial\en.json" />
-		<None Remove="Localization\NuSocial\fr.json" />
 		<None Remove="Resources\Fonts\Urbanist-Bold.ttf" />
 		<None Remove="Resources\Fonts\Urbanist-BoldItalic.ttf" />
 		<None Remove="Resources\Fonts\Urbanist-ExtraBold.ttf" />
@@ -163,8 +161,10 @@
 	<ItemGroup>
 		<EmbeddedResource Include="appsettings.Development.json" />
 		<EmbeddedResource Include="appsettings.json" />
-		<EmbeddedResource Include="Localization\NuSocial\fr.json" />
-		<EmbeddedResource Include="Localization\NuSocial\en.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NuSocial.Core\NuSocial.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -188,9 +188,6 @@
 	<ItemGroup>
 		<MauiXaml Update="Controls\ProfileImage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Core\View\LoadingIndicatorPopup.xaml">
-			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\MessagesView.xaml">
 		  <Generator>MSBuild:Compile</Generator>

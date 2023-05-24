@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using NuSocial.Core;
 using NuSocial.Managers;
+using NuSocial.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

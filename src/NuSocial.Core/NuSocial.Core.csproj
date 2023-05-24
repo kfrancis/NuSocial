@@ -1,8 +1,81 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<GenerateDocumentationFile>False</GenerateDocumentationFile>
+		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">True</UseInterpreter>
+	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Localization\NuSocial\en.json" />
+	  <None Remove="Localization\NuSocial\fr.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Localization\NuSocial\en.json" />
+	  <EmbeddedResource Include="Localization\NuSocial\fr.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+		<PackageReference Include="Bogus" Version="34.0.2" />
+		<PackageReference Include="Bogus.Tools.Analyzer" Version="34.0.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="CommunityToolkit.Maui" Version="5.1.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+		<PackageReference Include="Flurl.Http" Version="3.2.4" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
+		<PackageReference Include="modernhttpclient-updated" Version="3.4.3" />
+		<PackageReference Include="Mopups" Version="1.1.1" />
+		<PackageReference Include="NBitcoin" Version="7.0.25" />
+		<PackageReference Include="NBitcoin.Secp256k1" Version="3.1.1" />
+		<PackageReference Include="Nostr.Client" Version="1.4.0" />
+		<PackageReference Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
+		<PackageReference Include="Polly" Version="7.2.3" />
+		<PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
+		<PackageReference Include="Serilog" Version="2.12.0" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.4" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="Telerik.UI.for.Maui" Version="5.1.0" />
+		<PackageReference Include="Volo.Abp.Core" Version="7.1.1" />
+		<PackageReference Include="Volo.Abp.Localization" Version="7.1.1" />
+		<PackageReference Include="Volo.Abp.Localization.Abstractions" Version="7.1.1" />
+		<PackageReference Include="Volo.Abp.Validation" Version="7.1.1" />
+		<PackageReference Include="Xam.Plugin.Media" Version="5.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\LoadingIndicatorPopup.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\LoadingIndicatorPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
 </Project>

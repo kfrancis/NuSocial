@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using NuSocial.Core;
 using NuSocial.Localization;
 using Volo.Abp.Autofac;
 using Volo.Abp.Http.Client;
@@ -12,12 +13,13 @@ namespace NuSocial
 {
     [DependsOn(
         typeof(AbpLocalizationModule),
-        typeof(AbpAutofacModule))]
+        typeof(AbpAutofacModule),
+        typeof(NuSocialCoreModule))]
     public class NuSocialModule : AbpModule
     {
         public NuSocialModule()
         {
-            
+
         }
 
         public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -76,32 +78,11 @@ namespace NuSocial
                 throw new ArgumentNullException(nameof(context));
             }
 
-            Configure<AbpVirtualFileSystemOptions>(options =>
-            {
-                options.FileSets.AddEmbedded<NuSocialModule>("NuSocial");
-            });
-
-            Configure<AbpLocalizationOptions>(options =>
-            {
-                options.Resources
-                    .Add<NuSocialResource>("en")
-                    .AddBaseTypes(typeof(AbpValidationResource))
-                    .AddVirtualJson("/Localization/NuSocial");
-
-                options.DefaultResourceType = typeof(NuSocialResource);
-            });
-
-            Configure<AbpExceptionLocalizationOptions>(options =>
-            {
-                options.MapCodeNamespace("NuSocial", typeof(NuSocialResource));
-            });
-
             context.Services.AddAssemblyOf<ShellViewModel>();
 
             var configuration = context.Services.GetConfiguration();
 
             ConfigureLocalization();
-            ConfigureAnalytics(context.Services, configuration);
         }
 
         private void ConfigureLocalization()

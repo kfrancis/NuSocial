@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrKey", "src\NostrKey\No
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuSocial", "src\NuSocial\NuSocial.csproj", "{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuSocial.Blazor", "src\NuSocial.Blazor\NuSocial.Blazor.csproj", "{75519B3B-DA14-44B4-AC66-674909C359AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuSocial.Core", "src\NuSocial.Core\NuSocial.Core.csproj", "{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +35,16 @@ Global
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

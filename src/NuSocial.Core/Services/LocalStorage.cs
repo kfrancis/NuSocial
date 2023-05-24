@@ -1,4 +1,5 @@
-﻿using Polly;
+﻿using NuSocial.Models;
+using Polly;
 using SQLite;
 using System.Reflection;
 

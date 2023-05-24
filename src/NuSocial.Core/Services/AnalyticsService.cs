@@ -2,6 +2,8 @@
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Text;
 
