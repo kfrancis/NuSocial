@@ -14,7 +14,7 @@
     Shell.FlyoutBehavior="Disabled">
     <Grid
         Margin="20,0"
-        RowDefinitions="Auto,Auto,*,*"
+        RowDefinitions="Auto,Auto,Auto,*"
         RowSpacing="10">
         <Label Text="Enter your account key to login:" VerticalOptions="Center" />
         <Entry
@@ -24,7 +24,7 @@
             Text="{Binding AccountKey}" />
         <Button
             Grid.Row="2"
-            Margin="0,10"
+            Margin="0,10,0,0"
             Command="{Binding LoginCommand}"
             MaximumWidthRequest="200"
             Style="{StaticResource PrimaryActionButtonStyle}"
@@ -32,12 +32,11 @@
             VerticalOptions="Start" />
         <Button
             Grid.Row="3"
-            Margin="0,10"
             Command="{Binding DemoCommand}"
             IsVisible="{Binding ShowDemoButton}"
             MaximumWidthRequest="200"
             Style="{StaticResource PrimaryActionButtonStyle}"
-            Text="{loc:Translate Demo}"
+            Text="{loc:Translate TestMode}"
             VerticalOptions="Start" />
     </Grid>
 </base:ContentPageFormBase>
