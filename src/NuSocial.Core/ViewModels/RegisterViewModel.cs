@@ -14,7 +14,7 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
                              IDatabase db)
         : base(dialogService, navigationService)
     {
-        Title = L["CreateAccount"];
+        
         _db = db;
     }
 
@@ -37,10 +37,17 @@ public partial class RegisterViewModel : BaseFormModel, ITransientDependency
 
     public override Task OnFirstAppear()
     {
+        
         GenerateKeyPair();
 
         WeakReferenceMessenger.Default.Send<ResetNavMessage>(new("//start"));
         return Task.CompletedTask;
+    }
+
+    public override Task InitializeAsync()
+    {
+        Title = L["CreateAccount"];
+        return base.InitializeAsync();
     }
 
     private void GenerateKeyPair()

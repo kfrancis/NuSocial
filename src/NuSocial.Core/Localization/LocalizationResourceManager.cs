@@ -28,7 +28,13 @@ public partial class LocalizationResourceManager : ObservableObject, ISingletonD
         CultureInfo.CurrentCulture = CurrentCulture;
         CultureInfo.CurrentUICulture = CurrentCulture;
 
-        return _localizer[resourceKey];
+        var loc = _localizer[resourceKey];
+        if (loc.ResourceNotFound)
+        {
+            Debug.WriteLine($"Resource not found: {resourceKey}");
+            loc = new LocalizedString(loc.Name, $"[{resourceKey}]", loc.ResourceNotFound);
+        }
+        return loc;
     }
 
     internal static object GetInstance(IServiceProvider serviceProvider)

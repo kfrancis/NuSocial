@@ -26,7 +26,7 @@ namespace NuSocial.Core
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
                 // "YourRootNameSpace" is the root namespace of your project. It can be empty if your root namespace is empty.
-                options.FileSets.AddEmbedded<NuSocialCoreModule>();
+                options.FileSets.AddEmbedded<NuSocialCoreModule>("NuSocial.Core");
             });
 
             Configure<AbpLocalizationOptions>(options =>

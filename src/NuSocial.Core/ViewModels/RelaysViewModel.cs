@@ -31,12 +31,14 @@ public partial class RelaysViewModel : BaseViewModel, ITransientDependency
                            IDatabase db)
         : base(dialogService, navigationService)
     {
-        Title = L["Relays"];
+        
         _db = db;
     }
 
     public override async Task InitializeAsync()
     {
+        Title = L["Relays"];
+
         // We need to cancel any work currently handling nostr information, so fire that message.
         WeakReferenceMessenger.Default.Send<NostrStateChangeMessage>(new(false));
 

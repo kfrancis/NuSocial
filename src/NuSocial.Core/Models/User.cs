@@ -77,7 +77,7 @@ public class User
 
 public class Profile
 {
-    private string? _picture = "https://placehold.co/60x60";
+    private string? _picture = "https://placehold.co/60x60.png";
 
     public string Name { get; internal set; } = string.Empty;
     public string? DisplayName { get; internal set; }
@@ -85,9 +85,9 @@ public class Profile
     {
         get
         {
-            if (string.IsNullOrEmpty(_picture) || (_picture.Equals("https://placehold.co/60x60", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(Name)))
+            if (string.IsNullOrEmpty(_picture) || (_picture.Equals("https://placehold.co/60x60.png", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(Name)))
             {
-                _picture = $"https://placehold.co/60x60?text={Name}";
+                _picture = $"https://placehold.co/60x60.png?text={Name}";
             }
             return _picture;
         }

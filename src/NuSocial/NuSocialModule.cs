@@ -12,14 +12,13 @@ using Volo.Abp.VirtualFileSystem;
 namespace NuSocial
 {
     [DependsOn(
-        typeof(AbpLocalizationModule),
         typeof(AbpAutofacModule),
         typeof(NuSocialCoreModule))]
     public class NuSocialModule : AbpModule
     {
         public NuSocialModule()
         {
-
+            SkipAutoServiceRegistration = true;
         }
 
         public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -78,7 +77,8 @@ namespace NuSocial
                 throw new ArgumentNullException(nameof(context));
             }
 
-            context.Services.AddAssemblyOf<ShellViewModel>();
+            context.Services.AddAssemblyOf<StartViewModel>();
+            context.Services.AddAssemblyOf<StartView>();
 
             var configuration = context.Services.GetConfiguration();
 
@@ -87,6 +87,12 @@ namespace NuSocial
 
         private void ConfigureLocalization()
         {
+            Configure<AbpLocalizationOptions>(options =>
+            {
+                options.Resources
+                    .Get<NuSocialResource>();
+            });
+
             Configure<AbpLocalizationOptions>(options =>
             {
                 options.Languages.Add(new LanguageInfo("en", "en", "English"));

@@ -7,7 +7,7 @@
     xmlns:controls="clr-namespace:Drastic.Markdown;assembly=Drastic.Markdown.Maui"
     xmlns:converters="clr-namespace:NuSocial.Converters"
     xmlns:fa="clr-namespace:FontAwesome"
-    xmlns:loc="clr-namespace:NuSocial.Helpers;assembly=NuSocial.Core"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:local="clr-namespace:NuSocial.Controls"
     xmlns:models="clr-namespace:NuSocial.Models;assembly=NuSocial.Core"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"

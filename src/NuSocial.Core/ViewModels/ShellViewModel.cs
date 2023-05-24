@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using NuSocial.Core.ViewModel;
+using NuSocial.Localization;
 using NuSocial.Messages;
 using Volo.Abp.DependencyInjection;
 
@@ -24,7 +25,7 @@ public partial class ShellViewModel : BaseViewModel, ISingletonDependency
 
     private IRedirectService? _redirectService;
 
-    public ShellViewModel(IAppInfo appInfo)
+    public ShellViewModel(IAppInfo appInfo, LocalizationResourceManager localizationManager)
     {
         if (appInfo is null)
         {
@@ -42,10 +43,20 @@ public partial class ShellViewModel : BaseViewModel, ISingletonDependency
         {
             RefreshMenuItems(false);
         });
+
+        localizationManager.PropertyChanged += (_, _) =>
+        {
+            UpdateProperties();
+        };
     }
 
-    public ShellViewModel()
-        : this(AppInfo.Current)
+    private void UpdateProperties()
+    {
+        throw new NotImplementedException();
+    }
+
+    public ShellViewModel(LocalizationResourceManager localizationManager)
+        : this(AppInfo.Current, localizationManager)
     {
     }
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using Mopups.Hosting;
 using NuSocial.Core.Threading;
+using NuSocial.Localization;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.FastConsole;

@@ -23,7 +23,7 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
                           IConfiguration configuration,
                           IDatabase db) : base(dialogService, navigationService)
     {
-        Title = L["Login"];
+        
         _configuration = configuration;
         _db = db;
     }
@@ -80,8 +80,14 @@ public partial class LoginViewModel : BaseFormModel, ITransientDependency
         });
     }
 
+    public override Task InitializeAsync()
+    {
+        Title = L["Login"];
+        return base.InitializeAsync();
+    }
     public override Task OnFirstAppear()
     {
+        
         SetWhenDebug();
         return Task.CompletedTask;
     }

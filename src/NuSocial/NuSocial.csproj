@@ -13,6 +13,7 @@
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
 
 		<!-- Display name -->
 		<ApplicationTitle>NuSocial</ApplicationTitle>
@@ -68,7 +69,6 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Maui.Graphics.Text.Markdig" Version="7.0.86" />
 		<PackageReference Include="Mopups" Version="1.1.1" />
-		<PackageReference Include="NBitcoin.Secp256k1" Version="3.1.1" />
 		<PackageReference Include="Nostr.Client" Version="1.4.0" />
 		<PackageReference Include="Polly" Version="7.2.3" />
 		<PackageReference Include="Serilog" Version="2.12.0" />
@@ -102,38 +102,6 @@
 	  <CodesignKey>Apple Development: Created via API (45692F9U2L)</CodesignKey>
 	  <CodesignProvision>VS: WildCard Development</CodesignProvision>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x64\native\secp256k1.dll" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-x86\native\secp256k1.dll" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\win-arm64\native\secp256k1.dll" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x64\native\libsecp256k1.so" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-x86\native\libsecp256k1.so" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\linux-arm64\native\libsecp256k1.so" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-x64\native\libsecp256k1.dylib" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="C:\Users\byter\.nuget\packages\secp256k1.native\0.1.24-alpha\build\netstandard1.0\..\..\runtimes\osx-arm64\native\libsecp256k1.dylib" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="appsettings.Development.json" />

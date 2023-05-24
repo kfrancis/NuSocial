@@ -1,4 +1,3 @@
-using NuSocial.Core.ViewModel;
 using Volo.Abp.DependencyInjection;
 
 namespace NuSocial.ViewModels;
@@ -7,7 +6,7 @@ public partial class AgreeViewModel : BaseViewModel, ITransientDependency
 {
     public AgreeViewModel(IDialogService dialogService, INavigationService navigationService) : base(dialogService, navigationService)
     {
-        Title = L["EULA"];
+
     }
 
     [ObservableProperty]
@@ -56,9 +55,10 @@ public partial class AgreeViewModel : BaseViewModel, ITransientDependency
         });
     }
 
-    public override Task OnFirstAppear()
+    public override Task InitializeAsync()
     {
+        Title = L["EULA"];
         Eula = L["AgreementText"];
-        return Task.CompletedTask;
+        return base.InitializeAsync();
     }
 }

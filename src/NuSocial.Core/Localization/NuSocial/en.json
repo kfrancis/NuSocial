@@ -15,11 +15,19 @@
     "AboutPlaceholder": "Add something interesting about you ..",
     "AccountId": "Account ID",
     "AccountKeyPlaceholder": "nsec1...",
-    "NuSocial": "NuSocial",
+    "NuSocial": "NuSocial 123",
     "TapToRegenerate": "Tap to regenerate",
     "WelcomeText": "#nostr NuSocial: Your Universe, Nu Connections",
     "NoRecentPosts": "No recent posts",
     "Enum_My": "My",
-    "Enum_Mutual": "Mutual"
+    "Enum_Mutual": "Mutual",
+    "Unread": "Unread",
+    "Reply": "Reply",
+    "TestMode": "Test Mode",
+    "Logout": "Logout",
+    "Profile": "Profile",
+    "Home": "Home",
+    "Settings": "Settings",
+    "Messages": "Messages"
   }
 }
