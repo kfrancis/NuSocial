@@ -544,8 +544,8 @@ namespace NuSocial.Services
 
         public void StartNostr()
         {
-            var faker = new Faker();
-            _timer = new Timer(SendNostrPostMessage, null, 0, faker.Random.Int(1000, 5000));
+           // var faker = new Faker();
+           //_timer = new Timer(SendNostrPostMessage, null, 0, faker.Random.Int(1000, 5000));
         }
 
         private void SendNostrPostMessage(object? state)

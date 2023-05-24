@@ -1,6 +1,6 @@
-﻿using NBitcoin;
-using Nostr.Client.Keys;
+﻿using Nostr.Client.Keys;
 using SQLite;
+using SQLiteNetExtensions.Attributes;
 using System.Text.Json.Serialization;
 
 namespace NuSocial.Models;
@@ -117,8 +117,12 @@ public class UserConfiguration
 /// <summary>
 /// A contact on the #nostr network
 /// </summary>
-public sealed record Contact
+public class Contact
 {
+    [JsonIgnore]
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+
     [JsonPropertyName("name")]
     public Name Name { get; set; }
 
@@ -143,16 +147,86 @@ public sealed record Contact
     }
 }
 
+public class MessageData
+{
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+
+    public DateTime When { get; set; }
+    public string Text { get; set; }
+    public bool IsRead { get; set; }
+    public bool IsIncoming { get; set; }
+
+    [ForeignKey(typeof(Message))]
+    public int MessageId { get; set; }
+
+    [ManyToOne]
+    public Message Message { get; set; }
+}
+
+public class Message
+{
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+
+    [ForeignKey(typeof(Contact))]
+    public int ContactId { get; set; }
+
+    [ManyToOne]
+    public Contact? From { get; set; }
+
+    [OneToMany(CascadeOperations = CascadeOperation.All)]
+    public List<MessageData> Messages { get; set; } = new();
+
+    public DateTime LatestMessageDate
+    {
+        get
+        {
+            if (Messages.Count > 0)
+            {
+                return Messages.OrderByDescending(x => x.When).FirstOrDefault()?.When ?? DateTime.Now;
+            }
+            else
+            {
+                return DateTime.Now;
+            }
+        }
+    }
+
+    [Ignore]
+    public string LatestMessage
+    {
+        get
+        {
+            if (Messages.Count > 0)
+            {
+                return Messages.OrderByDescending(x => x.When).FirstOrDefault()?.Text ?? string.Empty;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+    }
+}
+
+public class MessageContactRelationshipTable
+{
+    public int ContactId { get; set; }
+    public int MessageId { get; set; }
+}
+
 /// <summary>
 /// A simple model for the name of a contact.
 /// </summary>
-/// <param name="First">The first name of the contact.</param>
-/// <param name="Last">The last name of the contact.</param>
-public sealed record Name(
-    [property: JsonPropertyName("first")] string First,
-    [property: JsonPropertyName("last")] string Last)
+public class Name
 {
-    /// <inheritdoc/>
+    [JsonPropertyName("first")]
+    public string First { get; set; } = string.Empty;
+
+    [JsonPropertyName("last")]
+    public string Last { get; set; } = string.Empty;
+
     public override string ToString()
     {
         return $"{First} {Last}";
@@ -162,5 +236,20 @@ public sealed record Name(
 /// <summary>
 /// A simple model for the picture of a contact.
 /// </summary>
-/// <param name="Url">The URL of the picture.</param>
-public sealed record Picture([property: JsonPropertyName("thumbnail")] Uri Url);
+public class Picture
+{
+    public Picture(Uri url)
+    {
+        Url = url;
+    }
+
+    public Picture()
+    {
+
+    }
+
+    [JsonPropertyName("thumbnail")]
+    public Uri Url { get; set; }
+
+    public string Blurhash { get; set; }
+}

@@ -154,6 +154,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Controls\MessagePreviewItem.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Controls\PostItemTemplate.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Controls\ProfileImage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

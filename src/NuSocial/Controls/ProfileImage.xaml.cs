@@ -5,7 +5,7 @@ namespace NuSocial.Controls;
 public partial class ProfileImage : ContentView
 {
     [BindableProp]
-    private Aspect _aspect = Aspect.Fill;
+    private Aspect _aspect = Aspect.AspectFit;
 
     [BindableProp(PropertyChangedDelegate = nameof(UpdateSize))]
     private double _borderSize;
@@ -73,6 +73,7 @@ public partial class ProfileImage : ContentView
         {
             if (newValue is string newStr && !string.IsNullOrEmpty(newStr))
             {
+                control.Source = newStr;
                 if (newStr.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
                 {
                     control.IsAnimationPlaying = true;

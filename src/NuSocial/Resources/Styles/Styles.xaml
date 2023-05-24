@@ -40,6 +40,11 @@
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
+    <Style x:Key="Horizontal1ptLineStyle" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="Color" Value="{DynamicResource Gray200}" />
+    </Style>
+
     <Style ApplyToDerivedTypes="True" TargetType="Button">
         <Setter Property="FontAttributes" Value="None" />
 

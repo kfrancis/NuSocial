@@ -37,22 +37,11 @@
                 <Grid.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MainViewModel}}, Path=GoToDetailsCommand}" CommandParameter="{Binding .}" />
                 </Grid.GestureRecognizers>
-                <Image
+                <local:ProfileImage
                     Grid.Row="1"
                     Grid.RowSpan="2"
                     Margin="0,5,10,0"
-                    Aspect="AspectFill"
-                    HeightRequest="60"
-                    IsAnimationPlaying="True"
-                    VerticalOptions="Start"
-                    WidthRequest="60">
-                    <Image.Source>
-                        <UriImageSource CacheValidity="00:00:15:00" Uri="{Binding Contact.Picture.Url}" />
-                    </Image.Source>
-                    <Image.Clip>
-                        <RoundRectangleGeometry CornerRadius="{StaticResource BaseButtonCornerRadius}" Rect="0,0,60,60" />
-                    </Image.Clip>
-                </Image>
+                    Source="{Binding Contact.Picture.Url}" />
                 <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,*">
                     <Label
                         Grid.Column="0"

@@ -8,12 +8,13 @@ namespace NuSocial.Services
     public interface IDatabase
     {
         Task DeleteAllDataAsync();
-
+        Task<ObservableCollection<Message>> GetMessagesAsync();
         Task<ObservableCollection<Relay>> GetRelaysAsync();
 
         Task<ObservableCollection<User>> GetUsersAsync();
 
         Task UpdateRelaysAsync(ObservableCollection<Relay> relays);
+        Task UpdateMessagesAsync(ObservableCollection<Message> relays);
 
         Task UpdateUsersAsync(ObservableCollection<User> users);
     }
@@ -30,9 +31,7 @@ namespace NuSocial.Services
 
         private const string _databaseFilename = "NuSocial.db3";
         private readonly string _databasePath;
-        private readonly SemaphoreSlim _lock = new(1, 1);
-
-        private readonly SemaphoreSlim _semaphore = new(1, 1);
+        //private readonly SemaphoreSlim _lock = new(1, 1);
 
         // create the database if it doesn't exist
         private Task? _constructionTask;
@@ -60,11 +59,11 @@ namespace NuSocial.Services
 
         public async Task CloseDatabaseAsync()
         {
-            await _lock.WaitAsync().ConfigureAwait(false);
+            //await _lock.WaitAsync();
 
             if (_database == null)
             {
-                _lock.Release();
+                //_lock.Release();
                 return;
             }
 
@@ -75,7 +74,7 @@ namespace NuSocial.Services
             }
             finally
             {
-                _lock.Release();
+                //_lock.Release();
             }
         }
 
@@ -87,7 +86,7 @@ namespace NuSocial.Services
             // delete data
             try
             {
-                await _lock.WaitAsync().ConfigureAwait(false);
+                //await _lock.WaitAsync();
 
                 await Task.WhenAll(
                     //DeleteAllOfType<Service>(),
@@ -96,7 +95,7 @@ namespace NuSocial.Services
             }
             finally
             {
-                _lock.Release();
+                //_lock.Release();
             }
 
             // reset data versions
@@ -121,13 +120,13 @@ namespace NuSocial.Services
             try
             {
                 var db = await GetDatabaseConnection<T>(reset).ConfigureAwait(false);
-                await _lock.WaitAsync().ConfigureAwait(false);
+                //await _lock.WaitAsync();
                 List<T>? items = await AttemptAndRetry(() => { return db.Table<T>().ToListAsync(); }).ConfigureAwait(false);
                 return new ObservableCollection<T>(items);
             }
             finally
             {
-                _lock.Release();
+                //_lock.Release();
             }
         }
 
@@ -155,8 +154,7 @@ namespace NuSocial.Services
 
                     _constructionTask?.Dispose();
                     _constructionTask = null;
-                    _semaphore?.Dispose();
-                    _lock?.Dispose();
+                    //_lock?.Dispose();
                 }
 
                 _isDisposed = true;
@@ -221,7 +219,7 @@ namespace NuSocial.Services
             
             try
             {
-                await _lock.WaitAsync().ConfigureAwait(false);
+                //await _lock.WaitAsync();
                 var entityType = typeof(T);
                 var entityProperties = entityType.GetProperties();
                 var needsReset = false;
@@ -255,7 +253,7 @@ namespace NuSocial.Services
             }
             finally
             {
-                _lock.Release();
+                //_lock.Release();
             }
         }
 
@@ -267,7 +265,7 @@ namespace NuSocial.Services
                 try
                 {
                     var db = await GetDatabaseConnection<T>(reset).ConfigureAwait(false);
-                    await _lock.WaitAsync().ConfigureAwait(false);
+                    //await _lock.WaitAsync();
                     await AttemptAndRetry(() =>
                     {
                         return db.RunInTransactionAsync((dbc) => { foreach (var item in items) { dbc.InsertOrReplace(item); } });
@@ -275,9 +273,14 @@ namespace NuSocial.Services
                 }
                 finally
                 {
-                    _lock.Release();
+                    //_lock.Release();
                 }
             }
         }
+
+        public Task<ObservableCollection<Message>> GetMessagesAsync() => GetItemsAsync<Message>();
+
+
+        public Task UpdateMessagesAsync(ObservableCollection<Message> messages) => UpdateIfPossible(messages);
     }
 }

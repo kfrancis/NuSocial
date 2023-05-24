@@ -1,8 +1,5 @@
-﻿using Microsoft.AppCenter;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using NuSocial.Localization;
-using NuSocial.Services;
-using System.Diagnostics;
 using Volo.Abp.Localization;
 using Volo.Abp.Localization.ExceptionHandling;
 using Volo.Abp.Modularity;
@@ -25,7 +22,6 @@ namespace NuSocial.Core
 
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
-                // "YourRootNameSpace" is the root namespace of your project. It can be empty if your root namespace is empty.
                 options.FileSets.AddEmbedded<NuSocialCoreModule>("NuSocial.Core");
             });
 
@@ -60,6 +56,4 @@ namespace NuSocial.Core
             }
         }
     }
-
-
 }

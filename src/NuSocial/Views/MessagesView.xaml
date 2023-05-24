@@ -3,15 +3,29 @@
     x:Class="NuSocial.Views.MessagesView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:base="clr-namespace:NuSocial.Core.View"
+    xmlns:base="clr-namespace:NuSocial.Core.View;assembly=NuSocial.Core"
+    xmlns:controls="clr-namespace:NuSocial.Controls"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
-    xmlns:viewModels="clr-namespace:NuSocial.ViewModels"
+    xmlns:models="clr-namespace:NuSocial.Models;assembly=NuSocial.Core"
+    xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"
+    Title="{Binding Title}"
     x:DataType="viewModels:MessagesViewModel"
-    x:TypeArguments="viewModels:MessagesViewModel">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Messages"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    x:TypeArguments="viewModels:MessagesViewModel"
+    Shell.FlyoutBehavior="Flyout"
+    Shell.NavBarIsVisible="True"
+    Shell.TabBarBackgroundColor="{StaticResource Primary}"
+    Shell.TabBarForegroundColor="{StaticResource White}"
+    Shell.TabBarIsVisible="True">
+    <Grid>
+        <CollectionView Margin="{OnPlatform Android='0,20,0,0'}" ItemsSource="{Binding Messages}">
+            <CollectionView.Header>
+                <BoxView HeightRequest="20" />
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Message">
+                    <controls:MessagePreviewItem Data="{Binding .}" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </base:ContentPageViewBase>

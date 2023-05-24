@@ -2,6 +2,7 @@
 using Nostr.Client.Keys;
 using NuSocial.Localization;
 using System.ComponentModel.DataAnnotations;
+using Volo.Abp.DependencyInjection;
 
 namespace NuSocial.Core.Validation
 {
@@ -19,7 +20,7 @@ namespace NuSocial.Core.Validation
             }
 
             var instance = validationContext.ObjectInstance;
-            var loc = (IStringLocalizer<NuSocialResource>?)instance.GetType().GetProperty("L")?.GetValue(instance);
+            var loc = (LocalizationResourceManager?)instance.GetType().GetProperty("L")?.GetValue(instance);
             var invalidMessage = loc?["InvalidNostrKey"] ?? "Invalid Key";
 
             if (value is string valueString && !string.IsNullOrEmpty(valueString))

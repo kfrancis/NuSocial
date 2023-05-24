@@ -3,8 +3,34 @@
     x:Class="NuSocial.Controls.ProfileImage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Name="root">
-    <Grid>
-        <Image IsAnimationPlaying="{Binding IsAnimationPlaying, Source={x:Reference root}}" Source="{Binding Aspect, Source={x:Reference root}}" />
-    </Grid>
+    x:Name="root"
+    Padding="0"
+    HeightRequest="60"
+    HorizontalOptions="StartAndExpand"
+    VerticalOptions="StartAndExpand"
+    WidthRequest="60">
+
+    <Frame
+        Margin="0"
+        Padding="0"
+        BorderColor="{StaticResource Gray200}"
+        CornerRadius="{StaticResource BaseButtonCornerRadius}"
+        HorizontalOptions="Start"
+        IsClippedToBounds="True"
+        VerticalOptions="Start">
+        <Image
+            Aspect="{Binding Aspect, Source={x:Reference root}}"
+            HeightRequest="60"
+            HorizontalOptions="StartAndExpand"
+            IsAnimationPlaying="{Binding IsAnimationPlaying, Source={x:Reference root}}"
+            VerticalOptions="StartAndExpand"
+            WidthRequest="60">
+            <Image.Source>
+                <UriImageSource CacheValidity="00:00:15:00" Uri="{Binding Source, Source={x:Reference root}}" />
+            </Image.Source>
+            <Image.Clip>
+                <RoundRectangleGeometry CornerRadius="{StaticResource BaseButtonCornerRadius}" Rect="0,0,60,60" />
+            </Image.Clip>
+        </Image>
+    </Frame>
 </ContentView>

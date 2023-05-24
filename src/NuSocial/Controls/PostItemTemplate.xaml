@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="NuSocial.Controls.PostItemTemplate"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+    xmlns:local="clr-namespace:NuSocial.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    x:DataType="local:PostItemTemplate"
+    mc:Ignorable="d">
+    <ContentView.Content>
+        <Grid
+            Padding="20,0,10,0"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="14"
+            RowSpacing="0"
+            VerticalOptions="Center">
+            <!--  VERTICAL LINE  -->
+            <BoxView
+                Margin="0,-10"
+                HorizontalOptions="Center"
+                VerticalOptions="Fill"
+                WidthRequest="2"
+                Color="{DynamicResource BasePageColor}" />
+
+            <!--  BG  -->
+            <BoxView
+                Grid.Column="1"
+                Margin="0,10"
+                CornerRadius="20"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                Color="{DynamicResource BasePageColor}" />
+
+            <local:ProfileImage
+                BorderSize="1"
+                HorizontalOptions="Center"
+                Size="50"
+                Source="{Binding ImageUrl, Source={x:Reference root}}"
+                VerticalOptions="Center" />
+
+            <!--  BODY  -->
+            <Grid
+                Grid.Column="1"
+                Padding="20"
+                RowDefinitions="Auto,Auto,15"
+                VerticalOptions="Center">
+                <!--  TITLE  -->
+                <Label
+                    FontAttributes="None"
+                    Text="{Binding ContentTitle, Source={x:Reference root}}"
+                    TextColor="{DynamicResource BaseTextColor}" />
+                <!--  TEXT  -->
+                <Label
+                    Grid.Row="1"
+                    FontSize="{StaticResource SmallFontSize}"
+                    MaxLines="3 "
+                    Text="{Binding ContentBody, Source={x:Reference root}}"
+                    TextColor="{DynamicResource BaseLightTextColor}" />
+                <!--  WHEN  -->
+                <Label
+                    Grid.Row="2"
+                    FontAttributes="None"
+                    FontSize="{StaticResource SmallFontSize}"
+                    Text="{Binding When, Source={x:Reference root}}"
+                    TextColor="{DynamicResource AccentColor}" />
+            </Grid>
+        </Grid>
+    </ContentView.Content>
+</ContentView>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="NuSocial.Controls.MessagePreviewItem"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+    xmlns:fa="clr-namespace:FontAwesome"
+    xmlns:local="clr-namespace:NuSocial.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    mc:Ignorable="d">
+    <ContentView.Content>
+        <Grid
+            Margin="0"
+            Padding="20,0,20,20"
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="14"
+            RowDefinitions="Auto,Auto"
+            RowSpacing="6">
+            <local:ProfileImage
+                Grid.RowSpan="2"
+                Margin="0,2,0,0"
+                BorderSize="2"
+                CornerRadius="15"
+                HorizontalOptions="Center"
+                Size="50"
+                Source="{Binding Data.From.Picture.Url, Source={x:Reference root}}"
+                VerticalOptions="Center">
+                <local:ProfileImage.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="ProfileImage_Tapped" />
+                </local:ProfileImage.GestureRecognizers>
+            </local:ProfileImage>
+
+            <!--  NAME  -->
+            <Label
+                Grid.Column="1"
+                Margin="0,5,0,0"
+                FontAttributes="Bold"
+                Text="{Binding Data.From.Name, Source={x:Reference root}}"
+                VerticalOptions="Center" />
+
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1"
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="5"
+                VerticalOptions="Start">
+                <Label
+                    FontSize="15"
+                    Style="{StaticResource FaSolid}"
+                    Text="{x:Static fa:FontAwesomeIcons.Check}"
+                    TextColor="{DynamicResource OkColor}"
+                    VerticalTextAlignment="Center" />
+                <Label
+                    Grid.Column="1"
+                    FontSize="{StaticResource BaseFontSize}"
+                    LineBreakMode="TailTruncation"
+                    Text="{Binding Data.LatestMessage, Source={x:Reference root}}"
+                    TextColor="{DynamicResource Gray500}" />
+            </Grid>
+
+            <!--  WHEN  -->
+            <Label
+                Grid.Row="0"
+                Grid.Column="2"
+                FontSize="{StaticResource SmallFontSize}"
+                Opacity=".5"
+                Text="{Binding Data.LatestMessageDate, Source={x:Reference root}}"
+                TextColor="{DynamicResource Gray500}"
+                VerticalOptions="Center" />
+
+            <!--  SEPARATOR  -->
+            <BoxView
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                Margin="0,0,-20,-15"
+                Style="{DynamicResource Horizontal1ptLineStyle}"
+                VerticalOptions="End" />
+        </Grid>
+    </ContentView.Content>
+</ContentView>
