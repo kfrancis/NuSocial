@@ -138,7 +138,7 @@ namespace NuSocial.Services
             if (!relays.Any())
             {
                 // make sure there's at least one
-                relays.Add(new Relay("wss://relay.damus.io"));
+                relays.Add(new Relay("wss://relayable.org"));
                 await _db.UpdateRelaysAsync(relays);
             }
 
