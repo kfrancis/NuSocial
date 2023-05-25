@@ -3,6 +3,7 @@
     x:Class="NuSocial.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:NuSocial.Controls"
     xmlns:fa="clr-namespace:FontAwesome"
     xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:local="clr-namespace:NuSocial"
@@ -17,6 +18,10 @@
     <Shell.Behaviors>
         <toolkit:StatusBarBehavior StatusBarColor="{OnPlatform iOS='#00FFFFFF', Default='#FF373063'}" StatusBarStyle="LightContent" />
     </Shell.Behaviors>
+
+    <Shell.FlyoutHeader>
+        <controls:FlyoutHeader />
+    </Shell.FlyoutHeader>
 
     <ShellContent
         ContentTemplate="{DataTemplate views:StartView}"
@@ -149,29 +154,53 @@
 
     <Shell.FlyoutFooterTemplate>
         <DataTemplate>
-            <Grid
-                Padding="20"
-                RowDefinitions="Auto,50"
-                RowSpacing="10"
-                VerticalOptions="End">
-                <!--  Version  -->
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+            <VerticalStackLayout VerticalOptions="EndAndExpand">
+                <Grid Margin="10,10,10,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width=".5*" />
+                        <ColumnDefinition Width=".5*" />
+                    </Grid.ColumnDefinitions>
                     <Label
-                        FontSize="{OnIdiom Phone=14,
-                                           Tablet=16}"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        FontFamily="FontAwesomeSolid"
+                        FontSize="25"
                         HorizontalOptions="Center"
-                        Text="{Binding AppVersion}"
+                        Text="{x:Static fa:FontAwesomeIcons.Lightbulb}"
                         TextColor="{DynamicResource White}" />
-                </HorizontalStackLayout>
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        FontFamily="FontAwesomeSolid"
+                        FontSize="25"
+                        HorizontalOptions="Center"
+                        Text="{x:Static fa:FontAwesomeIcons.Qrcode}"
+                        TextColor="{DynamicResource White}" />
+                </Grid>
+                <Grid
+                    Padding="20"
+                    RowDefinitions="Auto,50"
+                    RowSpacing="10"
+                    VerticalOptions="End">
+                    <!--  Version  -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <Label
+                            FontSize="{OnIdiom Phone=14,
+                                               Tablet=16}"
+                            HorizontalOptions="Center"
+                            Text="{Binding AppVersion}"
+                            TextColor="{DynamicResource White}" />
+                    </HorizontalStackLayout>
 
-                <!--  Logout  -->
-                <Button
-                    Grid.Row="1"
-                    Command="{Binding LogoutPressedCommand}"
-                    Style="{DynamicResource SecondaryActionButtonStyle}"
-                    Text="{loc:Translate Logout}"
-                    TextColor="{DynamicResource Black}" />
-            </Grid>
+                    <!--  Logout  -->
+                    <Button
+                        Grid.Row="1"
+                        Command="{Binding LogoutPressedCommand}"
+                        Style="{DynamicResource SecondaryActionButtonStyle}"
+                        Text="{loc:Translate Logout}"
+                        TextColor="{DynamicResource Black}" />
+                </Grid>
+            </VerticalStackLayout>
         </DataTemplate>
     </Shell.FlyoutFooterTemplate>
 </Shell>

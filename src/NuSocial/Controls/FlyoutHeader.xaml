@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="NuSocial.Controls.FlyoutHeader"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"
+    x:Name="root"
+    Padding="15,15,15,5"
+    BackgroundColor="Transparent">
+    <VerticalStackLayout>
+        <Grid Margin="0,0,0,15" RowSpacing="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".4*" />
+                <RowDefinition Height=".2*" />
+                <RowDefinition Height=".2*" />
+                <RowDefinition Height=".2*" />
+                <RowDefinition Height=".1*" />
+            </Grid.RowDefinitions>
+            <Image
+                Grid.Row="0"
+                Grid.Column="0"
+                HeightRequest="50"
+                HorizontalOptions="Start"
+                Source="https://pbs.twimg.com/profile_images/645601415973355521/No1ZTxyn_400x400.jpg"
+                WidthRequest="50">
+                <Image.Clip>
+                    <EllipseGeometry
+                        Center="25,25"
+                        RadiusX="25"
+                        RadiusY="25" />
+                </Image.Clip>
+            </Image>
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                FontFamily="Bold"
+                FontSize="{DynamicResource LargeFontSize}"
+                Text="Siddharth Singh"
+                TextColor="{DynamicResource White}" />
+            <Label
+                Grid.Row="2"
+                Grid.Column="0"
+                Text="@Sid_Singh89"
+                TextColor="{DynamicResource White}" />
+            <Grid Grid.Row="3" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=".5*" />
+                    <ColumnDefinition Width=".5*" />
+                </Grid.ColumnDefinitions>
+                <HorizontalStackLayout
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Spacing="5">
+                    <Label
+                        FontFamily="Bold"
+                        FontSize="{DynamicResource SmallFontSize}"
+                        Text="{Binding FollowingCount, Source={x:Reference root}}"
+                        TextColor="{DynamicResource White}" />
+                    <Label
+                        FontSize="{DynamicResource SmallFontSize}"
+                        Text="Following"
+                        TextColor="{DynamicResource White}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Spacing="5">
+                    <Label
+                        FontFamily="Bold"
+                        FontSize="{DynamicResource SmallFontSize}"
+                        Text="{Binding FollowerCount, Source={x:Reference root}}"
+                        TextColor="{DynamicResource White}" />
+                    <Label
+                        FontSize="{DynamicResource SmallFontSize}"
+                        Text="Followers"
+                        TextColor="{DynamicResource White}" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Grid>
+        <BoxView
+            Margin="0"
+            Style="{DynamicResource Horizontal1ptLineStyle}"
+            VerticalOptions="End" />
+    </VerticalStackLayout>
+
+</ContentView>

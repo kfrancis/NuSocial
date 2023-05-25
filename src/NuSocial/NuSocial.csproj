@@ -154,6 +154,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Controls\FlyoutHeader.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Controls\MessagePreviewItem.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

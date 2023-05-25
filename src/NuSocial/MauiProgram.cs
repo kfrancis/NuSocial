@@ -145,8 +145,8 @@ public static class MauiProgram
         var db = new LocalStorage();
         services.AddSingleton<IDatabase>(db);
         services.AddSingleton<ICustomDispatcher, MauiDispatcher>();
-        //services.AddSingleton<INostrService>(new TestNostrService());
-        services.AddSingleton<INostrService>(new NostrService(db));
+        services.AddSingleton<INostrService>(new TestNostrService());
+        //services.AddSingleton<INostrService>(new NostrService(db));
 
         services.AddLocalization();
         services.AddLogging(logging => logging.AddSerilog());
