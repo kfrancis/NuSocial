@@ -22,7 +22,7 @@ namespace NuSocial.Core
 
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
-                options.FileSets.AddEmbedded<NuSocialCoreModule>("NuSocial.Core");
+                options.FileSets.AddEmbedded<NuSocialCoreModule>("NuSocial");
             });
 
             Configure<AbpLocalizationOptions>(options =>

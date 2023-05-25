@@ -25,11 +25,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Localization\NuSocial\en.json" />
-	  <None Remove="Localization\NuSocial\fr.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<EmbeddedResource Include="Localization\NuSocial\*.json" />
 		<Content Remove="Localization\NuSocial\*.json" />
 	</ItemGroup>
