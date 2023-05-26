@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace NuSocial.Models;
 
+[Table("Users")]
 public class User
 {
     [Ignore]
@@ -75,6 +76,7 @@ public class User
     public bool IsReadOnly => PublicKey != null && PrivateKey == null;
 }
 
+[Table("Profiles")]
 public class Profile
 {
     private string? _picture = "https://placehold.co/60x60.png";
@@ -117,6 +119,7 @@ public class UserConfiguration
 /// <summary>
 /// A contact on the #nostr network
 /// </summary>
+[Table("Contacts")]
 public class Contact
 {
     [JsonIgnore]
@@ -147,6 +150,7 @@ public class Contact
     }
 }
 
+[Table("MessageData")]
 public class MessageData
 {
     [PrimaryKey, AutoIncrement]
@@ -159,11 +163,9 @@ public class MessageData
 
     [ForeignKey(typeof(Message))]
     public int MessageId { get; set; }
-
-    [ManyToOne]
-    public Message Message { get; set; }
 }
 
+[Table("Messages")]
 public class Message
 {
     [PrimaryKey, AutoIncrement]

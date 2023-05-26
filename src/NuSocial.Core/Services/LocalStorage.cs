@@ -2,6 +2,8 @@
 using Polly;
 using SQLite;
 using System.Reflection;
+using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
+using SQLiteNetExtensions.Extensions;
 
 namespace NuSocial.Services
 {
@@ -168,6 +170,7 @@ namespace NuSocial.Services
             {
                 await _database.EnableWriteAheadLoggingAsync();
                 await _database.CreateTableAsync<T>();
+                await _database.ExecuteAsync("PRAGMA foreign_keys = ON;");
                 if (reset != null)
                 {
                     await reset.InvokeAsync();
@@ -268,7 +271,7 @@ namespace NuSocial.Services
                     //await _lock.WaitAsync();
                     await AttemptAndRetry(() =>
                     {
-                        return db.RunInTransactionAsync((dbc) => { foreach (var item in items) { dbc.InsertOrReplace(item); } });
+                        return db.InsertAllAsync(items, true);
                     }).ConfigureAwait(false);
                 }
                 finally

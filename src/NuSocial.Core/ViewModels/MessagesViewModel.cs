@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using CommunityToolkit.Maui.Core.Extensions;
 using Volo.Abp.DependencyInjection;
 using Contact = NuSocial.Models.Contact;
 
@@ -20,6 +21,13 @@ public partial class MessagesViewModel : BaseViewModel, ITransientDependency
         _db = db;
     }
 
+    public override async Task OnAppearing()
+    {
+        // Load data
+        var messages = await _db.GetMessagesAsync();
+        Messages.AddIfNotContains(messages);
+    }
+
     public override async Task InitializeAsync()
     {
         Title = L["Messages"];
@@ -29,6 +37,8 @@ public partial class MessagesViewModel : BaseViewModel, ITransientDependency
 
         if (messages == null || !messages.Any())
         {
+            var faker = new Faker();
+
             var nameFaker = new Faker<Name>()
                 .RuleFor(n => n.First, f => f.Person.FirstName)
                 .RuleFor(n => n.Last, f => f.Person.LastName);
@@ -60,20 +70,13 @@ public partial class MessagesViewModel : BaseViewModel, ITransientDependency
                     m.ContactId = m.From?.Id ?? 0;
                     foreach (var item in m.Messages)
                     {
-                        item.Message = m;
                         item.MessageId = m.Id;
                     }
                 });
 
-            var message = messageFaker.Generate();
+            var newMessages = messageFaker.GenerateBetween(1, faker.Random.Int(2,4));
 
-            Messages.AddIfNotContains(message);
-            await _db.UpdateMessagesAsync(Messages);
+            await _db.UpdateMessagesAsync(newMessages.ToObservableCollection());
         }
-        else
-        {
-            Messages.AddIfNotContains(messages);
-        }
-
     }
 }
