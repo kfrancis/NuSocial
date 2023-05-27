@@ -79,5 +79,6 @@ public partial class AppShell : Shell, ISingletonDependency
         Routing.RegisterRoute(nameof(RelaysViewModel), typeof(RelaysView));
         Routing.RegisterRoute(nameof(SettingsViewModel), typeof(SettingsView));
         Routing.RegisterRoute(nameof(WalletViewModel), typeof(WalletView));
+        Routing.RegisterRoute(nameof(MessageViewModel), typeof(MessageView));
     }
 }

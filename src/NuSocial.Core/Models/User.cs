@@ -180,6 +180,11 @@ public class Message
     [OneToMany(CascadeOperations = CascadeOperation.All)]
     public List<MessageData> Messages { get; set; } = new();
 
+    public bool ContainsText(string filter)
+    {
+        return Messages.Any(x => x.Text.Contains(filter, StringComparison.OrdinalIgnoreCase));
+    }
+
     public DateTime LatestMessageDate
     {
         get

@@ -46,9 +46,9 @@
                 ColumnSpacing="5"
                 VerticalOptions="Start">
                 <Label
+                    FontFamily="{StaticResource FaSolid}"
                     FontSize="15"
-                    Style="{StaticResource FaSolid}"
-                    Text="{x:Static fa:FontAwesomeIcons.Check}"
+                    Text="{x:Static fa:FontAwesomeIcons.Circle}"
                     TextColor="{DynamicResource OkColor}"
                     VerticalTextAlignment="Center" />
                 <Label
@@ -74,7 +74,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
-                Margin="0,0,-20,-15"
+                Margin="0,0,0,-15"
                 Style="{DynamicResource Horizontal1ptLineStyle}"
                 VerticalOptions="End" />
         </Grid>

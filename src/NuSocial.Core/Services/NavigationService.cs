@@ -78,7 +78,7 @@ namespace NuSocial.Services
 
             var parameters = new Dictionary<string, object>
             {
-                { "cabParameter", parameter }
+                { "nsParameter", parameter }
             };
 
             await Shell.Current.GoToAsync(key, parameters);

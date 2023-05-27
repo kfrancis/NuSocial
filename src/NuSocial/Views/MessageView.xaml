@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:ContentPageViewBase
-    x:Class="NuSocial.Views.MessagesView"
+    x:Class="NuSocial.Views.MessageView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:NuSocial.Core.View;assembly=NuSocial.Core"
@@ -11,8 +11,8 @@
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"
     Title="{Binding Title}"
     Padding="20,0"
-    x:DataType="viewModels:MessagesViewModel"
-    x:TypeArguments="viewModels:MessagesViewModel"
+    x:DataType="viewModels:MessageViewModel"
+    x:TypeArguments="viewModels:MessageViewModel"
     Shell.FlyoutBehavior="Flyout"
     Shell.NavBarIsVisible="True"
     Shell.TabBarBackgroundColor="{StaticResource Primary}"
@@ -30,32 +30,25 @@
                 <toolkit:EventToCommandBehavior Command="{Binding SearchTextChangedCommand}" EventName="TextChanged" />
             </SearchBar.Behaviors>
         </SearchBar>
-        <RefreshView
+        <CollectionView
             Grid.Row="1"
-            Command="{Binding RefreshCommand}"
-            IsRefreshing="{Binding IsBusy}">
-            <CollectionView
-                Margin="{OnPlatform Android='0,20,0,0'}"
-                EmptyView="{loc:Translate NoMessagesYet}"
-                ItemsSource="{Binding Messages}"
-                SelectionChangedCommand="{Binding ViewMessageCommand}"
-                SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}"
-                SelectionMode="Single">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout
-                        Orientation="Vertical"
-                        SnapPointsAlignment="Start"
-                        SnapPointsType="MandatorySingle" />
-                </CollectionView.ItemsLayout>
-                <CollectionView.Header>
-                    <BoxView HeightRequest="20" />
-                </CollectionView.Header>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Message">
-                        <controls:MessagePreviewItem Data="{Binding .}" />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+            Margin="{OnPlatform Android='0,20,0,0'}"
+            EmptyView="{loc:Translate NoMessagesYet}"
+            ItemsSource="{Binding Messages}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    SnapPointsAlignment="Start"
+                    SnapPointsType="MandatorySingle" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.Header>
+                <BoxView HeightRequest="20" />
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:MessageData">
+                    <Label Text="{Binding Text}" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </Grid>
 </base:ContentPageViewBase>

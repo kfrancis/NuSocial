@@ -169,6 +169,9 @@
 		<MauiXaml Update="Views\MessagesView.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\MessageView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\StartView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
