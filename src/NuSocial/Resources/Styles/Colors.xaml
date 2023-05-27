@@ -75,4 +75,6 @@
         <GradientStop Offset="1.0" Color="#FFD0BCD5" />
     </LinearGradientBrush>
 
+    <Color x:Key="DialogsShimBackgroundColor">#CC000000</Color>
+
 </ResourceDictionary>

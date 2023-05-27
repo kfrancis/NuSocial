@@ -42,7 +42,7 @@
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
 		<PackageReference Include="modernhttpclient-updated" Version="3.4.3" />
-		<PackageReference Include="Mopups" Version="1.1.1" />
+		<PackageReference Include="Mopups" Version="1.1.0" />
 		<PackageReference Include="NBitcoin" Version="7.0.25" />
 		<PackageReference Include="NBitcoin.Secp256k1" Version="3.1.1" />
 		<PackageReference Include="Nostr.Client" Version="1.4.0" />

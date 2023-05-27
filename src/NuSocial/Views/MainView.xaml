@@ -10,8 +10,8 @@
     xmlns:loc="clr-namespace:NuSocial.Helpers"
     xmlns:local="clr-namespace:NuSocial.Controls"
     xmlns:models="clr-namespace:NuSocial.Models;assembly=NuSocial.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"
-    Title="{Binding Title}"
     Padding="20"
     x:DataType="viewModels:MainViewModel"
     x:TypeArguments="viewModels:MainViewModel"
@@ -141,6 +141,28 @@
             </Grid>
         </DataTemplate>
     </ContentPage.Resources>
+    <Shell.TitleView>
+        <Grid
+            ColumnDefinitions="Auto,*"
+            HeightRequest="44"
+            HorizontalOptions="End"
+            VerticalOptions="Center">
+            <Label
+                FontAttributes="Bold"
+                FontSize="Large"
+                HorizontalTextAlignment="Center"
+                Text="{Binding Title}"
+                VerticalTextAlignment="Center" />
+            <HorizontalStackLayout Grid.Column="1" Padding="6">
+                <local:IconButton
+                    Clicked="IconButton_Clicked"
+                    IconColor="{StaticResource White}"
+                    IconText="{x:Static fa:FontAwesomeIcons.Plus}"
+                    Text="{loc:Translate Post}" />
+            </HorizontalStackLayout>
+
+        </Grid>
+    </Shell.TitleView>
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" ColumnDefinitions="*,150">
             <SearchBar Grid.Column="0" />

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="NuSocial.Controls.IconButton"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
+    x:Name="root">
+    <Grid>
+        <Button
+            x:Name="button"
+            Clicked="OnButtonClicked"
+            Command="{Binding Command, Source={x:Reference root}}"
+            CommandParameter="{Binding CommandParameter, Source={x:Reference root}}"
+            Style="{Binding ButtonStyle, Source={x:Reference root}}"
+            Text="{Binding Text, Source={x:Reference root}}" />
+
+        <Grid
+            android:VisualElement.Elevation="10"
+            ColumnDefinitions="*,Auto,*"
+            HorizontalOptions="Fill"
+            InputTransparent="True">
+
+            <Label
+                x:Name="icon"
+                Margin="8,0"
+                FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                FontSize="{Binding IconFontSize, Source={x:Reference root}}"
+                HorizontalOptions="End"
+                LineHeight="1"
+                Text="{Binding IconText, Source={x:Reference root}}"
+                TextColor="{Binding IconColor, Source={x:Reference root}}"
+                VerticalOptions="Center" />
+
+            <Label
+                Grid.Column="1"
+                Margin="10,0,0,0"
+                FontSize="{Binding FontSize, Source={x:Reference button}}"
+                Opacity="0"
+                Text="{Binding Text, Source={x:Reference button}}"
+                TextColor="{Binding TextColor, Source={x:Reference button}}"
+                TextTransform="{Binding TextTransform, Source={x:Reference button}}"
+                VerticalOptions="Center" />
+
+        </Grid>
+    </Grid>
+</ContentView>

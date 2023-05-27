@@ -18,9 +18,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NostrKey", "src\NostrKey\No
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuSocial", "src\NuSocial\NuSocial.csproj", "{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuSocial.Blazor", "src\NuSocial.Blazor\NuSocial.Blazor.csproj", "{75519B3B-DA14-44B4-AC66-674909C359AA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuSocial.Core", "src\NuSocial.Core\NuSocial.Core.csproj", "{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostrClient.Helpers", "src\NostrClient.Helpers\NostrClient.Helpers.csproj", "{DF270C14-E03E-48F6-8C6F-62C7EACF840F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C70613A8-4B35-4CF3-87F8-FDECB34DF89C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostrClient.Helpers.Tests", "tests\NostrClient.Helpers.Tests\NostrClient.Helpers.Tests.csproj", "{FCF36045-186D-4F3C-9437-C37730D728EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,19 +42,24 @@ Global
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4ACB6AB9-E3C6-466E-928C-D763FAFC0BF4}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75519B3B-DA14-44B4-AC66-674909C359AA}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{979FB1C3-D08C-4F33-A1AD-43D82B9049D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF270C14-E03E-48F6-8C6F-62C7EACF840F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF270C14-E03E-48F6-8C6F-62C7EACF840F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF270C14-E03E-48F6-8C6F-62C7EACF840F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF270C14-E03E-48F6-8C6F-62C7EACF840F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF36045-186D-4F3C-9437-C37730D728EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF36045-186D-4F3C-9437-C37730D728EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF36045-186D-4F3C-9437-C37730D728EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF36045-186D-4F3C-9437-C37730D728EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FCF36045-186D-4F3C-9437-C37730D728EE} = {C70613A8-4B35-4CF3-87F8-FDECB34DF89C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D77DACFE-6915-462B-9046-93E1D629CDE7}

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:PopupPageBase
+    x:Class="NuSocial.Views.SendPostPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:Animations="clr-namespace:Mopups.Animations;assembly=Mopups"
+    xmlns:Mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:base="clr-namespace:NuSocial.Core.View;assembly=NuSocial.Core"
+    xmlns:controls="clr-namespace:NuSocial.Controls"
+    xmlns:fa="clr-namespace:FontAwesome"
+    xmlns:loc="clr-namespace:NuSocial.Helpers"
+    xmlns:models="clr-namespace:NuSocial.Models;assembly=NuSocial.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:NuSocial.ViewModels;assembly=NuSocial.Core"
+    x:DataType="viewModels:SendPostPopupViewModel"
+    x:TypeArguments="viewModels:SendPostPopupViewModel"
+    BackgroundColor="{DynamicResource DialogsShimBackgroundColor}">
+    <Grid
+        Margin="20"
+        Style="{StaticResource BlurredShadow}"
+        VerticalOptions="{DynamicResource DialogsVerticalPositioning}">
+        <Grid
+            Padding="0,0,0,20"
+            BackgroundColor="{DynamicResource BasePageColor}"
+            RowDefinitions="Auto,*,64"
+            RowSpacing="0">
+            <!--  TITLE AND ICON  -->
+            <Grid
+                Grid.Row="0"
+                Padding="30,30,30,0"
+                BackgroundColor="{StaticResource Primary}"
+                ColumnDefinitions="Auto,Auto,*">
+
+                <!--  ICON  -->
+                <Label
+                    Grid.Column="0"
+                    Margin="0,0,10,0"
+                    FontSize="{StaticResource DialogsIconsSize}"
+                    HorizontalTextAlignment="Start"
+                    Style="{StaticResource FontIcon}"
+                    Text="{x:Static fa:FontAwesomeIcons.Message}"
+                    TextColor="{DynamicResource BaseTextColor}"
+                    VerticalTextAlignment="Center" />
+
+                <!--  TITLE  -->
+                <Label
+                    Grid.Column="1"
+                    FontSize="{StaticResource LargeFontSize}"
+                    HorizontalTextAlignment="Start"
+                    Text="Grial UI Kit Reminder"
+                    TextColor="{DynamicResource BaseTextColor}"
+                    VerticalTextAlignment="Center" />
+
+                <!--  ICON CLOSE  -->
+                <Label
+                    Grid.Column="2"
+                    Margin="0"
+                    FontSize="{StaticResource DialogsIconsSize}"
+                    HorizontalTextAlignment="End"
+                    Style="{StaticResource FontIconFill}"
+                    Text="{x:Static fa:FontAwesomeIcons.Message}"
+                    VerticalTextAlignment="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnClose" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+            </Grid>
+
+            <!--  CONTENT  -->
+            <StackLayout Grid.Row="1" Margin="30,20">
+                <!--  BODY  -->
+                <Label
+                    HorizontalTextAlignment="Start"
+                    Text="Something here"
+                    TextColor="{DynamicResource Gray500}" />
+            </StackLayout>
+
+            <!--  FOOTER  -->
+            <Grid Grid.Row="2" Margin="20,0">
+                <Button
+                    Clicked="OnClose"
+                    Style="{StaticResource DialogPrimaryActionButtonStyle}"
+                    Text="OK"
+                    VerticalOptions="End" />
+            </Grid>
+        </Grid>
+    </Grid>
+</base:PopupPageBase>

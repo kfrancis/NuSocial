@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Mopups.Services;
 using Nostr.Client.Messages;
 using NuSocial.Core;
 using NuSocial.Core.ViewModel;
@@ -48,7 +49,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
 
         WeakReferenceMessenger.Default.Register<NostrUserChangedMessage>(this, (r, m) =>
         {
-            UpdateUser();
+            UpdateUser(m.Value.privKey, m.Value.pubKey);
         });
 
         WeakReferenceMessenger.Default.Register<NostrPostMessage>(this, (r, m) =>
@@ -73,6 +74,16 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
                 GlobalSetting.Instance.CurrentUser = user;
             }
 
+            return Task.CompletedTask;
+        });
+    }
+
+    [RelayCommand(CanExecute = nameof(IsNotBusy))]
+    private Task ShowPopupAsync()
+    {
+        return SetBusyAsync(() =>
+        {
+            //MopupService.Instance.PushAsync(new SendPostPopup())
             return Task.CompletedTask;
         });
     }
@@ -177,9 +188,9 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
         });
     }
 
-    private void UpdateUser()
+    private void UpdateUser(string privKey, string pubKey)
     {
-        throw new NotImplementedException();
+        
     }
 
     protected virtual void Dispose(bool disposing)
