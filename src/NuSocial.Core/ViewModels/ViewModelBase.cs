@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using NuSocial.Core.Threading;
 using NuSocial.Localization;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ public abstract partial class ViewModelBase : ObservableValidator, IQueryAttribu
 {
     private const string _parameterKey = "nsParameter";
 
-    [ObservableProperty]
     private bool _canLoadMore = true;
 
     private ICustomDispatcher? _dispatcher;
