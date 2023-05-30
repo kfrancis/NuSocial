@@ -145,7 +145,7 @@
         <Grid
             ColumnDefinitions="Auto,*"
             HeightRequest="44"
-            HorizontalOptions="End"
+            HorizontalOptions="Center"
             VerticalOptions="Center">
             <Label
                 FontAttributes="Bold"
@@ -153,7 +153,10 @@
                 HorizontalTextAlignment="Center"
                 Text="{Binding Title}"
                 VerticalTextAlignment="Center" />
-            <HorizontalStackLayout Grid.Column="1" Padding="6">
+            <HorizontalStackLayout
+                Grid.Column="1"
+                Padding="6"
+                HorizontalOptions="End">
                 <local:IconButton
                     Clicked="IconButton_Clicked"
                     IconColor="{StaticResource White}"

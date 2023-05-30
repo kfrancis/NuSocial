@@ -4,6 +4,7 @@ using CommunityToolkit.Maui.Markup;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+using Microsoft.Maui.Platform;
 using Mopups.Hosting;
 using NuSocial.Core.Threading;
 using NuSocial.Localization;
@@ -63,7 +64,7 @@ public static class MauiProgram
             })
             .ConfigureMopups()
             .ConfigureContainer<ContainerBuilder>(new AbpAutofacServiceProviderFactory(GetAutofacContainerBuilder(builder.Services)));
-
+        HandleEntryHandler();
         ConfigureFromConfigurationOptions(builder);
 
         builder.Services.AddApplication<NuSocialModule>(options =>
@@ -93,6 +94,20 @@ public static class MauiProgram
         app.Services.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().Initialize(app.Services);
 
         return app;
+    }
+
+    public static void HandleEntryHandler()
+    {
+        Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (handler, view) =>
+        {
+#if ANDROID
+            handler.PlatformView.SetBackgroundColor(Colors.Transparent.ToPlatform());
+#elif IOS || MACCATALYST
+            handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.None;
+#elif WINDOWS
+            handler.PlatformView.FontWeight = Microsoft.UI.Text.FontWeights.Thin;
+#endif
+        });
     }
 
     private static void SetupSerilog()

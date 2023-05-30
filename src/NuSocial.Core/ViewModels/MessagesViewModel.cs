@@ -36,6 +36,7 @@ public partial class MessagesViewModel : BaseViewModel, ITransientDependency
             return Task.CompletedTask;
         });
     }
+
     [RelayCommand(CanExecute = nameof(IsNotBusy))]
     private Task Refresh()
     {
@@ -171,6 +172,6 @@ public partial class MessagesViewModel : BaseViewModel, ITransientDependency
             });
         }
 
-        Messages.AddIfNotContains(messages);
+        Messages.AddIfNotContains(messages.OrderByDescending(m => m.LatestMessageDate));
     }
 }

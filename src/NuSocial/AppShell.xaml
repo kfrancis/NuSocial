@@ -28,12 +28,12 @@
         FlyoutItemIsVisible="False"
         Route="start" />
 
-    <FlyoutItem Title="{loc:Translate Profile}" Icon="{x:Static fa:FontAwesomeIcons.User}">
-        <ShellContent ContentTemplate="{DataTemplate views:ProfileView}" Route="profile" />
-    </FlyoutItem>
-
     <FlyoutItem Title="{loc:Translate Home}" Icon="{x:Static fa:FontAwesomeIcons.House}">
         <ShellContent ContentTemplate="{DataTemplate views:MainView}" Route="home" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{loc:Translate Profile}" Icon="{x:Static fa:FontAwesomeIcons.User}">
+        <ShellContent ContentTemplate="{DataTemplate views:ProfileView}" Route="profile" />
     </FlyoutItem>
 
     <FlyoutItem Title="{loc:Translate Relays}" Icon="{x:Static fa:FontAwesomeIcons.Globe}">
@@ -45,18 +45,12 @@
     </FlyoutItem>
 
     <TabBar>
-        <Tab
-            Title="{loc:Translate Home}"
-            Icon="{x:Static fa:FontAwesomeIcons.House}"
-            Route="main">
-            <ShellContent ContentTemplate="{DataTemplate views:MainView}" />
+        <Tab Title="{loc:Translate Home}" Icon="{x:Static fa:FontAwesomeIcons.House}">
+            <ShellContent ContentTemplate="{DataTemplate views:MainView}" Route="main" />
         </Tab>
 
-        <Tab
-            Title="{loc:Translate Messages}"
-            Icon="{x:Static fa:FontAwesomeIcons.Message}"
-            Route="messages">
-            <ShellContent ContentTemplate="{DataTemplate views:MessagesView}" />
+        <Tab Title="{loc:Translate Messages}" Icon="{x:Static fa:FontAwesomeIcons.Message}">
+            <ShellContent ContentTemplate="{DataTemplate views:MessagesView}" Route="messages" />
         </Tab>
     </TabBar>
     <Shell.MenuItemTemplate>
@@ -141,7 +135,7 @@
                         </VisualState>
                         <VisualState x:Name="Selected">
                             <VisualState.Setters>
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                <Setter Property="BackgroundColor" Value="Transparent" />
                                 <Setter TargetName="IconLabel" Property="Label.TextColor" Value="White" />
                                 <Setter TargetName="NameLabel" Property="Label.TextColor" Value="{StaticResource Gray300}" />
                             </VisualState.Setters>

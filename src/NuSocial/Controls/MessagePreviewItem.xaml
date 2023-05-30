@@ -8,24 +8,23 @@
     xmlns:local="clr-namespace:NuSocial.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="root"
+    Margin="0,10"
     mc:Ignorable="d">
     <ContentView.Content>
         <Grid
             Margin="0"
-            Padding="20,0,20,20"
             ColumnDefinitions="Auto,*,Auto"
-            ColumnSpacing="14"
+            ColumnSpacing="5"
             RowDefinitions="Auto,Auto"
             RowSpacing="6">
             <local:ProfileImage
                 Grid.RowSpan="2"
-                Margin="0,2,0,0"
                 BorderSize="2"
                 CornerRadius="15"
                 HorizontalOptions="Center"
                 Size="50"
                 Source="{Binding Data.From.Picture.Url, Source={x:Reference root}}"
-                VerticalOptions="Center">
+                VerticalOptions="Start">
                 <local:ProfileImage.GestureRecognizers>
                     <TapGestureRecognizer Tapped="ProfileImage_Tapped" />
                 </local:ProfileImage.GestureRecognizers>
@@ -34,7 +33,7 @@
             <!--  NAME  -->
             <Label
                 Grid.Column="1"
-                Margin="0,5,0,0"
+                Margin="0"
                 FontAttributes="Bold"
                 Text="{Binding Data.From.Name, Source={x:Reference root}}"
                 VerticalOptions="Center" />
@@ -50,7 +49,7 @@
                     FontSize="15"
                     Text="{x:Static fa:FontAwesomeIcons.Circle}"
                     TextColor="{DynamicResource OkColor}"
-                    VerticalTextAlignment="Center" />
+                    VerticalTextAlignment="Start" />
                 <Label
                     Grid.Column="1"
                     FontSize="{StaticResource BaseFontSize}"
@@ -74,7 +73,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
-                Margin="0,0,0,-15"
+                Margin="0,0,0,-10"
                 Style="{DynamicResource Horizontal1ptLineStyle}"
                 VerticalOptions="End" />
         </Grid>

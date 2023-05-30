@@ -20,6 +20,7 @@
     Shell.TabBarIsVisible="True">
     <Grid RowDefinitions="Auto,*">
         <SearchBar
+            Margin="0,0,0,10"
             IsSpellCheckEnabled="False"
             IsTextPredictionEnabled="False"
             Keyboard="Text"
@@ -32,6 +33,7 @@
         </SearchBar>
         <RefreshView
             Grid.Row="1"
+            BackgroundColor="Transparent"
             Command="{Binding RefreshCommand}"
             IsRefreshing="{Binding IsBusy}">
             <CollectionView
