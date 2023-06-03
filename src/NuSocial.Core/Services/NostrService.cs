@@ -25,7 +25,7 @@ namespace NuSocial.Services
         Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken);
 
         void RegisterFilter(string subscription, NostrFilter filter);
-
+        void Send(string v, NostrFilter nostrFilter);
         void StartNostr();
 
         void StopNostr();
@@ -65,12 +65,19 @@ namespace NuSocial.Services
                 }
                 else if (!string.IsNullOrEmpty(pubKey))
                 {
+                    var keyPair = new NostrKeyPair(NostrPrivateKey.GenerateNew(), NostrPublicKey.FromHex(pubKey));
+                    await Setup(keyPair);
                 }
                 else
                 {
                     // nothing usable
                 }
             }
+        }
+
+        public void Send(string v, NostrFilter nostrFilter)
+        {
+            _client?.Send(new NostrRequest(v, nostrFilter));
         }
 
         public NostrClientStreams? Streams => _client?.Streams;
@@ -89,9 +96,19 @@ namespace NuSocial.Services
                 {
                     Kinds = new[]
                     {
-                        NostrKind.ShortTextNote
+                        NostrKind.Metadata,
+                        NostrKind.ShortTextNote,
+                        NostrKind.EncryptedDm,
+                        NostrKind.Reaction,
+                        NostrKind.Contacts,
+                        NostrKind.RecommendRelay,
+                        NostrKind.EventDeletion,
+                        NostrKind.Reporting,
+                        NostrKind.ClientAuthentication
                     },
-                    Limit = 0
+                    Limit = 0,
+                    Since = DateTime.UtcNow.AddHours(-12),
+                    Until = DateTime.UtcNow.AddHours(4)
                 });
 
                 StartNostr();
@@ -196,13 +213,14 @@ namespace NuSocial.Services
             {
                 throw new ArgumentNullException(nameof(response));
             }
+
             var ev = response.Event;
-            Log.Information("{kind}: {content}", ev?.Kind, ev?.Content);
+            Log.Debug("{kind}: {content}", ev?.Kind, ev?.Content);
 
             if (ev is NostrMetadataEvent evm)
             {
                 WeakReferenceMessenger.Default.Send<NostrMetadataMessage>(new(evm));
-                Log.Information("Name: {name}, about: {about}", evm.Metadata?.Name, evm.Metadata?.About);
+                Log.Debug("Name: {name}, about: {about}", evm.Metadata?.Name, evm.Metadata?.About);        
             }
 
             if (response.Event != null && response.Event.IsSignatureValid())
@@ -450,7 +468,7 @@ namespace NuSocial.Services
 
         private static string GenerateRandomMarkdownContent(Faker faker)
         {
-            var markdownContent = $"{string.Join(" ", faker.Lorem.Words(faker.Random.Int(1,3)))}\n\n";
+            var markdownContent = $"{string.Join(" ", faker.Lorem.Words(faker.Random.Int(1, 3)))}\n\n";
             var hasSomethingInteresting = false;
             if (!hasSomethingInteresting && faker.Random.Bool(0.05f))
             {
@@ -544,8 +562,8 @@ namespace NuSocial.Services
 
         public void StartNostr()
         {
-           // var faker = new Faker();
-           //_timer = new Timer(SendNostrPostMessage, null, 0, faker.Random.Int(1000, 5000));
+            // var faker = new Faker();
+            //_timer = new Timer(SendNostrPostMessage, null, 0, faker.Random.Int(1000, 5000));
         }
 
         private void SendNostrPostMessage(object? state)
@@ -584,6 +602,11 @@ namespace NuSocial.Services
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public void Send(string v, NostrFilter nostrFilter)
+        {
+            throw new NotImplementedException();
         }
     }
 }

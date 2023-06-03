@@ -10,7 +10,8 @@ using NuSocial.Core.Threading;
 using NuSocial.Localization;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.FastConsole;
+using Serilog.Formatting.Display;
+using Serilog.Sinks.SystemConsole.Themes;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Reflection;
 using Volo.Abp;
@@ -115,13 +116,19 @@ public static class MauiProgram
         var flushInterval = new TimeSpan(0, 0, 1);
         var file = Path.Combine(FileSystem.AppDataDirectory, "NuSocial.log");
 
+#pragma warning disable CA1305 // Specify IFormatProvider
         Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Verbose()
+        .MinimumLevel.Debug()
         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         //.WriteTo.File(file, flushToDiskInterval: flushInterval, encoding: System.Text.Encoding.UTF8, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 22)
-        .WriteTo.FastConsole()
+        .WriteTo.Console(
+            LogEventLevel.Debug,
+            outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+            theme: AnsiConsoleTheme.Code    
+        )
         .CreateLogger();
+#pragma warning restore CA1305 // Specify IFormatProvider
     }
 
     [Conditional("DEBUG")]
@@ -160,8 +167,8 @@ public static class MauiProgram
         var db = new LocalStorage();
         services.AddSingleton<IDatabase>(db);
         services.AddSingleton<ICustomDispatcher, MauiDispatcher>();
-        services.AddSingleton<INostrService>(new TestNostrService());
-        //services.AddSingleton<INostrService>(new NostrService(db));
+        //services.AddSingleton<INostrService>(new TestNostrService());
+        services.AddSingleton<INostrService>(new NostrService(db));
 
         services.AddLocalization();
         services.AddLogging(logging => logging.AddSerilog());

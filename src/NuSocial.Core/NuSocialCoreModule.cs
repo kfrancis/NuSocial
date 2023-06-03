@@ -46,14 +46,14 @@ namespace NuSocial.Core
 
         private static void ConfigureAnalytics(IServiceCollection services, IConfiguration config)
         {
-            if (Guid.TryParse(config["Analytics:AppCenterKey"], out var key) && !Debugger.IsAttached)
-            {
-                _ = services.AddSingleton<IAnalyticsService>(new AppCenterService(key.ToString()));
-            }
-            else
-            {
-                _ = services.AddSingleton<IAnalyticsService>(new DebugAnalyticsService());
-            }
+            //if (Guid.TryParse(config["Analytics:AppCenterKey"], out var key) && !Debugger.IsAttached)
+            //{
+            //    _ = services.AddSingleton<IAnalyticsService>(new AppCenterService(key.ToString()));
+            //}
+            //else
+            //{
+            //    _ = services.AddSingleton<IAnalyticsService>(new DebugAnalyticsService());
+            //}
         }
     }
 }

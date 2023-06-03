@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Mopups.Services;
 using Nostr.Client.Messages;
+using Nostr.Client.Requests;
 using NuSocial.Core;
 using NuSocial.Core.ViewModel;
 using NuSocial.Messages;
@@ -34,6 +35,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
     {
         _authorService = authorService;
         _nostrService = nostrService;
+        User = GlobalSetting.Instance.CurrentUser;
     }
 
     public string UnreadLabel => $"{L["Unread"]} ({_postsWaiting.Count})";
@@ -62,6 +64,32 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
             // Should we receive the state change message, cancel the nostr token to let other tasks continue.
             _cts?.Cancel();
         });
+        return Task.CompletedTask;
+    }
+
+    public override Task OnAppearing()
+    {
+        //if (User != null && User.PublicKey != null)
+        //{
+        //    _nostrService.Send("timeline:pubkey:follows", new NostrFilter()
+        //    {
+        //        Authors = new[] { User.PublicKey.Hex },
+        //        Kinds = new[]
+        //        {
+        //            NostrKind.Metadata,
+        //            NostrKind.ShortTextNote,
+        //            NostrKind.EncryptedDm,
+        //            NostrKind.Reaction,
+        //            NostrKind.Contacts,
+        //            NostrKind.RecommendRelay,
+        //            NostrKind.EventDeletion,
+        //            NostrKind.Reporting,
+        //            NostrKind.ClientAuthentication
+        //        },
+        //        Since = DateTime.UtcNow.AddHours(-12),
+        //        Until = DateTime.UtcNow.AddHours(4)
+        //    });
+        //}
         return Task.CompletedTask;
     }
 
@@ -190,7 +218,7 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
 
     private void UpdateUser(string privKey, string pubKey)
     {
-        
+
     }
 
     protected virtual void Dispose(bool disposing)

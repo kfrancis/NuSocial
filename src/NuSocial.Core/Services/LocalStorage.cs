@@ -269,10 +269,14 @@ namespace NuSocial.Services
                 {
                     var db = await GetDatabaseConnection<T>(reset).ConfigureAwait(false);
                     //await _lock.WaitAsync();
-                    await AttemptAndRetry(() =>
+                    foreach (var item in items)
                     {
-                        return db.InsertAllAsync(items, true);
-                    }).ConfigureAwait(false);
+                        await AttemptAndRetry(() =>
+                        {
+                            return db.InsertOrReplaceAsync(item);
+                        }).ConfigureAwait(false);
+                    }
+                    
                 }
                 finally
                 {
