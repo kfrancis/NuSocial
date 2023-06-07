@@ -2,6 +2,7 @@
 using Nostr.Client.Keys;
 using Nostr.Client.Messages;
 using Nostr.Client.Requests;
+using System.Reflection;
 
 namespace NostrClient.Helpers
 {
@@ -80,7 +81,47 @@ namespace NostrClient.Helpers
 
         public static void SendZap(this INostrClient client)
         {
+            // send event of kind 23194 to The content is a pay_invoice
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="privateKey"></param>
+        public static string SendProfileRequest(this INostrClient client, NostrPrivateKey privateKey, params NostrKind[] kinds)
+        {
+            return SendProfileRequest(client, privateKey.DerivePublicKey().Hex, kinds);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="publicKey"></param>
+        public static string SendProfileRequest(this INostrClient client, NostrPublicKey publicKey, params NostrKind[] kinds)
+        {
+            return SendProfileRequest(client, publicKey.Hex, kinds);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="publicKey"></param>
+        /// <param name="kinds"></param>
+        public static string SendProfileRequest(this INostrClient client, string publicKey, params NostrKind[] kinds)
+        {
+            var subscription = $"profile:pubkey:{Guid.NewGuid():N}";
+            if (kinds.Length > 0)
+            {
+                client.Send(new NostrRequest(subscription, new NostrFilter() { Kinds = kinds, Authors = new[] { publicKey } }));
+            } else
+            {
+                client.Send(new NostrRequest(subscription, new NostrFilter() { Kinds = new[] { NostrKind.Metadata }, Authors = new[] { publicKey } }));
+            }
+            
+            return subscription;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 using Nostr.Client.Keys;
 using Nostr.Client.Messages;
+using Nostr.Client.Messages.Contacts;
 using Nostr.Client.Messages.Metadata;
 
 namespace NuSocial.Messages
@@ -25,9 +26,23 @@ namespace NuSocial.Messages
         }
     }
 
+    public class NostrReadyMessage : ValueChangedMessage<bool?>
+    {
+        public NostrReadyMessage(bool? value) : base(value)
+        {
+        }
+    }
+
     public class NostrMetadataMessage : ValueChangedMessage<NostrMetadataEvent?>
     {
         public NostrMetadataMessage(NostrMetadataEvent? value = null) : base(value)
+        {
+        }
+    }
+
+    public class NostrContactMessage : ValueChangedMessage<NostrContactEvent?>
+    {
+        public NostrContactMessage(NostrContactEvent? value = null) : base(value)
         {
         }
     }

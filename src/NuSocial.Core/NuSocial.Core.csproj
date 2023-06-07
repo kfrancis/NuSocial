@@ -65,6 +65,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\NostrClient.Helpers\NostrClient.Helpers.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="Views\LoadingIndicatorPopup.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>

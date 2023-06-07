@@ -99,6 +99,7 @@ public class Profile
     public string? About { get; internal set; }
     public string? Website { get; internal set; }
     public List<Relay> Relays { get; internal set; } = new();
+    public List<Contact> Follows { get; internal set; } = new();
 }
 
 public class AuthenticateResult
@@ -143,6 +144,8 @@ public class Contact
 
     [JsonPropertyName("picture")]
     public Picture Picture { get; set; }
+
+    public string? Relay { get; internal set; }
 
     public override string ToString()
     {

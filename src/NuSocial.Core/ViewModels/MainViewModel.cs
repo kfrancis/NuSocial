@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Mopups.Services;
+using NBitcoin;
 using Nostr.Client.Messages;
+using Nostr.Client.Messages.Metadata;
 using Nostr.Client.Requests;
 using NuSocial.Core;
 using NuSocial.Core.ViewModel;
@@ -40,12 +42,15 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
 
     public string UnreadLabel => $"{L["Unread"]} ({_postsWaiting.Count})";
 
-    public override Task OnFirstAppear()
+    public override async Task OnFirstAppear()
     {
-        if (GlobalSetting.Instance.DemoMode && _nostrService is TestNostrService)
-        {
-            _nostrService.StartNostr();
-        }
+
+        
+    }
+
+
+    public override async Task OnAppearing()
+    {
 
         WeakReferenceMessenger.Default.Send<ResetNavMessage>(new());
 
@@ -54,43 +59,34 @@ public partial class MainViewModel : BaseViewModel, ITransientDependency, IDispo
             UpdateUser(m.Value.privKey, m.Value.pubKey);
         });
 
-        WeakReferenceMessenger.Default.Register<NostrPostMessage>(this, (r, m) =>
-        {
-            ReceivePost(m.Value);
-        });
-
         WeakReferenceMessenger.Default.Register<NostrStateChangeMessage>(this, (r, m) =>
         {
             // Should we receive the state change message, cancel the nostr token to let other tasks continue.
             _cts?.Cancel();
         });
-        return Task.CompletedTask;
-    }
 
-    public override Task OnAppearing()
-    {
-        //if (User != null && User.PublicKey != null)
+        WeakReferenceMessenger.Default.Register<NostrReadyMessage>(this, (r, m) =>
+        {
+            _ = Task.Run(async () => {
+                if (User != null && User.PublicKey != null)
+                {
+                    _cts ??= new();
+                    var userProfile = await _nostrService.GetProfileAsync(User.PublicKey.Hex, true, _cts.Token);
+                    string t = "";
+
+                    WeakReferenceMessenger.Default.Register<NostrPostMessage>(this, (r, m) =>
+                    {
+                        ReceivePost(m.Value);
+                    });
+                }
+            });
+        });
+
+        //if (GlobalSetting.Instance.DemoMode && _nostrService is TestNostrService)
         //{
-        //    _nostrService.Send("timeline:pubkey:follows", new NostrFilter()
-        //    {
-        //        Authors = new[] { User.PublicKey.Hex },
-        //        Kinds = new[]
-        //        {
-        //            NostrKind.Metadata,
-        //            NostrKind.ShortTextNote,
-        //            NostrKind.EncryptedDm,
-        //            NostrKind.Reaction,
-        //            NostrKind.Contacts,
-        //            NostrKind.RecommendRelay,
-        //            NostrKind.EventDeletion,
-        //            NostrKind.Reporting,
-        //            NostrKind.ClientAuthentication
-        //        },
-        //        Since = DateTime.UtcNow.AddHours(-12),
-        //        Until = DateTime.UtcNow.AddHours(4)
-        //    });
+        _cts ??= new();
+        await _nostrService.StartNostrAsync(_cts.Token);
         //}
-        return Task.CompletedTask;
     }
 
     public override Task OnParameterSet()

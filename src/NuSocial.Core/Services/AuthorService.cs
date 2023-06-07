@@ -75,7 +75,7 @@ namespace NuSocial.Services
             {
                 try
                 {
-                    var result = await _nostr.GetProfileAsync(key, cancellationToken);
+                    var result = await _nostr.GetProfileAsync(key, ct: cancellationToken);
                     _cache.TryAdd(key, result);
                     return result;
                 }

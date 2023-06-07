@@ -1,18 +1,22 @@
 ﻿using Bogus;
 using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nostr.Client.Client;
 using Nostr.Client.Communicator;
 using Nostr.Client.Keys;
 using Nostr.Client.Messages;
+using Nostr.Client.Messages.Contacts;
 using Nostr.Client.Messages.Metadata;
 using Nostr.Client.Requests;
 using Nostr.Client.Responses;
+using NostrClient.Helpers;
 using NuSocial.Messages;
 using NuSocial.Models;
 using Serilog;
 using System.Net.WebSockets;
 using Websocket.Client.Models;
+using Contact = NuSocial.Models.Contact;
 
 namespace NuSocial.Services
 {
@@ -22,13 +26,15 @@ namespace NuSocial.Services
 
         void Dispose();
 
-        Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken);
+        Task<Profile> GetProfileAsync(string publicKey, bool getExtra = false, CancellationToken ct = default);
 
         void RegisterFilter(string subscription, NostrFilter filter);
         void Send(string v, NostrFilter nostrFilter);
         void StartNostr();
+        Task StartNostrAsync(CancellationToken ct = default);
 
         void StopNostr();
+        Task StopNostrAsync(CancellationToken ct = default);
     }
 
     public class NostrService : INostrService, IDisposable
@@ -111,7 +117,10 @@ namespace NuSocial.Services
                     Until = DateTime.UtcNow.AddHours(4)
                 });
 
-                StartNostr();
+                await StartNostrAsync();
+
+                WeakReferenceMessenger.Default.Send<NostrReadyMessage>(new(true));
+                
             }
             catch (Exception)
             {
@@ -136,6 +145,16 @@ namespace NuSocial.Services
             }
         }
 
+        public async Task StartNostrAsync(CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (_communicators != null)
+            {
+                var startTasks = _communicators.Select(x => x.Start());
+                await Task.WhenAll(startTasks);
+            }
+        }
+
         public void StopNostr()
         {
             if (_communicators != null)
@@ -145,6 +164,16 @@ namespace NuSocial.Services
                     // fire and forget
                     _ = comm.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
                 }
+            }
+        }
+
+        public async Task StopNostrAsync(CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (_communicators != null)
+            {
+                var stopTasks = _communicators.Select(x => x.Stop(WebSocketCloseStatus.NormalClosure, string.Empty));
+                await Task.WhenAll(stopTasks);
             }
         }
 
@@ -217,17 +246,16 @@ namespace NuSocial.Services
             var ev = response.Event;
             Log.Debug("{kind}: {content}", ev?.Kind, ev?.Content);
 
-            if (ev is NostrMetadataEvent evm)
-            {
-                WeakReferenceMessenger.Default.Send<NostrMetadataMessage>(new(evm));
-                Log.Debug("Name: {name}, about: {about}", evm.Metadata?.Name, evm.Metadata?.About);        
-            }
-
             if (response.Event != null && response.Event.IsSignatureValid())
             {
                 switch (response.Event.Kind)
                 {
                     case NostrKind.Metadata:
+                        if (ev is NostrMetadataEvent evm)
+                        {
+                            Log.Debug("Name: {name}, about: {about}", evm.Metadata?.Name, evm.Metadata?.About);
+                            WeakReferenceMessenger.Default.Send<NostrMetadataMessage>(new(evm));
+                        }
                         break;
 
                     case NostrKind.ShortTextNote:
@@ -238,6 +266,10 @@ namespace NuSocial.Services
                         break;
 
                     case NostrKind.Contacts:
+                        if (ev is NostrContactEvent evc)
+                        {
+                            WeakReferenceMessenger.Default.Send<NostrContactMessage>(new(evc));
+                        }
                         break;
 
                     case NostrKind.EncryptedDm:
@@ -339,43 +371,34 @@ namespace NuSocial.Services
             GC.SuppressFinalize(this);
         }
 
-        public async Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken)
+        public async Task<Profile> GetProfileAsync(string publicKey, bool getExtra = false, CancellationToken ct = default)
         {
-            RegisterFilter(publicKey, new NostrFilter()
-            {
-                Kinds = new[]
-                {
-                    NostrKind.Metadata
-                },
-                Authors = new[]
-                {
-                    publicKey
-                },
-                Limit = 0
-            });
+            if (_client == null) throw new InvalidOperationException();
 
-            var relays = await _db.GetRelaysAsync();
-            var relay = relays.FirstOrDefault(r => r.Uri != null);
             var profileEvents = new List<NostrMetadataEvent>();
-            if (relay != null)
-            {
-                WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
-                WeakReferenceMessenger.Default.Register<NostrMetadataMessage>(this, (r, m) =>
-                {
-                    if (m.Value != null)
-                        profileEvents.Add(m.Value);
-                });
-                var ev = new NostrRequest(publicKey, new NostrFilter() { Authors = new[] { publicKey }, Kinds = new[] { NostrKind.Metadata } });
-                _client.Send<NostrRequest>(ev);
-                await Task.Delay(TimeSpan.FromSeconds(_profileThreshold), cancellationToken);
-                WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
-            }
+            var contactEvents = new List<NostrContactEvent>();
 
-            var profileInfo = new Profile();
-            var latestProfileEvent = profileEvents.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-            if (latestProfileEvent != null && !string.IsNullOrEmpty(latestProfileEvent.Content))
+            WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
+            WeakReferenceMessenger.Default.Register<NostrMetadataMessage>(this, (r, m) =>
             {
-                using var doc = JsonDocument.Parse(latestProfileEvent.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
+                if (m.Value != null)
+                    profileEvents.Add(m.Value);
+            });
+            WeakReferenceMessenger.Default.Unregister<NostrContactMessage>(this);
+            WeakReferenceMessenger.Default.Register<NostrContactMessage>(this, (r, m) =>
+            {
+                if (m.Value != null)
+                    contactEvents.Add(m.Value);
+            });
+            var subscription = _client.SendProfileRequest(publicKey, NostrKind.Metadata, NostrKind.Contacts);
+            await Task.Delay(TimeSpan.FromSeconds(_profileThreshold), ct);
+            WeakReferenceMessenger.Default.Unregister<NostrMetadataMessage>(this);
+            WeakReferenceMessenger.Default.Unregister<NostrContactMessage>(this);
+            var profileInfo = new Profile();
+            var latestMetadataEvent = profileEvents.Where(x => x.Kind == NostrKind.Metadata).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            if (latestMetadataEvent != null && !string.IsNullOrEmpty(latestMetadataEvent.Content))
+            {
+                using var doc = JsonDocument.Parse(latestMetadataEvent.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
                 var json = doc.RootElement;
                 if (json.TryGetProperty("name", out var nameJson))
                 {
@@ -403,17 +426,39 @@ namespace NuSocial.Services
                 }
             }
 
-            //var followingInfo = await GetFollowingInfoAsync(publicKey, cancellationToken);
-            //if (followingInfo != null &&
-            //    !string.IsNullOrEmpty(followingInfo.Content))
-            //{
-            //    using var doc = JsonDocument.Parse(followingInfo.Content.Replace("\\", "", StringComparison.OrdinalIgnoreCase));
-            //    var json = doc.RootElement;
-            //    foreach (var key in json.EnumerateObject())
-            //    {
-            //        profileInfo.Relays.Add(new(key.Name, key.Value.GetProperty("read").GetBoolean(), key.Value.GetProperty("write").GetBoolean()));
-            //    }
-            //}
+            if (getExtra)
+            {
+                var latestContactEvent = contactEvents.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+
+                if (latestContactEvent != null)
+                {
+                    foreach (var relay in latestContactEvent.Relays)
+                    {
+                        profileInfo.Relays.Add(new Relay(relay.Key, relay.Value.Read, relay.Value.Write));
+                    }
+                    if (latestContactEvent.Tags != null)
+                    {
+                        foreach (var tag in latestContactEvent.Tags.Where(t => !string.IsNullOrEmpty(t.TagIdentifier) && t.TagIdentifier.Equals("p", StringComparison.OrdinalIgnoreCase) && t.AdditionalData != null))
+                        {
+                            var followData = tag.AdditionalData.ToList();
+                            var followsHex = followData[0].ToString();
+                            if (!string.IsNullOrEmpty(followsHex))
+                            {
+                                var followContact = new Contact() { PublicKey = followsHex };
+                                if (followData.Count > 1)
+                                {
+                                    followContact.Relay = followData[1].ToString();
+                                }
+                                if (followData.Count > 2 && !string.IsNullOrEmpty(followData[2].ToString()))
+                                {
+                                    followContact.PetName = followData[2].ToString()!;
+                                }
+                                profileInfo.Follows.Add(followContact);
+                            }
+                        }
+                    }
+                }
+            }
 
             return profileInfo;
         }
@@ -549,7 +594,7 @@ namespace NuSocial.Services
         public NostrClientStreams? Streams => throw new NotImplementedException();
 
 
-        public Task<Profile> GetProfileAsync(string publicKey, CancellationToken cancellationToken)
+        public Task<Profile> GetProfileAsync(string publicKey, bool getExtra = false, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(_profileFaker.Generate());
@@ -605,6 +650,16 @@ namespace NuSocial.Services
         }
 
         public void Send(string v, NostrFilter nostrFilter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task StartNostrAsync(CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task StopNostrAsync(CancellationToken ct = default)
         {
             throw new NotImplementedException();
         }
